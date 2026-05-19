@@ -10,6 +10,5 @@ namespace PetBuddies_API.Data
 
         }
 
-        public DbSet<AnimalEntity> Animal { get; set; }
     }
 }
