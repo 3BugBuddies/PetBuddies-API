@@ -1,6 +1,6 @@
 ﻿namespace PetBuddies_API.Enums
 {
-    public enum StatusAgendamentoEnum
+    public enum StatusConsultaEnum
     {
         AGENDADA,
         CONFIRMADA,

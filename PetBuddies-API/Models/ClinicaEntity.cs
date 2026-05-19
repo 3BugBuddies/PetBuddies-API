@@ -29,7 +29,6 @@ namespace PetBuddies_API.Models
         public DateTime CreatedAt { get; set; }
 
 
-
         [ForeignKey(nameof(EnderecoEntity))]
         public int EnderecoId { get; set; }
 
@@ -37,8 +36,12 @@ namespace PetBuddies_API.Models
         public EnderecoEntity? Endereco { get; set; }
 
 
-
         public ICollection<ResponsavelEntity> Responsaveis { get; set; }
+
+        public ICollection<ConsultaEntity> Consultas { get; set; }
+
+        public ICollection<VeterinarioEntity> Veterinarios { get; set; }
+
 
     }
 }

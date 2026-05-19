@@ -33,14 +33,28 @@ namespace PetBuddies_API.Models
         public DateTime CreatedAt { get; set; }
 
 
-        public ProntuarioEntity? Prontuario { get; set; }
-
-
-
         [ForeignKey(nameof(ResponsavelEntity))]
         public int ResponsavelId { get; set; }
 
         [JsonIgnore]
         public ResponsavelEntity? Responsavel { get; set; }
+
+        [ForeignKey(nameof(TipoAnimalEntity))]
+        public int TipoAnimalId { get; set; }
+
+        [JsonIgnore]
+        public TipoAnimalEntity? TipoAnimal { get; set; }
+
+
+        public ProntuarioEntity? Prontuario { get; set; }
+
+
+        public ICollection<RegistroAtendimentoEntity> RegistroAtendimentos { get; set; }
+
+
+        public ICollection<ConsultaEntity> Consultas { get; set; }
+
+
+        public ICollection<ProcedimentoEntity> Procedimentos { get; set; }
     }
 }

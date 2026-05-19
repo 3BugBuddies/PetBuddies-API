@@ -31,10 +31,8 @@ namespace PetBuddies_API.Models
 
 
 
-        [ForeignKey(nameof(ClinicaEntity))]
-        public int ClinicaId { get; set; }
-
-        [JsonIgnore]
         public ClinicaEntity? Clinica { get; set; }
+
+        public ICollection<ResponsavelEntity> Responsavel { get; set; }
     }
 }

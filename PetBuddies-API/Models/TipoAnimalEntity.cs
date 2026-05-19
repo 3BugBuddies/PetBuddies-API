@@ -20,10 +20,6 @@ namespace PetBuddies_API.Models
         public DateTime CreatedAt { get; set; }
         
 
-        [ForeignKey(nameof(AnimalEntity))]
-        public int AnimalId { get; set; }
-
-        [JsonIgnore]
         public AnimalEntity? Animal { get; set; }
     }
 }

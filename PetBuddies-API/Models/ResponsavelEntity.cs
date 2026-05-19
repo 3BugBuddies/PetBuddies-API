@@ -28,12 +28,16 @@ namespace PetBuddies_API.Models
 
         [JsonIgnore]
         public ClinicaEntity? Clinica { get; set; }
-
+        
 
         [ForeignKey(nameof(EnderecoEntity))]
         public int EnderecoId { get; set; }
 
         [JsonIgnore]
         public EnderecoEntity? Endereco { get; set; }
+
+
+        public ICollection<AnimalEntity> Animais { get; set; }
+
     }
 }
