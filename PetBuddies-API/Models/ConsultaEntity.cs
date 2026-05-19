@@ -5,58 +5,54 @@ using System.Text.Json.Serialization;
 
 namespace PetBuddies_API.Models
 {
-    [Table("pb_tb_consulta")]
-    public class ConsultaEntity
+    [Table("T_PB_CONSULTA")]
+    public class ConsultaEntity : BaseEntity
     {
         [Key]
-        [Column("id")]
+        [Column("ID_CONSULTA")]
         public int Id { get; set; }
 
-        [Column("tp_consulta")]
+        [Column("TP_TIPO_CONSULTA")]
+        [EnumDataType(typeof(TipoConsultaEnum))]
         public TipoConsultaEnum TipoConsulta { get; set; }
 
-        [Column("dt_consulta")]
+        [Column("DH_DATA_HORA")]
         public DateTime DataHora { get; set; }
 
-        [Column("st_consulta")]
+        [Column("ST_STATUS_CONSULTA")]
+        [EnumDataType(typeof(StatusConsultaEnum))]
         public StatusConsultaEnum Status { get; set; }
 
-        [Column("bl_emergencia")]
+        [Column("EM_EMERGENCIA")]
         public bool Emergencia { get; set; }
 
-        [Column("bl_prioridade")]
+        [Column("PR_PRIORIDADE")]
         public bool Prioridade { get; set; }
 
-        [Column("s_observacao")]
+        [Column("OB_OBSERVACAO")]
         [StringLength(2000)]
         public string? Observacao { get; set; }
 
-        [Column("s_motivo")]
+        [Column("MT_MOTIVO")]
         [StringLength(2000)]
         public string? Motivo { get; set; }
 
-        [Column("dt_atualizado")]
-        public DateTime UpdatedAt { get; set; }
-
-        [Column("dt_criado")]
-        public DateTime CreatedAt { get; set; }
-
         [ForeignKey(nameof(Animal))]
-        [Column("id_animal")]
+        [Column("ID_ANIMAL")]
         public int AnimalId { get; set; }
 
         [JsonIgnore]
         public AnimalEntity? Animal { get; set; }
 
         [ForeignKey(nameof(Veterinario))]
-        [Column("id_veterinario")]
+        [Column("ID_VETERINARIO")]
         public int VeterinarioId { get; set; }
 
         [JsonIgnore]
         public VeterinarioEntity? Veterinario { get; set; }
 
         [ForeignKey(nameof(Clinica))]
-        [Column("id_clinica")]
+        [Column("ID_CLINICA")]
         public int ClinicaId { get; set; }
 
         [JsonIgnore]

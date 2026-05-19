@@ -4,30 +4,23 @@ using System.Text.Json.Serialization;
 
 namespace PetBuddies_API.Models
 {
-    [Table("pb_tb_prontuario")]
-    public class ProntuarioEntity
+    [Table("T_PB_PRONTUARIO")]
+    public class ProntuarioEntity : BaseEntity
     {
         [Key]
-        [Column("id")]
+        [Column("ID_PRONTUARIO")]
         public int Id { get; set; }
 
-        [Column("s_alergias")]
+        [Column("OB_ALERGIA")]
         [StringLength(2000)]
         public string? Alergias { get; set; }
 
-        [Column("s_observacoes")]
+        [Column("OB_OBSERVACOES")]
         [StringLength(2000)]
         public string? Observacoes { get; set; }
 
-        [Column("dt_atualizado")]
-        public DateTime UpdatedAt { get; set; }
-
-        [Column("dt_criado")]
-        public DateTime CreatedAt { get; set; }
-
         [ForeignKey(nameof(Animal))]
-        [Column("id_animal")]
-        
+        [Column("ID_ANIMAL")]
         public int AnimalId { get; set; }
 
         [JsonIgnore]

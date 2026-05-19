@@ -4,53 +4,49 @@ using System.Text.Json.Serialization;
 
 namespace PetBuddies_API.Models
 {
-    [Table("pb_tb_endereco")]
-    public class EnderecoEntity
+    [Table("T_PB_ENDERECO")]
+    public class EnderecoEntity : BaseEntity
     {
         [Key]
-        [Column("id")]
+        [Column("ID_ENDERECO")]
         public int Id { get; set; }
 
-        [Required]
-        [Column("s_logradouro")]
+        [Required(ErrorMessage = "Logradouro é obrigatório.")]
+        [Column("LG_LOGRADOURO")]
         [StringLength(150)]
+        [RegularExpression(@".*\S.*", ErrorMessage = "Logradouro é obrigatório.")]
         public string Logradouro { get; set; } = string.Empty;
 
-        [Required]
-        [Column("s_numero")]
+        [Required(ErrorMessage = "Número é obrigatório.")]
+        [Column("NR_NUMERO")]
         [StringLength(20)]
+        [RegularExpression(@".*\S.*", ErrorMessage = "Número é obrigatório.")]
         public string Numero { get; set; } = string.Empty;
 
-        [Column("s_complemento")]
+        [Column("CM_COMPLEMENTO")]
         [StringLength(100)]
         public string? Complemento { get; set; }
 
-        [Column("s_bairro")]
+        [Column("BR_BAIRRO")]
         [StringLength(100)]
         public string? Bairro { get; set; }
 
-        [Required]
-        [Column("s_cidade")]
+        [Required(ErrorMessage = "Cidade é obrigatória.")]
+        [Column("CD_CIDADE")]
         [StringLength(100)]
-        public string? Cidade { get; set; }
+        public string Cidade { get; set; } = string.Empty;
 
-        [Required]
-        [Column("s_estado")]
-        [StringLength(2)]
-        public string? Estado { get; set; }
+        [Required(ErrorMessage = "Estado é obrigatório.")]
+        [Column("ES_ESTADO")]
+        [StringLength(2, MinimumLength = 2)]
+        [RegularExpression(@"^[A-Za-z]{2}$", ErrorMessage = "Estado deve conter a UF com 2 letras.")]
+        public string Estado { get; set; } = string.Empty;
 
-        [Required]
-        [Column("s_cep")]
-        [StringLength(8)]
-        public string? Cep { get; set; }
-
-        [Required]
-        [Column("s_pais")]
-        [StringLength(60)]
-        public string? Pais { get; set; }
-
-        [Column("dt_criado")]
-        public DateTime CreatedAt { get; set; }
+        [Required(ErrorMessage = "CEP é obrigatório.")]
+        [Column("NR_CEP")]
+        [StringLength(8, MinimumLength = 8)]
+        [RegularExpression(@"^\d{8}$", ErrorMessage = "CEP deve conter 8 dígitos.")]
+        public string Cep { get; set; } = string.Empty;
 
         [JsonIgnore]
         public ClinicaEntity? Clinica { get; set; }

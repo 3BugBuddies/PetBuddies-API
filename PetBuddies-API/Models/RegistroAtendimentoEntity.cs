@@ -4,59 +4,54 @@ using System.Text.Json.Serialization;
 
 namespace PetBuddies_API.Models
 {
-    [Table("pb_tb_registro_atendimento")]
-    public class RegistroAtendimentoEntity
+    [Table("T_PB_REGISTRO_ATENDIMENTO")]
+    public class RegistroAtendimentoEntity : BaseEntity
     {
         [Key]
-        [Column("id")]
+        [Column("ID_REGISTRO_ATENDIMENTO")]
         public int Id { get; set; }
 
-        [Column("dt_atendimento")]
+        [Column("DT_DATA_ATENDIMENTO")]
         public DateTime DataAtendimento { get; set; }
 
-        [Column("s_anamnese")]
+        [Column("AN_ANAMNESE")]
         [StringLength(2000)]
         public string? Anamnese { get; set; }
 
-        [Column("s_diagnostico")]
+        [Column("DG_DIAGNOSTICO")]
         [StringLength(2000)]
         public string? Diagnostico { get; set; }
 
-        [Column("s_tratamento")]
+        [Column("TR_TRATAMENTO")]
         [StringLength(2000)]
         public string? Tratamento { get; set; }
 
-        [Column("s_observacao")]
+        [Column("OB_OBSERVACAO")]
         [StringLength(2000)]
         public string? Observacao { get; set; }
 
-        [Column("dt_proximo_retorno")]
+        [Column("PR_PROXIMO_RETORNO")]
         public DateOnly ProximoRetorno { get; set; }
 
-        [Column("dt_proxima_vacina")]
-        public DateOnly ProximoVacina { get; set; }
-
-        [Column("dt_criado")]
-        public DateTime CreatedAt { get; set; }
+        [Column("PR_PROXIMA_VACINA")]
+        public DateOnly ProximaVacina { get; set; }
 
         [ForeignKey(nameof(Animal))]
-        [Column("id_animal")]
-        
+        [Column("ID_ANIMAL")]
         public int AnimalId { get; set; }
 
         [JsonIgnore]
         public AnimalEntity? Animal { get; set; }
 
         [ForeignKey(nameof(Prontuario))]
-        [Column("id_prontuario")]
+        [Column("ID_PRONTUARIO")]
         public int ProntuarioId { get; set; }
 
         [JsonIgnore]
         public ProntuarioEntity? Prontuario { get; set; }
 
         [ForeignKey(nameof(Consulta))]
-        [Column("id_consulta")]
-        
+        [Column("ID_CONSULTA")]
         public int ConsultaId { get; set; }
 
         [JsonIgnore]

@@ -5,25 +5,24 @@ using System.Text.Json.Serialization;
 
 namespace PetBuddies_API.Models
 {
-    [Table("pb_tb_tipo_animal")]
-    public class TipoAnimalEntity
+    [Table("T_PB_TIPO_ANIMAL")]
+    public class TipoAnimalEntity : BaseEntity
     {
         [Key]
-        [Column("id")]
+        [Column("ID_TIPO_ANIMAL")]
         public int Id { get; set; }
 
-        [Column("tp_especie")]
+        [Column("ES_ESPECIE")]
+        [EnumDataType(typeof(EspecieEnum))]
         public EspecieEnum Especie { get; set; }
 
-        [Column("s_raca")]
+        [Column("RC_RACA")]
         [StringLength(100)]
         public string Raca { get; set; } = string.Empty;
 
-        [Column("tp_porte")]
+        [Column("PT_PORTE")]
+        [EnumDataType(typeof(PorteEnum))]
         public PorteEnum Porte { get; set; }
-
-        [Column("dt_criado")]
-        public DateTime CreatedAt { get; set; }
 
         [JsonIgnore]
         public ICollection<AnimalEntity> Animais { get; set; } = [];

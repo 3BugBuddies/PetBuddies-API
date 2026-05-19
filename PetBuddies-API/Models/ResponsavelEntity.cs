@@ -5,52 +5,51 @@ using System.Text.Json.Serialization;
 
 namespace PetBuddies_API.Models
 {
-    [Table("pb_tb_responsavel")]
-    public class ResponsavelEntity
+    [Table("T_PB_RESPONSAVEL")]
+    public class ResponsavelEntity : BaseEntity
     {
         [Key]
-        [Column("id")]
+        [Column("ID_RESPONSAVEL")]
         public int Id { get; set; }
 
-        [Required]
-        [Column("s_nome")]
+        [Required(ErrorMessage = "Nome do responsável é obrigatório.")]
+        [Column("NM_NOME_RESPONSAVEL")]
         [StringLength(150)]
+        [RegularExpression(@".*\S.*", ErrorMessage = "Nome do responsável é obrigatório.")]
         public string Nome { get; set; } = string.Empty;
 
-        [Required]
-        [Column("s_cpf")]
+        [Column("NR_CPF")]
         [StringLength(11, MinimumLength = 11)]
+        [RegularExpression(@"^\d{11}$|^$", ErrorMessage = "CPF deve conter 11 dígitos.")]
         public string Cpf { get; set; } = string.Empty;
 
-        [Column("dt_nascimento")]
+        [Column("DT_DATA_NASCIMENTO")]
         public DateOnly DataNascimento { get; set; }
 
-        [Required]
-        [Column("s_telefone")]
+        [Required(ErrorMessage = "Telefone do responsável é obrigatório.")]
+        [Column("TL_TELEFONE")]
         [StringLength(20)]
+        [RegularExpression(@".*\d.*", ErrorMessage = "Telefone deve conter ao menos um dígito.")]
         public string Telefone { get; set; } = string.Empty;
 
-        [Column("s_email")]
+        [Column("EM_EMAIL")]
         [EmailAddress]
         [StringLength(254)]
         public string? Email { get; set; }
 
-        [Column("st_responsavel")]
+        [Column("ST_STATUS")]
+        [EnumDataType(typeof(StatusTutorEnum))]
         public StatusTutorEnum Status { get; set; }
 
-        [Column("dt_criado")]
-        public DateTime CreatedAt { get; set; }
-
         [ForeignKey(nameof(Clinica))]
-        [Column("id_clinica")]
-        
+        [Column("ID_CLINICA")]
         public int ClinicaId { get; set; }
 
         [JsonIgnore]
         public ClinicaEntity? Clinica { get; set; }
 
         [ForeignKey(nameof(Endereco))]
-        [Column("id_endereco")]
+        [Column("ID_ENDERECO")]
         public int? EnderecoId { get; set; }
 
         [JsonIgnore]

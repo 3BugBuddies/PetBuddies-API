@@ -9,6 +9,19 @@ namespace PetBuddies_API.Data
         {
         }
 
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var now = DateTime.Now;
+            foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+            {
+                if (entry.State == EntityState.Added)
+                    entry.Entity.CreatedAt = now;
+                if (entry.State == EntityState.Modified)
+                    entry.Entity.UpdatedAt = now;
+            }
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
         public DbSet<AnimalEntity> Animais { get; set; }
         public DbSet<ClinicaEntity> Clinicas { get; set; }
         public DbSet<ConsultaEntity> Consultas { get; set; }

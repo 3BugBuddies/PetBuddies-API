@@ -5,53 +5,52 @@ using System.Text.Json.Serialization;
 
 namespace PetBuddies_API.Models
 {
-    [Table("pb_tb_animal")]
-    public class AnimalEntity
+    [Table("T_PB_ANIMAL")]
+    public class AnimalEntity : BaseEntity
     {
         [Key]
-        [Column("id")]
+        [Column("ID_ANIMAL")]
         public int Id { get; set; }
 
-        [Required]
-        [Column("s_nome")]
+        [Required(ErrorMessage = "Nome do animal é obrigatório.")]
+        [Column("NM_NOME_ANIMAL")]
         [StringLength(150)]
+        [RegularExpression(@".*\S.*", ErrorMessage = "Nome do animal é obrigatório.")]
         public string Nome { get; set; } = string.Empty;
 
-        [Column("tp_sexo")]
+        [Column("SX_SEXO")]
+        [EnumDataType(typeof(SexoEnum))]
         public SexoEnum Sexo { get; set; }
 
-        [Column("dt_nascimento")]
+        [Column("DT_DATA_NASCIMENTO")]
         public DateOnly DataNascimento { get; set; }
 
-        [Column("nr_peso")]
+        [Column("NR_PESO")]
         [Range(0, 999.99)]
         public decimal Peso { get; set; }
 
-        [Column("bl_condicao_cronica")]
+        [Column("CN_CONDICAO_CRONICA")]
         public bool CondicaoCronica { get; set; }
 
-        [Column("bl_pre_cadastro")]
+        [Column("PC_PRE_CADASTRO")]
         public bool PreCadastro { get; set; }
 
-        [Column("bl_castrado")]
+        [Column("CT_CASTRADO")]
         public bool Castrado { get; set; }
 
-        [Column("s_foto")]
+        [Column("FT_FOTO")]
         [StringLength(500)]
         public string? Foto { get; set; }
 
-        [Column("dt_criado")]
-        public DateTime CreatedAt { get; set; }
-
         [ForeignKey(nameof(Responsavel))]
-        [Column("id_responsavel")]
+        [Column("ID_RESPONSAVEL")]
         public int ResponsavelId { get; set; }
 
         [JsonIgnore]
         public ResponsavelEntity? Responsavel { get; set; }
 
         [ForeignKey(nameof(TipoAnimal))]
-        [Column("id_tipo_animal")]
+        [Column("ID_TIPO_ANIMAL")]
         public int TipoAnimalId { get; set; }
 
         [JsonIgnore]

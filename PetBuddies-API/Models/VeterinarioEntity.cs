@@ -4,48 +4,46 @@ using System.Text.Json.Serialization;
 
 namespace PetBuddies_API.Models
 {
-    [Table("pb_tb_veterinario")]
-    public class VeterinarioEntity
+    [Table("T_PB_VETERINARIO")]
+    public class VeterinarioEntity : BaseEntity
     {
         [Key]
-        [Column("id")]
+        [Column("ID_VETERINARIO")]
         public int Id { get; set; }
 
-        [Required]
-        [Column("s_nome")]
+        [Required(ErrorMessage = "Nome do veterinário é obrigatório.")]
+        [Column("NM_NOME_VETERINARIO")]
         [StringLength(150)]
+        [RegularExpression(@".*\S.*", ErrorMessage = "Nome do veterinário é obrigatório.")]
         public string Nome { get; set; } = string.Empty;
 
-        [Required]
-        [Column("s_crmv")]
+        [Required(ErrorMessage = "CRMV do veterinário é obrigatório.")]
+        [Column("NR_CRMV")]
         [StringLength(30)]
+        [RegularExpression(@".*\S.*", ErrorMessage = "CRMV é obrigatório.")]
         public string Crmv { get; set; } = string.Empty;
 
-        [Column("s_especialidade")]
+        [Column("ES_ESPECIALIDADE")]
         [StringLength(100)]
         public string? Especialidade { get; set; }
 
-        [Column("s_telefone")]
+        [Column("TL_TELEFONE")]
         [StringLength(20)]
         public string? Telefone { get; set; }
 
-        [Column("s_email")]
+        [Column("EM_EMAIL")]
         [EmailAddress]
         [StringLength(254)]
         public string? Email { get; set; }
 
-        [Column("bl_atende_emergencia")]
+        [Column("AE_ATENDE_EMERGENCIA")]
         public bool AtendeEmergencia { get; set; }
 
-        [Column("bl_ativo")]
+        [Column("AT_ATIVO")]
         public bool Ativo { get; set; }
 
-        [Column("dt_criado")]
-        public DateTime CreatedAt { get; set; }
-
         [ForeignKey(nameof(Clinica))]
-        [Column("id_clinica")]
-        
+        [Column("ID_CLINICA")]
         public int ClinicaId { get; set; }
 
         [JsonIgnore]
