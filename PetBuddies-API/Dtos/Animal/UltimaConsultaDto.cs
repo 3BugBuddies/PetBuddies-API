@@ -1,4 +1,4 @@
-namespace PetBuddies_API.Dtos.Client
+namespace PetBuddies_API.Dtos.Animal
 {
     public class UltimaConsultaDto
     {

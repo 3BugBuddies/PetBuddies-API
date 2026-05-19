@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PetBuddies_API.Data;
-using PetBuddies_API.Dtos.Client;
+using PetBuddies_API.Dtos.Animal;
 using PetBuddies_API.Enums;
 
 namespace PetBuddies_API.Services
@@ -14,7 +14,7 @@ namespace PetBuddies_API.Services
             _context = context;
         }
 
-        public Task<AnimalMotorDto?> GetDadosMotorAsync(int animalId, CancellationToken cancellationToken = default)
+        public Task<AnimalMotorDto?> GetDadosMotorAsync(int animalId)
         {
             return _context.Animais
                 .AsNoTracking()
@@ -32,10 +32,10 @@ namespace PetBuddies_API.Services
                     Especie = animal.TipoAnimal != null ? animal.TipoAnimal.Especie.ToString() : string.Empty,
                     Porte = animal.TipoAnimal != null ? animal.TipoAnimal.Porte.ToString() : string.Empty
                 })
-                .SingleOrDefaultAsync(cancellationToken);
+                .SingleOrDefaultAsync();
         }
 
-        public Task<UltimaConsultaDto?> GetUltimaConsultaAsync(int animalId, CancellationToken cancellationToken = default)
+        public Task<UltimaConsultaDto?> GetUltimaConsultaAsync(int animalId)
         {
             return _context.Consultas
                 .AsNoTracking()
@@ -46,7 +46,7 @@ namespace PetBuddies_API.Services
                     DataHora = consulta.DataHora,
                     Tipo = consulta.TipoConsulta.ToString()
                 })
-                .FirstOrDefaultAsync(cancellationToken);
+                .FirstOrDefaultAsync();
         }
     }
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PetBuddies_API.Data;
 using PetBuddies_API.Services;
@@ -10,14 +11,22 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseOracle(builder.Configuration.GetConnectionString("Oracle"));
 });
 
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<MotorApiClient>();
 builder.Services.AddScoped<AnimalMotorService>();
+builder.Services.AddScoped<AnimalCadastroService>();
+builder.Services.AddScoped<ConsultaService>();
+builder.Services.AddScoped<JanelaAtendimentoService>();
+builder.Services.AddScoped<ResponsavelService>();
+
 
 // serializa todos enums para string ao inves de number
 builder.Services
     .AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false));
     });
 
 builder.Services.AddEndpointsApiExplorer();
