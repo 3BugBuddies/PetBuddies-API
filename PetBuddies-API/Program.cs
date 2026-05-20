@@ -8,16 +8,25 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationContext>(options =>
 {
-    options.UseOracle(builder.Configuration.GetConnectionString("Oracle"));
+    options.UseOracle(
+        builder.Configuration.GetConnectionString("Oracle"),
+        o => o.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)
+    );
 });
-
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<MotorApiClient>();
 builder.Services.AddScoped<AnimalMotorService>();
 builder.Services.AddScoped<AnimalCadastroService>();
 builder.Services.AddScoped<ConsultaService>();
+builder.Services.AddScoped<ClinicaService>();
+builder.Services.AddScoped<EnderecoService>();
 builder.Services.AddScoped<JanelaAtendimentoService>();
+builder.Services.AddScoped<ProcedimentoService>();
+builder.Services.AddScoped<ProntuarioService>();
+builder.Services.AddScoped<RegistroAtendimentoService>();
 builder.Services.AddScoped<ResponsavelService>();
+builder.Services.AddScoped<TipoAnimalService>();
+builder.Services.AddScoped<VeterinarioService>();
 
 
 // serializa todos enums para string ao inves de number
@@ -43,7 +52,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthorization();
 

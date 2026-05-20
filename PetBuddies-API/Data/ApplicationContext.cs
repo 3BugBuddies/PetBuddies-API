@@ -9,6 +9,21 @@ namespace PetBuddies_API.Data
         {
         }
 
+
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var now = DateTime.Now;
+            foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+            {
+                if (entry.State == EntityState.Added)
+                    entry.Entity.CreatedAt = now;
+                if (entry.State == EntityState.Modified)
+                    entry.Entity.UpdatedAt = now;
+            }
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -27,19 +42,6 @@ namespace PetBuddies_API.Data
             }
 
             base.OnModelCreating(modelBuilder);
-        }
-
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            var now = DateTime.Now;
-            foreach (var entry in ChangeTracker.Entries<BaseEntity>())
-            {
-                if (entry.State == EntityState.Added)
-                    entry.Entity.CreatedAt = now;
-                if (entry.State == EntityState.Modified)
-                    entry.Entity.UpdatedAt = now;
-            }
-            return base.SaveChangesAsync(cancellationToken);
         }
 
 

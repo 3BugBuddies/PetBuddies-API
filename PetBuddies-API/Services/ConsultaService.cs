@@ -11,22 +11,24 @@ namespace PetBuddies_API.Services
         private const int ClinicaId = 1;
 
         private readonly ApplicationContext _context;
+        private readonly MotorApiClient _motorApiClient;
 
-        public ConsultaService(ApplicationContext context)
+        public ConsultaService(ApplicationContext context, MotorApiClient motorApiClient)
         {
             _context = context;
+            _motorApiClient = motorApiClient;
         }
 
-        public Task<bool> AnimalExisteAsync(int animalId)
+        public async Task<bool> AnimalExisteAsync(int animalId)
         {
-            return _context.Animais
+            return await _context.Animais
                 .AsNoTracking()
                 .AnyAsync(animal => animal.Id == animalId);
         }
 
-        public Task<bool> JanelaExisteAsync(int janelaId)
+        public async Task<bool> JanelaExisteAsync(int janelaId)
         {
-            return _context.JanelasAtendimento
+            return await _context.JanelasAtendimento
                 .AsNoTracking()
                 .AnyAsync(janela => janela.Id == janelaId);
         }
@@ -42,15 +44,19 @@ namespace PetBuddies_API.Services
                 return false;
             }
 
-            var dataHora = janela.Data.ToDateTime(janela.HoraInicio);
+            var dataHora = janela.DataHoraInicio;
 
-            return await _context.Consultas
+            var query = _context.Consultas
                 .AsNoTracking()
-                .AnyAsync(consulta =>
+                .Where(consulta =>
                     consulta.VeterinarioId == janela.VeterinarioId
                     && consulta.DataHora == dataHora
-                    && consulta.Status != StatusConsultaEnum.CANCELADA
-                    && (!ignorarConsultaId.HasValue || consulta.Id != ignorarConsultaId.Value));
+                    && consulta.Status != StatusConsultaEnum.CANCELADA);
+
+            if (ignorarConsultaId.HasValue)
+                query = query.Where(consulta => consulta.Id != ignorarConsultaId.Value);
+
+            return await query.AnyAsync();
         }
 
         public async Task<bool> ConsultaRealizadaAsync(int consultaId)
@@ -63,7 +69,7 @@ namespace PetBuddies_API.Services
         public async Task<ConsultaDto> AgendarAsync(AgendarConsultaRequest request)
         {
             var janela = await BuscarJanelaAsync(request.JanelaId);
-            var dataHora = janela!.Data.ToDateTime(janela.HoraInicio);
+            var dataHora = janela!.DataHoraInicio;
 
             var consulta = new ConsultaEntity
             {
@@ -153,8 +159,10 @@ namespace PetBuddies_API.Services
                 return null;
             }
 
+            var statusAnterior = consulta.Status;
+
             var janela = await BuscarJanelaAsync(request.JanelaId);
-            var dataHora = janela!.Data.ToDateTime(janela.HoraInicio);
+            var dataHora = janela!.DataHoraInicio;
 
             consulta.AnimalId = request.AnimalId;
             consulta.TipoConsulta = request.TipoConsulta!.Value;
@@ -165,6 +173,11 @@ namespace PetBuddies_API.Services
             consulta.ClinicaId = ClinicaId;
 
             await _context.SaveChangesAsync();
+
+            bool ficouRealizada = statusAnterior != StatusConsultaEnum.REALIZADA
+                               && consulta.Status == StatusConsultaEnum.REALIZADA;
+            if (ficouRealizada)
+                await _motorApiClient.RecalcularScoreAsync(consulta.AnimalId, "CONSULTA_REALIZADA");
 
             return ToDto(consulta);
         }

@@ -38,30 +38,30 @@ namespace PetBuddies_API.Services
             return animal is null ? null : ToDto(animal);
         }
 
-        public Task<bool> ExisteAsync(int animalId)
+        public async Task<bool> ExisteAsync(int animalId)
         {
-            return _context.Animais
+            return await _context.Animais
                 .AsNoTracking()
                 .AnyAsync(animal => animal.Id == animalId);
         }
 
-        public Task<bool> ResponsavelExisteAsync(int responsavelId)
+        public async Task<bool> ResponsavelExisteAsync(int responsavelId)
         {
-            return _context.Responsaveis
+            return await _context.Responsaveis
                 .AsNoTracking()
                 .AnyAsync(responsavel => responsavel.Id == responsavelId);
         }
 
-        public Task<bool> TipoAnimalExisteAsync(EspecieEnum especie, PorteEnum porte)
+        public async Task<bool> TipoAnimalExisteAsync(EspecieEnum especie, PorteEnum porte)
         {
-            return _context.TiposAnimal
+            return await _context.TiposAnimal
                 .AsNoTracking()
                 .AnyAsync(item => item.Especie == especie && item.Porte == porte);
         }
 
-        public Task<bool> PossuiConsultasAsync(int animalId)
+        public async Task<bool> PossuiConsultasAsync(int animalId)
         {
-            return _context.Consultas
+            return await _context.Consultas
                 .AsNoTracking()
                 .AnyAsync(consulta => consulta.AnimalId == animalId);
         }
@@ -89,7 +89,13 @@ namespace PetBuddies_API.Services
             _context.Animais.Add(animal);
             await _context.SaveChangesAsync();
 
-            await _motorApiClient.InstanciarPlanoPreventivoAsync(animal.Id);
+            await _motorApiClient.InstanciarPlanoPreventivoAsync(
+                animal.Id,
+                especie,
+                porte,
+                animal.Sexo,
+                animal.Castrado,
+                animal.DataNascimento);
 
             return ToDto(animal, especie, porte);
         }
@@ -108,6 +114,11 @@ namespace PetBuddies_API.Services
             var porte = request.Porte!.Value;
             var tipoAnimal = await BuscarTipoAnimalAsync(especie, porte);
 
+            var dataNascimentoOld = animal.DataNascimento;
+            var castradoOld = animal.Castrado;
+            var condicaoCronicaOld = animal.CondicaoCronica;
+            var tipoAnimalIdOld = animal.TipoAnimalId;
+
             animal.ResponsavelId = request.ResponsavelId;
             animal.Nome = request.Nome.Trim();
             animal.Sexo = request.Sexo!.Value;
@@ -118,6 +129,14 @@ namespace PetBuddies_API.Services
             animal.TipoAnimalId = tipoAnimal!.Id;
 
             await _context.SaveChangesAsync();
+
+            bool mudouCampoClinco = dataNascimentoOld != animal.DataNascimento
+                || castradoOld != animal.Castrado
+                || condicaoCronicaOld != animal.CondicaoCronica
+                || tipoAnimalIdOld != animal.TipoAnimalId;
+
+            if (mudouCampoClinco)
+                await _motorApiClient.RecalcularScoreAsync(animal.Id, "ATUALIZACAO_CLINICA");
 
             return ToDto(animal, especie, porte);
         }
