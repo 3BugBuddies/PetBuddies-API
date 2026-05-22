@@ -4,11 +4,11 @@ namespace PetBuddies_API.Dtos.JanelaAtendimento
     {
         public int Id { get; init; }
 
-        public DateOnly Data { get; init; }
+        public DateTime DataHoraInicio { get; init; }
 
-        public TimeOnly HoraInicio { get; init; }
+        public DateTime DataHoraFim { get; init; }
 
-        public TimeOnly HoraFim { get; init; }
+        public int DuracaoSlot { get; init; }
 
         public int VeterinarioId { get; init; }
 

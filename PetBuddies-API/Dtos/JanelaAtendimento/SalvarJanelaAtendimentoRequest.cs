@@ -4,14 +4,11 @@ namespace PetBuddies_API.Dtos.JanelaAtendimento
 {
     public class SalvarJanelaAtendimentoRequest
     {
-        [Required(ErrorMessage = "Data da janela é obrigatória.")]
-        public DateOnly? Data { get; set; }
+        [Required(ErrorMessage = "DataHoraInicio é obrigatória.")]
+        public DateTime? DataHoraInicio { get; set; }
 
-        [Required(ErrorMessage = "Hora de início é obrigatória.")]
-        public TimeOnly? HoraInicio { get; set; }
-
-        [Required(ErrorMessage = "Hora de fim é obrigatória.")]
-        public TimeOnly? HoraFim { get; set; }
+        [Required(ErrorMessage = "DataHoraFim é obrigatória.")]
+        public DateTime? DataHoraFim { get; set; }
 
         [Range(1, 1440, ErrorMessage = "Duração do slot deve estar entre 1 e 1440 minutos.")]
         public int DuracaoSlot { get; set; }
