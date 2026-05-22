@@ -31,10 +31,10 @@ namespace PetBuddies_API.Models
         public string? Observacao { get; set; }
 
         [Column("PR_PROXIMO_RETORNO")]
-        public DateOnly ProximoRetorno { get; set; }
+        public DateOnly? ProximoRetorno { get; set; }
 
         [Column("PR_PROXIMA_VACINA")]
-        public DateOnly ProximaVacina { get; set; }
+        public DateOnly? ProximaVacina { get; set; }
 
         [ForeignKey(nameof(Animal))]
         [Column("ID_ANIMAL")]

@@ -20,11 +20,11 @@ namespace PetBuddies_API.Models
 
         [Column("NR_CPF")]
         [StringLength(11, MinimumLength = 11)]
-        [RegularExpression(@"^\d{11}$|^$", ErrorMessage = "CPF deve conter 11 dígitos.")]
-        public string Cpf { get; set; } = string.Empty;
+        [RegularExpression(@"^\d{11}$", ErrorMessage = "CPF deve conter 11 dígitos.")]
+        public string? Cpf { get; set; }
 
         [Column("DT_DATA_NASCIMENTO")]
-        public DateOnly DataNascimento { get; set; }
+        public DateOnly? DataNascimento { get; set; }
 
         [Required(ErrorMessage = "Telefone do responsável é obrigatório.")]
         [Column("TL_TELEFONE")]

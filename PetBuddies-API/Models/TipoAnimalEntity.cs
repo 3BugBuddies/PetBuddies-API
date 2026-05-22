@@ -18,7 +18,7 @@ namespace PetBuddies_API.Models
 
         [Column("RC_RACA")]
         [StringLength(100)]
-        public string Raca { get; set; } = string.Empty;
+        public string Raca { get; set; } = "SEM_RACA";
 
         [Column("PT_PORTE")]
         [EnumDataType(typeof(PorteEnum))]

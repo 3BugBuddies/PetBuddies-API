@@ -25,9 +25,9 @@ namespace PetBuddies_API.Models
         [Column("DT_DATA_NASCIMENTO")]
         public DateOnly DataNascimento { get; set; }
 
-        [Column("NR_PESO")]
+        [Column("NR_PESO", TypeName = "NUMBER(5,2)")]
         [Range(0, 999.99)]
-        public decimal Peso { get; set; }
+        public decimal? Peso { get; set; }
 
         [Column("CN_CONDICAO_CRONICA")]
         public bool CondicaoCronica { get; set; }
