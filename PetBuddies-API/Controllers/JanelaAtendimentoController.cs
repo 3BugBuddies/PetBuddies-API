@@ -58,6 +58,11 @@ namespace PetBuddies_API.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "Horário já cadastrado.")]
         public async Task<ActionResult<JanelaAtendimentoDto>> Cadastrar([FromBody] SalvarJanelaAtendimentoRequest request)
         {
+            if (request.DataHoraFim <= request.DataHoraInicio)
+            {
+                return BadRequest("DataHoraFim deve ser maior que DataHoraInicio.");
+            }
+
             if (!await _janelaAtendimentoService.VeterinarioExisteAsync(request.VeterinarioId))
             {
                 return NotFound("Veterinário não encontrado para cadastrar janela de atendimento.");
@@ -65,8 +70,7 @@ namespace PetBuddies_API.Controllers
 
             if (await _janelaAtendimentoService.HorarioExisteAsync(
                 request.VeterinarioId,
-                request.Data!.Value,
-                request.HoraInicio!.Value))
+                request.DataHoraInicio!.Value))
             {
                 return Conflict("Já existe janela de atendimento neste horário para o veterinário.");
             }
@@ -83,6 +87,11 @@ namespace PetBuddies_API.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "Janela possui conflito de horário ou vínculo.")]
         public async Task<IActionResult> Atualizar(int id, [FromBody] SalvarJanelaAtendimentoRequest request)
         {
+            if (request.DataHoraFim <= request.DataHoraInicio)
+            {
+                return BadRequest("DataHoraFim deve ser maior que DataHoraInicio.");
+            }
+
             if (await _janelaAtendimentoService.BuscarPorIdAsync(id) is null)
             {
                 return NotFound("Janela de atendimento não encontrada para o id informado.");
@@ -100,8 +109,7 @@ namespace PetBuddies_API.Controllers
 
             if (await _janelaAtendimentoService.HorarioExisteAsync(
                 request.VeterinarioId,
-                request.Data!.Value,
-                request.HoraInicio!.Value,
+                request.DataHoraInicio!.Value,
                 id))
             {
                 return Conflict("Já existe janela de atendimento neste horário para o veterinário.");
