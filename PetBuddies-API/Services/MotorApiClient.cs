@@ -19,12 +19,7 @@ namespace PetBuddies_API.Services
             _logger = logger;
         }
 
-        public async Task InstanciarPlanoPreventivoAsync(int animalId,
-                                                        EspecieEnum especie,
-                                                        PorteEnum porte,
-                                                        SexoEnum sexo,
-                                                        bool castrado,
-                                                        DateOnly dataNascimento)
+        public async Task InstanciarPlanoPreventivoAsync(int animalId, EspecieEnum especie, PorteEnum porte, SexoEnum sexo, bool castrado, DateOnly dataNascimento)
         {
             try
             {

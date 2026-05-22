@@ -17,12 +17,11 @@ namespace PetBuddies_API.Services
 
         public async Task<List<JanelaAtendimentoDto>> ListarDisponiveisAsync()
         {
-            var hoje = DateOnly.FromDateTime(DateTime.Now);
-            var inicioHoje = hoje.ToDateTime(TimeOnly.MinValue);
+            var agora = DateTime.Now;
 
             var consultasOcupadas = await _context.Consultas
                 .AsNoTracking()
-                .Where(consulta => consulta.Status != StatusConsultaEnum.CANCELADA && consulta.DataHora >= inicioHoje)
+                .Where(consulta => consulta.Status != StatusConsultaEnum.CANCELADA && consulta.DataHora >= agora)
                 .Select(consulta => new { consulta.VeterinarioId, consulta.DataHora })
                 .ToListAsync();
 
@@ -33,13 +32,12 @@ namespace PetBuddies_API.Services
             var janelas = await _context.JanelasAtendimento
                 .AsNoTracking()
                 .Include(janela => janela.Veterinario)
-                .Where(janela => janela.Data >= hoje)
-                .OrderBy(janela => janela.Data)
-                .ThenBy(janela => janela.HoraInicio)
+                .Where(janela => janela.DataHoraInicio >= agora)
+                .OrderBy(janela => janela.DataHoraInicio)
                 .ToListAsync();
 
             return janelas
-                .Where(janela => !ocupadas.Contains((janela.VeterinarioId, janela.Data.ToDateTime(janela.HoraInicio))))
+                .Where(janela => !ocupadas.Contains((janela.VeterinarioId, janela.DataHoraInicio)))
                 .Select(ToDto)
                 .ToList();
         }
@@ -49,8 +47,7 @@ namespace PetBuddies_API.Services
             var janelas = await _context.JanelasAtendimento
                 .AsNoTracking()
                 .Include(janela => janela.Veterinario)
-                .OrderBy(janela => janela.Data)
-                .ThenBy(janela => janela.HoraInicio)
+                .OrderBy(janela => janela.DataHoraInicio)
                 .ToListAsync();
 
             return janelas.Select(ToDto).ToList();
@@ -66,22 +63,25 @@ namespace PetBuddies_API.Services
             return janela is null ? null : ToDto(janela);
         }
 
-        public Task<bool> VeterinarioExisteAsync(int veterinarioId)
+        public async Task<bool> VeterinarioExisteAsync(int veterinarioId)
         {
-            return _context.Veterinarios
+            return await _context.Veterinarios
                 .AsNoTracking()
                 .AnyAsync(item => item.Id == veterinarioId);
         }
 
-        public Task<bool> HorarioExisteAsync(int veterinarioId, DateOnly data, TimeOnly horaInicio, int? ignorarJanelaId = null)
+        public async Task<bool> HorarioExisteAsync(int veterinarioId, DateTime dataHoraInicio, int? ignorarJanelaId = null)
         {
-            return _context.JanelasAtendimento
+            var query = _context.JanelasAtendimento
                 .AsNoTracking()
-                .AnyAsync(item =>
+                .Where(item =>
                     item.VeterinarioId == veterinarioId
-                    && item.Data == data
-                    && item.HoraInicio == horaInicio
-                    && (!ignorarJanelaId.HasValue || item.Id != ignorarJanelaId.Value));
+                    && item.DataHoraInicio == dataHoraInicio);
+
+            if (ignorarJanelaId.HasValue)
+                query = query.Where(item => item.Id != ignorarJanelaId.Value);
+
+            return await query.AnyAsync();
         }
 
         public async Task<bool> PossuiConsultaAsync(int janelaId)
@@ -99,7 +99,7 @@ namespace PetBuddies_API.Services
                 .AsNoTracking()
                 .AnyAsync(consulta =>
                     consulta.VeterinarioId == janela.VeterinarioId
-                    && consulta.DataHora == janela.Data.ToDateTime(janela.HoraInicio)
+                    && consulta.DataHora == janela.DataHoraInicio
                     && consulta.Status != StatusConsultaEnum.CANCELADA);
         }
 
@@ -107,9 +107,8 @@ namespace PetBuddies_API.Services
         {
             var janela = new JanelaAtendimentoEntity
             {
-                Data = request.Data!.Value,
-                HoraInicio = request.HoraInicio!.Value,
-                HoraFim = request.HoraFim!.Value,
+                DataHoraInicio = request.DataHoraInicio!.Value,
+                DataHoraFim = request.DataHoraFim!.Value,
                 DuracaoSlot = request.DuracaoSlot,
                 VeterinarioId = request.VeterinarioId
             };
@@ -130,9 +129,8 @@ namespace PetBuddies_API.Services
                 return null;
             }
 
-            janela.Data = request.Data!.Value;
-            janela.HoraInicio = request.HoraInicio!.Value;
-            janela.HoraFim = request.HoraFim!.Value;
+            janela.DataHoraInicio = request.DataHoraInicio!.Value;
+            janela.DataHoraFim = request.DataHoraFim!.Value;
             janela.DuracaoSlot = request.DuracaoSlot;
             janela.VeterinarioId = request.VeterinarioId;
 
@@ -162,9 +160,9 @@ namespace PetBuddies_API.Services
             return new JanelaAtendimentoDto
             {
                 Id = janela.Id,
-                Data = janela.Data,
-                HoraInicio = janela.HoraInicio,
-                HoraFim = janela.HoraFim,
+                DataHoraInicio = janela.DataHoraInicio,
+                DataHoraFim = janela.DataHoraFim,
+                DuracaoSlot = janela.DuracaoSlot,
                 VeterinarioId = janela.VeterinarioId,
                 VeterinarioNome = janela.Veterinario?.Nome ?? string.Empty
             };

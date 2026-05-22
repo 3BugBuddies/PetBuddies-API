@@ -47,20 +47,22 @@ namespace PetBuddies_API.Services
             return responsavel is null ? null : ToDto(responsavel);
         }
 
-        public Task<bool> TelefoneExisteAsync(string telefone, int? ignorarResponsavelId = null)
+        public async Task<bool> TelefoneExisteAsync(string telefone, int? ignorarResponsavelId = null)
         {
             var telefoneNormalizado = NormalizarTelefone(telefone);
-
-            return _context.Responsaveis
+            var query = _context.Responsaveis
                 .AsNoTracking()
-                .AnyAsync(item =>
-                    item.Telefone == telefoneNormalizado
-                    && (!ignorarResponsavelId.HasValue || item.Id != ignorarResponsavelId.Value));
+                .Where(item => item.Telefone == telefoneNormalizado);
+
+            if (ignorarResponsavelId.HasValue)
+                query = query.Where(item => item.Id != ignorarResponsavelId.Value);
+
+            return await query.AnyAsync();
         }
 
-        public Task<bool> PossuiAnimaisAsync(int responsavelId)
+        public async Task<bool> PossuiAnimaisAsync(int responsavelId)
         {
-            return _context.Animais
+            return await _context.Animais
                 .AsNoTracking()
                 .AnyAsync(animal => animal.ResponsavelId == responsavelId);
         }
@@ -70,7 +72,7 @@ namespace PetBuddies_API.Services
             var responsavel = new ResponsavelEntity
             {
                 Nome = request.Nome.Trim(),
-                Cpf = string.Empty,
+                Cpf = null,
                 Telefone = NormalizarTelefone(request.Telefone),
                 Email = null,
                 Status = StatusTutorEnum.PRE_CADASTRO,
