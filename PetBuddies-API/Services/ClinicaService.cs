@@ -33,6 +33,17 @@ namespace PetBuddies_API.Services
             return clinica is null ? null : ToDto(clinica);
         }
 
+        public async Task<List<ClinicaDto>> BuscarPorNomeAsync(string nome)
+        {
+            var clinicas = await _context.Clinicas
+                .AsNoTracking()
+                .Where(item => item.Nome.ToLower().Contains(nome.ToLower()))
+                .OrderBy(item => item.Nome)
+                .ToListAsync();
+
+            return clinicas.Select(ToDto).ToList();
+        }
+
         public async Task<bool> EnderecoExisteAsync(int enderecoId)
         {
             return await _context.Enderecos

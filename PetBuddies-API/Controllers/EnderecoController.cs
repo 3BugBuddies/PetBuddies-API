@@ -19,13 +19,24 @@ namespace PetBuddies_API.Controllers
 
         [HttpGet]
         [SwaggerOperation(Summary = "Lista endereços")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Endereços listados com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Nenhum endereço cadastrado.")]
         public async Task<ActionResult<List<EnderecoDto>>> Listar()
         {
-            return Ok(await _enderecoService.ListarAsync());
+            var response = await _enderecoService.ListarAsync();
+
+            if (response.Count == 0)
+            {
+                return NoContent();
+            }
+
+            return Ok(response);
         }
 
         [HttpGet("{id:int}")]
         [SwaggerOperation(Summary = "Busca endereço por id")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Endereço encontrado.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Endereço não encontrado.")]
         public async Task<ActionResult<EnderecoDto>> BuscarPorId(int id)
         {
             var response = await _enderecoService.BuscarPorIdAsync(id);
@@ -36,14 +47,19 @@ namespace PetBuddies_API.Controllers
 
         [HttpPost]
         [SwaggerOperation(Summary = "Cadastra endereço")]
+        [SwaggerResponse(StatusCodes.Status201Created, "Endereço cadastrado com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Dados inválidos para cadastrar o endereço.")]
         public async Task<ActionResult<EnderecoDto>> Cadastrar([FromBody] SalvarEnderecoRequest request)
         {
             var response = await _enderecoService.CadastrarAsync(request);
-            return Created($"/api/endereco/{response.Id}", response);
+            return CreatedAtAction(nameof(BuscarPorId), new { id = response.Id }, response);
         }
 
         [HttpPut("{id:int}")]
         [SwaggerOperation(Summary = "Atualiza endereço")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Endereço atualizado com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Dados inválidos para atualizar o endereço.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Endereço não encontrado.")]
         public async Task<IActionResult> Atualizar(int id, [FromBody] SalvarEnderecoRequest request)
         {
             if (!await _enderecoService.ExisteAsync(id))
@@ -57,6 +73,9 @@ namespace PetBuddies_API.Controllers
 
         [HttpDelete("{id:int}")]
         [SwaggerOperation(Summary = "Remove endereço")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Endereço removido com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Endereço não encontrado.")]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Endereço possui vínculos e não pode ser removido.")]
         public async Task<IActionResult> Remover(int id)
         {
             if (!await _enderecoService.ExisteAsync(id))

@@ -27,8 +27,11 @@ namespace PetBuddies_API.Dtos.Procedimento
         [StringLength(2000)]
         public string? Observacao { get; set; }
 
+        [Range(1, int.MaxValue, ErrorMessage = "RegistroAtendimentoId deve ser maior que zero.")]
         public int RegistroAtendimentoId { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "AnimalId deve ser maior que zero.")]
         public int AnimalId { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "VeterinarioId deve ser maior que zero.")]
         public int VeterinarioId { get; set; }
     }
 }

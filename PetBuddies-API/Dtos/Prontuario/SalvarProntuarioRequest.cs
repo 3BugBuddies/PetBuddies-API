@@ -10,6 +10,7 @@ namespace PetBuddies_API.Dtos.Prontuario
         [StringLength(2000)]
         public string? Observacoes { get; set; }
 
+        [Range(1, int.MaxValue, ErrorMessage = "AnimalId deve ser maior que zero.")]
         public int AnimalId { get; set; }
     }
 }

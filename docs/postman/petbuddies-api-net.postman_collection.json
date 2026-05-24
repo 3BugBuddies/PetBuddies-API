@@ -1,0 +1,465 @@
+{
+  "info": {
+    "name": "PetBuddies API — .NET (Clínico)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",          "value": "http://localhost:5297" },
+    { "key": "enderecoId",       "value": "" },
+    { "key": "enderecoDeleteId", "value": "" },
+    { "key": "clinicaId",        "value": "" },
+    { "key": "clinicaDeleteId",  "value": "" },
+    { "key": "veterinarioId",    "value": "" },
+    { "key": "vetDeleteId",      "value": "" },
+    { "key": "janelaId",         "value": "" }
+  ],
+  "item": [
+
+    {
+      "name": "Endereco",
+      "item": [
+        {
+          "name": "Cria endereço — 201",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/endereco",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"logradouro\": \"Rua das Flores\",\n  \"numero\": \"123\",\n  \"complemento\": \"Sala 1\",\n  \"bairro\": \"Bela Vista\",\n  \"cidade\": \"Sao Paulo\",\n  \"estado\": \"SP\",\n  \"cep\": \"01001000\"\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "pm.collectionVariables.set('enderecoId', pm.response.json().id);"
+          ]}}]
+        },
+        {
+          "name": "Lista endereços — 200",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/endereco" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
+        },
+        {
+          "name": "Busca endereço por id — 200",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/endereco/{{enderecoId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
+        },
+        {
+          "name": "Busca endereço inexistente — 404",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/endereco/999999" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+        },
+        {
+          "name": "Atualiza endereço — 204",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/endereco/{{enderecoId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"logradouro\": \"Av. Paulista\",\n  \"numero\": \"1000\",\n  \"bairro\": \"Bela Vista\",\n  \"cidade\": \"Sao Paulo\",\n  \"estado\": \"SP\",\n  \"cep\": \"01310100\"\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
+        },
+        {
+          "name": "Atualiza endereço inexistente — 404",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/endereco/999999",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"logradouro\": \"Rua X\",\n  \"numero\": \"1\",\n  \"cidade\": \"Sao Paulo\",\n  \"estado\": \"SP\",\n  \"cep\": \"01001000\"\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+        },
+        {
+          "name": "Cria endereço sem logradouro — 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/endereco",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero\": \"1\",\n  \"cidade\": \"Sao Paulo\",\n  \"estado\": \"SP\",\n  \"cep\": \"01001000\"\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] }}]
+        },
+        {
+          "name": "Cria segundo endereço (para deletar) — 201",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/endereco",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"logradouro\": \"Rua para Deletar\",\n  \"numero\": \"999\",\n  \"cidade\": \"Sao Paulo\",\n  \"estado\": \"SP\",\n  \"cep\": \"04001000\"\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "pm.collectionVariables.set('enderecoDeleteId', pm.response.json().id);"
+          ]}}]
+        },
+        {
+          "name": "Remove endereço — 204",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/endereco/{{enderecoDeleteId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
+        },
+        {
+          "name": "Remove endereço inexistente — 404",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/endereco/999999" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+        }
+      ]
+    },
+
+    {
+      "name": "Clinica",
+      "item": [
+        {
+          "name": "Cria clínica — 201",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/clinica",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"PetVida Clinica Veterinaria\",\n  \"cnpj\": \"11222333000144\",\n  \"telefone\": \"11999990001\",\n  \"email\": \"contato@petvida.com\",\n  \"enderecoId\": {{enderecoId}}\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "pm.collectionVariables.set('clinicaId', pm.response.json().id);"
+          ]}}]
+        },
+        {
+          "name": "Lista clínicas — 200",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/clinica" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
+        },
+        {
+          "name": "Busca clínica por id — 200",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/clinica/{{clinicaId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
+        },
+        {
+          "name": "Busca clínica inexistente — 404",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/clinica/999999" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+        },
+        {
+          "name": "Busca clínicas por nome — 200",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/clinica/buscar?nome=PetVida" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
+        },
+        {
+          "name": "Atualiza clínica — 204",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/clinica/{{clinicaId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"PetVida Clinica Veterinaria (atualizada)\",\n  \"cnpj\": \"11222333000144\",\n  \"telefone\": \"11999990002\",\n  \"enderecoId\": {{enderecoId}}\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
+        },
+        {
+          "name": "Cria clínica com CNPJ inválido — 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/clinica",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Clinica Invalida\",\n  \"cnpj\": \"123\",\n  \"telefone\": \"11999990001\",\n  \"enderecoId\": {{enderecoId}}\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] }}]
+        },
+        {
+          "name": "Cria clínica com endereço inexistente — 404",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/clinica",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Clinica Orfao\",\n  \"cnpj\": \"99888777000155\",\n  \"telefone\": \"11900000000\",\n  \"enderecoId\": 999999\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+        },
+        {
+          "name": "Cria clínica com CNPJ duplicado — 409",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/clinica",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Outra Clinica\",\n  \"cnpj\": \"11222333000144\",\n  \"telefone\": \"11900000000\",\n  \"enderecoId\": {{enderecoId}}\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 409', () => pm.response.to.have.status(409));"] }}]
+        },
+        {
+          "name": "Cria segunda clínica (para deletar) — 201",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/clinica",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Clinica para Deletar\",\n  \"cnpj\": \"22333444000155\",\n  \"telefone\": \"11900000000\",\n  \"enderecoId\": {{enderecoId}}\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "pm.collectionVariables.set('clinicaDeleteId', pm.response.json().id);"
+          ]}}]
+        },
+        {
+          "name": "Remove clínica — 204",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/clinica/{{clinicaDeleteId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
+        },
+        {
+          "name": "Remove clínica inexistente — 404",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/clinica/999999" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+        }
+      ]
+    },
+
+    {
+      "name": "Veterinario",
+      "item": [
+        {
+          "name": "Cria veterinário — 201",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/veterinario",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Dra. Ana Lima\",\n  \"crmv\": \"12345SP\",\n  \"especialidade\": \"Clinico Geral\",\n  \"telefone\": \"11912345678\",\n  \"email\": \"ana.lima@petvida.com\",\n  \"atendeEmergencia\": true,\n  \"ativo\": true,\n  \"clinicaId\": {{clinicaId}}\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "pm.collectionVariables.set('veterinarioId', pm.response.json().id);"
+          ]}}]
+        },
+        {
+          "name": "Lista veterinários — 200",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/veterinario" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
+        },
+        {
+          "name": "Busca veterinário por id — 200",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/veterinario/{{veterinarioId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
+        },
+        {
+          "name": "Busca veterinário inexistente — 404",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/veterinario/999999" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+        },
+        {
+          "name": "Lista veterinários por clínica — 200",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/veterinario/por-clinica/{{clinicaId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
+        },
+        {
+          "name": "Atualiza veterinário — 204",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/veterinario/{{veterinarioId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Dra. Ana Lima (atualizada)\",\n  \"crmv\": \"12345SP\",\n  \"especialidade\": \"Dermatologia\",\n  \"atendeEmergencia\": false,\n  \"ativo\": true,\n  \"clinicaId\": {{clinicaId}}\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
+        },
+        {
+          "name": "Cria veterinário com clinicaId zero — 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/veterinario",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Vet Invalido\",\n  \"crmv\": \"99999SP\",\n  \"atendeEmergencia\": false,\n  \"ativo\": true,\n  \"clinicaId\": 0\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] }}]
+        },
+        {
+          "name": "Cria veterinário com clínica inexistente — 404",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/veterinario",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Vet Orfao\",\n  \"crmv\": \"88888SP\",\n  \"atendeEmergencia\": false,\n  \"ativo\": true,\n  \"clinicaId\": 999999\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+        },
+        {
+          "name": "Cria veterinário com CRMV duplicado na clínica — 409",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/veterinario",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Dr. Outro\",\n  \"crmv\": \"12345SP\",\n  \"atendeEmergencia\": false,\n  \"ativo\": true,\n  \"clinicaId\": {{clinicaId}}\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 409', () => pm.response.to.have.status(409));"] }}]
+        },
+        {
+          "name": "Cria segundo veterinário (para deletar) — 201",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/veterinario",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Dr. para Deletar\",\n  \"crmv\": \"77777SP\",\n  \"atendeEmergencia\": false,\n  \"ativo\": true,\n  \"clinicaId\": {{clinicaId}}\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "pm.collectionVariables.set('vetDeleteId', pm.response.json().id);"
+          ]}}]
+        },
+        {
+          "name": "Remove veterinário — 204",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/veterinario/{{vetDeleteId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
+        },
+        {
+          "name": "Remove veterinário inexistente — 404",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/veterinario/999999" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+        }
+      ]
+    },
+
+    {
+      "name": "JanelaAtendimento",
+      "item": [
+        {
+          "name": "Cria janela de atendimento — 201",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/janela-atendimento",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataHoraInicio\": \"2026-06-20T09:00:00\",\n  \"dataHoraFim\": \"2026-06-20T09:30:00\",\n  \"duracaoSlot\": 30,\n  \"veterinarioId\": {{veterinarioId}}\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "pm.collectionVariables.set('janelaId', pm.response.json().id);"
+          ]}}]
+        },
+        {
+          "name": "Lista janelas disponíveis — 200",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/janela-atendimento" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
+        },
+        {
+          "name": "Lista todas as janelas — 200",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/janela-atendimento/todas" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
+        },
+        {
+          "name": "Busca janela por id — 200",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/janela-atendimento/{{janelaId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
+        },
+        {
+          "name": "Busca janela inexistente — 404",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/janela-atendimento/999999" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+        },
+        {
+          "name": "Atualiza janela — 204",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/janela-atendimento/{{janelaId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataHoraInicio\": \"2026-06-20T10:00:00\",\n  \"dataHoraFim\": \"2026-06-20T10:30:00\",\n  \"duracaoSlot\": 30,\n  \"veterinarioId\": {{veterinarioId}}\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
+        },
+        {
+          "name": "Cria janela com dataHoraFim anterior — 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/janela-atendimento",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataHoraInicio\": \"2026-06-20T10:00:00\",\n  \"dataHoraFim\": \"2026-06-20T09:00:00\",\n  \"duracaoSlot\": 30,\n  \"veterinarioId\": {{veterinarioId}}\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] }}]
+        },
+        {
+          "name": "Cria janela com veterinário inexistente — 404",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/janela-atendimento",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataHoraInicio\": \"2026-07-01T08:00:00\",\n  \"dataHoraFim\": \"2026-07-01T08:30:00\",\n  \"duracaoSlot\": 30,\n  \"veterinarioId\": 999999\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+        },
+        {
+          "name": "Cria janela com horário duplicado — 409",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/janela-atendimento",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataHoraInicio\": \"2026-06-20T10:00:00\",\n  \"dataHoraFim\": \"2026-06-20T10:30:00\",\n  \"duracaoSlot\": 30,\n  \"veterinarioId\": {{veterinarioId}}\n}"
+            }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 409', () => pm.response.to.have.status(409));"] }}]
+        },
+        {
+          "name": "Remove janela — 204",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/janela-atendimento/{{janelaId}}" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
+        },
+        {
+          "name": "Remove janela inexistente — 404",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/janela-atendimento/999999" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+        }
+      ]
+    }
+
+  ]
+}

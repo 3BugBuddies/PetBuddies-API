@@ -41,17 +41,23 @@ namespace PetBuddies_API.Controllers
             }
 
             var response = await _consultaService.AgendarAsync(request);
-            return Created($"/api/consulta/{response.Id}", response);
+            return CreatedAtAction(nameof(BuscarPorId), new { id = response.Id }, response);
         }
 
         [HttpGet]
         [SwaggerOperation(Summary = "Lista consultas")]
         [SwaggerResponse(StatusCodes.Status200OK, "Consultas listadas com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Nenhuma consulta encontrada.")]
         public async Task<ActionResult<List<ConsultaDto>>> Listar([FromQuery] int? animalId)
         {
             var response = animalId.HasValue
                 ? await _consultaService.ListarPorAnimalAsync(animalId.Value)
                 : await _consultaService.ListarAsync();
+
+            if (response.Count == 0)
+            {
+                return NoContent();
+            }
 
             return Ok(response);
         }

@@ -95,6 +95,7 @@ namespace PetBuddies_API.Services
                 porte,
                 animal.Sexo,
                 animal.Castrado,
+            
                 animal.DataNascimento);
 
             return ToDto(animal, especie, porte);

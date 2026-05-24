@@ -19,13 +19,24 @@ namespace PetBuddies_API.Controllers
 
         [HttpGet]
         [SwaggerOperation(Summary = "Lista tipos de animal")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Tipos de animal listados com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Nenhum tipo de animal cadastrado.")]
         public async Task<ActionResult<List<TipoAnimalDto>>> Listar()
         {
-            return Ok(await _tipoAnimalService.ListarAsync());
+            var response = await _tipoAnimalService.ListarAsync();
+
+            if (response.Count == 0)
+            {
+                return NoContent();
+            }
+
+            return Ok(response);
         }
 
         [HttpGet("{id:int}")]
         [SwaggerOperation(Summary = "Busca tipo de animal por id")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Tipo de animal encontrado.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Tipo de animal não encontrado.")]
         public async Task<ActionResult<TipoAnimalDto>> BuscarPorId(int id)
         {
             var response = await _tipoAnimalService.BuscarPorIdAsync(id);
@@ -36,6 +47,9 @@ namespace PetBuddies_API.Controllers
 
         [HttpPost]
         [SwaggerOperation(Summary = "Cadastra tipo de animal")]
+        [SwaggerResponse(StatusCodes.Status201Created, "Tipo de animal cadastrado com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Dados inválidos para cadastrar o tipo de animal.")]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Combinação de espécie, porte e raça já cadastrada.")]
         public async Task<ActionResult<TipoAnimalDto>> Cadastrar([FromBody] SalvarTipoAnimalRequest request)
         {
             if (await _tipoAnimalService.DuplicadoAsync(request))
@@ -44,11 +58,15 @@ namespace PetBuddies_API.Controllers
             }
 
             var response = await _tipoAnimalService.CadastrarAsync(request);
-            return Created($"/api/tipo-animal/{response.Id}", response);
+            return CreatedAtAction(nameof(BuscarPorId), new { id = response.Id }, response);
         }
 
         [HttpPut("{id:int}")]
         [SwaggerOperation(Summary = "Atualiza tipo de animal")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Tipo de animal atualizado com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Dados inválidos para atualizar o tipo de animal.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Tipo de animal não encontrado.")]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Combinação de espécie, porte e raça já cadastrada.")]
         public async Task<IActionResult> Atualizar(int id, [FromBody] SalvarTipoAnimalRequest request)
         {
             if (await _tipoAnimalService.BuscarPorIdAsync(id) is null)
@@ -67,6 +85,9 @@ namespace PetBuddies_API.Controllers
 
         [HttpDelete("{id:int}")]
         [SwaggerOperation(Summary = "Remove tipo de animal")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Tipo de animal removido com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Tipo de animal não encontrado.")]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Tipo de animal possui vínculos e não pode ser removido.")]
         public async Task<IActionResult> Remover(int id)
         {
             if (await _tipoAnimalService.BuscarPorIdAsync(id) is null)

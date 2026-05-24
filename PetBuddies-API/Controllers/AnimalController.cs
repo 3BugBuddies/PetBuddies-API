@@ -39,9 +39,16 @@ namespace PetBuddies_API.Controllers
         [HttpGet]
         [SwaggerOperation(Summary = "Lista animais")]
         [SwaggerResponse(StatusCodes.Status200OK, "Animais listados com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Nenhum animal cadastrado.")]
         public async Task<ActionResult<List<AnimalDto>>> Listar()
         {
             var response = await _animalCadastroService.ListarAsync();
+
+            if (response.Count == 0)
+            {
+                return NoContent();
+            }
+
             return Ok(response);
         }
 
@@ -95,7 +102,7 @@ namespace PetBuddies_API.Controllers
             }
 
             var response = await _animalCadastroService.CadastrarAsync(request);
-            return Created($"/api/animal/{response.Id}", response);
+            return CreatedAtAction(nameof(BuscarPorId), new { id = response.Id }, response);
         }
 
         [HttpPut("{id:int}")]

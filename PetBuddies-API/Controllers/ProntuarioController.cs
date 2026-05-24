@@ -19,13 +19,24 @@ namespace PetBuddies_API.Controllers
 
         [HttpGet]
         [SwaggerOperation(Summary = "Lista prontuários")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Prontuários listados com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Nenhum prontuário encontrado.")]
         public async Task<ActionResult<List<ProntuarioDto>>> Listar([FromQuery] int? animalId)
         {
-            return Ok(await _prontuarioService.ListarAsync(animalId));
+            var response = await _prontuarioService.ListarAsync(animalId);
+
+            if (response.Count == 0)
+            {
+                return NoContent();
+            }
+
+            return Ok(response);
         }
 
         [HttpGet("{id:int}")]
         [SwaggerOperation(Summary = "Busca prontuário por id")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Prontuário encontrado.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Prontuário não encontrado.")]
         public async Task<ActionResult<ProntuarioDto>> BuscarPorId(int id)
         {
             var response = await _prontuarioService.BuscarPorIdAsync(id);
@@ -36,6 +47,9 @@ namespace PetBuddies_API.Controllers
 
         [HttpPost]
         [SwaggerOperation(Summary = "Cadastra prontuário")]
+        [SwaggerResponse(StatusCodes.Status201Created, "Prontuário cadastrado com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Dados inválidos para cadastrar o prontuário.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Animal não encontrado.")]
         public async Task<ActionResult<ProntuarioDto>> Cadastrar([FromBody] SalvarProntuarioRequest request)
         {
             if (!await _prontuarioService.AnimalExisteAsync(request.AnimalId))
@@ -44,11 +58,14 @@ namespace PetBuddies_API.Controllers
             }
 
             var response = await _prontuarioService.CadastrarAsync(request);
-            return Created($"/api/prontuario/{response.Id}", response);
+            return CreatedAtAction(nameof(BuscarPorId), new { id = response.Id }, response);
         }
 
         [HttpPut("{id:int}")]
         [SwaggerOperation(Summary = "Atualiza prontuário")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Prontuário atualizado com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Dados inválidos para atualizar o prontuário.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Prontuário ou animal não encontrado.")]
         public async Task<IActionResult> Atualizar(int id, [FromBody] SalvarProntuarioRequest request)
         {
             if (await _prontuarioService.BuscarPorIdAsync(id) is null)
@@ -67,6 +84,9 @@ namespace PetBuddies_API.Controllers
 
         [HttpDelete("{id:int}")]
         [SwaggerOperation(Summary = "Remove prontuário")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Prontuário removido com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Prontuário não encontrado.")]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Prontuário possui vínculos e não pode ser removido.")]
         public async Task<IActionResult> Remover(int id)
         {
             if (await _prontuarioService.BuscarPorIdAsync(id) is null)

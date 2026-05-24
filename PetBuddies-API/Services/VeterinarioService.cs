@@ -33,6 +33,17 @@ namespace PetBuddies_API.Services
             return veterinario is null ? null : ToDto(veterinario);
         }
 
+        public async Task<List<VeterinarioDto>> ListarPorClinicaAsync(int clinicaId)
+        {
+            var veterinarios = await _context.Veterinarios
+                .AsNoTracking()
+                .Where(item => item.ClinicaId == clinicaId)
+                .OrderBy(item => item.Nome)
+                .ToListAsync();
+
+            return veterinarios.Select(ToDto).ToList();
+        }
+
         public async Task<bool> ClinicaExisteAsync(int clinicaId)
         {
             return await _context.Clinicas

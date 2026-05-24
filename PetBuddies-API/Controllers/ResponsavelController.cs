@@ -36,9 +36,16 @@ namespace PetBuddies_API.Controllers
         [HttpGet]
         [SwaggerOperation(Summary = "Lista responsáveis")]
         [SwaggerResponse(StatusCodes.Status200OK, "Responsáveis listados com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Nenhum responsável cadastrado.")]
         public async Task<ActionResult<List<ResponsavelDto>>> Listar()
         {
             var response = await _responsavelService.ListarAsync();
+
+            if (response.Count == 0)
+            {
+                return NoContent();
+            }
+
             return Ok(response);
         }
 
@@ -71,7 +78,7 @@ namespace PetBuddies_API.Controllers
             }
 
             var response = await _responsavelService.CadastrarAsync(request);
-            return Created($"/api/responsavel/{response.Id}", response);
+            return CreatedAtAction(nameof(BuscarPorId), new { id = response.Id }, response);
         }
 
         [HttpPut("{id:int}")]
@@ -99,6 +106,7 @@ namespace PetBuddies_API.Controllers
         [HttpGet("{id:int}/animal")]
         [SwaggerOperation(Summary = "Lista animais de um responsável")]
         [SwaggerResponse(StatusCodes.Status200OK, "Animais listados com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Responsável sem animais cadastrados.")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Responsável não encontrado.")]
         public async Task<ActionResult<List<AnimalDto>>> ListarAnimais(int id)
         {
@@ -107,6 +115,11 @@ namespace PetBuddies_API.Controllers
             if (response is null)
             {
                 return NotFound("Responsável não encontrado para o id informado.");
+            }
+
+            if (response.Count == 0)
+            {
+                return NoContent();
             }
 
             return Ok(response);

@@ -19,18 +19,32 @@ namespace PetBuddies_API.Controllers
         [HttpGet]
         [SwaggerOperation(Summary = "Lista janelas de atendimento disponíveis")]
         [SwaggerResponse(StatusCodes.Status200OK, "Janelas de atendimento listadas com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Nenhuma janela de atendimento disponível.")]
         public async Task<ActionResult<List<JanelaAtendimentoDto>>> ListarDisponiveis()
         {
             var response = await _janelaAtendimentoService.ListarDisponiveisAsync();
+
+            if (response.Count == 0)
+            {
+                return NoContent();
+            }
+
             return Ok(response);
         }
 
         [HttpGet("todas")]
         [SwaggerOperation(Summary = "Lista todas as janelas de atendimento")]
         [SwaggerResponse(StatusCodes.Status200OK, "Janelas de atendimento listadas com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Nenhuma janela de atendimento cadastrada.")]
         public async Task<ActionResult<List<JanelaAtendimentoDto>>> Listar()
         {
             var response = await _janelaAtendimentoService.ListarAsync();
+
+            if (response.Count == 0)
+            {
+                return NoContent();
+            }
+
             return Ok(response);
         }
 
@@ -76,7 +90,7 @@ namespace PetBuddies_API.Controllers
             }
 
             var response = await _janelaAtendimentoService.CadastrarAsync(request);
-            return Created($"/api/janela-atendimento/{response.Id}", response);
+            return CreatedAtAction(nameof(BuscarPorId), new { id = response.Id }, response);
         }
 
         [HttpPut("{id:int}")]

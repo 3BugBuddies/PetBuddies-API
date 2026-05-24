@@ -5,6 +5,7 @@ namespace PetBuddies_API.Dtos.Animal
 {
     public class AtualizarAnimalRequest
     {
+        [Range(1, int.MaxValue, ErrorMessage = "ResponsavelId deve ser maior que zero.")]
         public int ResponsavelId { get; set; }
 
         [Required(ErrorMessage = "Nome do animal é obrigatório.")]

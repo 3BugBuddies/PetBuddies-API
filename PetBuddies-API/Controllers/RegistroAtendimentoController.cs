@@ -19,13 +19,24 @@ namespace PetBuddies_API.Controllers
 
         [HttpGet]
         [SwaggerOperation(Summary = "Lista registros de atendimento")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Registros de atendimento listados com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Nenhum registro de atendimento encontrado.")]
         public async Task<ActionResult<List<RegistroAtendimentoDto>>> Listar([FromQuery] int? animalId)
         {
-            return Ok(await _registroAtendimentoService.ListarAsync(animalId));
+            var response = await _registroAtendimentoService.ListarAsync(animalId);
+
+            if (response.Count == 0)
+            {
+                return NoContent();
+            }
+
+            return Ok(response);
         }
 
         [HttpGet("{id:int}")]
         [SwaggerOperation(Summary = "Busca registro de atendimento por id")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Registro de atendimento encontrado.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Registro de atendimento não encontrado.")]
         public async Task<ActionResult<RegistroAtendimentoDto>> BuscarPorId(int id)
         {
             var response = await _registroAtendimentoService.BuscarPorIdAsync(id);
@@ -36,6 +47,9 @@ namespace PetBuddies_API.Controllers
 
         [HttpPost]
         [SwaggerOperation(Summary = "Cadastra registro de atendimento")]
+        [SwaggerResponse(StatusCodes.Status201Created, "Registro de atendimento cadastrado com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Dados inválidos ou referências inconsistentes.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Animal, consulta ou prontuário não encontrado.")]
         public async Task<ActionResult<RegistroAtendimentoDto>> Cadastrar([FromBody] SalvarRegistroAtendimentoRequest request)
         {
             var validacao = await ValidarReferenciasAsync(request);
@@ -45,11 +59,14 @@ namespace PetBuddies_API.Controllers
             }
 
             var response = await _registroAtendimentoService.CadastrarAsync(request);
-            return Created($"/api/registro-atendimento/{response.Id}", response);
+            return CreatedAtAction(nameof(BuscarPorId), new { id = response.Id }, response);
         }
 
         [HttpPut("{id:int}")]
         [SwaggerOperation(Summary = "Atualiza registro de atendimento")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Registro de atendimento atualizado com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Dados inválidos ou referências inconsistentes.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Registro, animal, consulta ou prontuário não encontrado.")]
         public async Task<IActionResult> Atualizar(int id, [FromBody] SalvarRegistroAtendimentoRequest request)
         {
             if (await _registroAtendimentoService.BuscarPorIdAsync(id) is null)
@@ -69,6 +86,9 @@ namespace PetBuddies_API.Controllers
 
         [HttpDelete("{id:int}")]
         [SwaggerOperation(Summary = "Remove registro de atendimento")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Registro de atendimento removido com sucesso.")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Registro de atendimento não encontrado.")]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Registro de atendimento possui vínculos e não pode ser removido.")]
         public async Task<IActionResult> Remover(int id)
         {
             if (await _registroAtendimentoService.BuscarPorIdAsync(id) is null)
