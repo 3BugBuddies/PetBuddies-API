@@ -46,6 +46,10 @@ ScaffoldingReadMe.txt
 *~
 CodeCoverage/
 
+# Local AI assistant context
+CLAUDE.md
+.claude/
+
 # MSBuild Binary and Structured Log
 *.binlog
 

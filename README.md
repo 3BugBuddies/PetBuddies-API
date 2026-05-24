@@ -135,20 +135,30 @@ PetBuddies-API/
 
 ### Entidades e Tabelas
 
-As quatro entidades usadas diretamente na avaliação isolada são `EnderecoEntity`, `ClinicaEntity`, `VeterinarioEntity` e `JanelaAtendimentoEntity`. As demais compõem o domínio completo da aplicação e os fluxos integrados com o serviço Java.
+#### Tabelas independentes — Sem ligação com Java
+
+| Entidade | Tabela | Relacionamentos |
+|----------|--------|-----------------|
+| `VeterinarioEntity` | `T_PB_VETERINARIO` | → Clinica |
+| `ClinicaEntity` | `T_PB_CLINICA` | → Endereco |
+| `EnderecoEntity` | `T_PB_ENDERECO` | — |
+| `TipoAnimalEntity` | `T_PB_TIPO_ANIMAL` | Especie + Porte |
+| `JanelaAtendimentoEntity` | `T_PB_JANELA_ATENDIMENTO` | → Veterinario |
+
+#### Tabelas dependentes — Com ligação ao Java
 
 | Entidade | Tabela | Relacionamentos |
 |----------|--------|-----------------|
 | `AnimalEntity` | `T_PB_ANIMAL` | → Responsavel, TipoAnimal |
 | `ResponsavelEntity` | `T_PB_RESPONSAVEL` | → Clinica, Endereco (nullable) |
-| `VeterinarioEntity` | `T_PB_VETERINARIO` | → Clinica |
-| `ClinicaEntity` | `T_PB_CLINICA` | → Endereco |
 | `ConsultaEntity` | `T_PB_CONSULTA` | → Animal, Veterinario, Clinica |
-| `EnderecoEntity` | `T_PB_ENDERECO` | — |
-| `TipoAnimalEntity` | `T_PB_TIPO_ANIMAL` | Especie + Porte |
+
+#### Tabelas dependentes de tabelas relacionadas ao Java
+
+| Entidade | Tabela | Relacionamentos |
+|----------|--------|-----------------|
 | `ProntuarioEntity` | `T_PB_PRONTUARIO` | → Animal |
 | `ProcedimentoEntity` | `T_PB_PROCEDIMENTO` | → RegistroAtendimento, Animal, Veterinario |
-| `JanelaAtendimentoEntity` | `T_PB_JANELA_ATENDIMENTO` | → Veterinario |
 | `RegistroAtendimentoEntity` | `T_PB_REGISTRO_ATENDIMENTO` | → Animal, Prontuario, Consulta |
 
 ### Enums
