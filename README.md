@@ -1,4 +1,4 @@
-# PetBuddies API — Challenge FIAP 2026 | .NET Advanced
+# PetBuddies API — Challenge FIAP 2026 | .NET
 
 API REST de domínio clínico veterinário desenvolvida com ASP.NET Core e EF Core, como parte do Challenge da disciplina de **Advanced Business Development with .NET (2TDS)** — FIAP 2026.
 
@@ -29,8 +29,6 @@ O serviço gerencia clínica, endereços, veterinários, tutores, animais, tipos
 ## Avaliação isolada — endpoints clínicos
 
 > Devido à relação de algumas classes com o Java, o teste de ponta a ponta completo exige o outro serviço rodando. Para a avaliação isolada da API .NET, a coleção Postman cobre os recursos clínicos independentes listados abaixo.
-
-> Estes endpoints são autocontidos (cadeia `Endereco → Clinica → Veterinario → JanelaAtendimento`).
 
 ### Setup rápido para o avaliador
 
@@ -81,7 +79,7 @@ O domínio clínico é a base operacional do PetBuddies. Ele guarda os dados que
 
 ### Rotas testadas na coleção Postman
 
-Execute as pastas na ordem em que aparecem na coleção, pois cada recurso depende do ID gerado pelo anterior.
+Execute os recursos na ordem em que aparecem na coleção, pois cada recurso depende do ID gerado pelo anterior.
 
 | Recurso | Rotas cobertas | Principais cenários | Status codes |
 |---|---|---|---|
@@ -90,9 +88,6 @@ Execute as pastas na ordem em que aparecem na coleção, pois cada recurso depen
 | `Veterinario` | `POST /api/veterinario`<br>`GET /api/veterinario`<br>`GET /api/veterinario/{id}`<br>`GET /api/veterinario/por-clinica/{clinicaId}`<br>`PUT /api/veterinario/{id}`<br>`DELETE /api/veterinario/{id}` | Vínculo com clínica<br>Filtro por clínica<br>CRMV duplicado na clínica<br>FK inexistente<br>Operações CRUD | `201 Created`<br>`200 OK`<br>`204 No Content`<br>`400 Bad Request`<br>`404 Not Found`<br>`409 Conflict` |
 | `JanelaAtendimento` | `POST /api/janela-atendimento`<br>`GET /api/janela-atendimento`<br>`GET /api/janela-atendimento/todas`<br>`GET /api/janela-atendimento/{id}`<br>`PUT /api/janela-atendimento/{id}`<br>`DELETE /api/janela-atendimento/{id}` | Vínculo com veterinário<br>Horários disponíveis<br>Listagem completa<br>Conflito de horário<br>Intervalo inválido<br>Operações CRUD | `201 Created`<br>`200 OK`<br>`204 No Content`<br>`400 Bad Request`<br>`404 Not Found`<br>`409 Conflict` |
 
-### Fluxo principal sugerido
-
-`Endereco` → `Clinica` → `Veterinario` → `JanelaAtendimento`
 
 ### Validações e respostas esperadas
 
@@ -214,19 +209,6 @@ dotnet run --project PetBuddies-API
 A aplicação sobe em:
 - **HTTP:** `http://localhost:5297`
 - **Swagger UI:** `http://localhost:5297/swagger`
-
-
-
-## Integração com petbuddies-ai (Java)
-
-Este serviço é chamado pelo bot WhatsApp para cadastro, consulta e agendamento. Também expõe endpoints específicos para o motor de personalização Java:
-
-| Endpoint | Consumidor | Finalidade |
-|----------|-----------|------------|
-| `GET /api/animal/{id}/motor` | `petbuddies-ai` MotorScoreService | Dados do animal para cálculo de risco |
-| `GET /api/animal/{id}/ultima-consulta` | `petbuddies-ai` MotorPlanoService | Data/tipo da última consulta realizada |
-| `POST /api/responsavel` | `petbuddies-ai` CadastroTools | Criar tutor via WhatsApp |
-| `POST /api/animal` | `petbuddies-ai` CadastroTools | Criar animal via WhatsApp |
 
 ---
 
