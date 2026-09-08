@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PetBuddies_API.Infrastructure.Clients;
 using PetBuddies_API.Infrastructure.Data;
 using PetBuddies_API.Application.Dtos.Consulta;
 using PetBuddies_API.Domain.Enums;

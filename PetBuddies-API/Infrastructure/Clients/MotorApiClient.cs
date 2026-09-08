@@ -2,9 +2,9 @@ using System.Text;
 using System.Text.Json;
 using PetBuddies_API.Domain.Enums;
 
-namespace PetBuddies_API.Application.UseCases
+namespace PetBuddies_API.Infrastructure.Clients
 {
-    public class MotorApiClient
+    public class MotorApiClient : IMotorApiClient
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly string _baseUrl;
