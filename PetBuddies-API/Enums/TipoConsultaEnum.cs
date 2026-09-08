@@ -2,7 +2,6 @@
 {
     public enum TipoConsultaEnum
     {
-        TRIAGEM,
         ROTINA,
         VACINACAO,
         EXAME,

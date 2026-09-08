@@ -96,11 +96,6 @@ namespace PetBuddies_API.Controllers
                 return NotFound("Responsável não encontrado para vincular o animal.");
             }
 
-            if (!await _animalCadastroService.TipoAnimalExisteAsync(request.Especie!.Value, request.Porte!.Value))
-            {
-                return BadRequest($"Não há TipoAnimal cadastrado para a combinação ({request.Especie}, {request.Porte}).");
-            }
-
             var response = await _animalCadastroService.CadastrarAsync(request);
             return CreatedAtAction(nameof(BuscarPorId), new { id = response.Id }, response);
         }
@@ -120,11 +115,6 @@ namespace PetBuddies_API.Controllers
             if (!await _animalCadastroService.ResponsavelExisteAsync(request.ResponsavelId))
             {
                 return NotFound("Responsável não encontrado para vincular o animal.");
-            }
-
-            if (!await _animalCadastroService.TipoAnimalExisteAsync(request.Especie!.Value, request.Porte!.Value))
-            {
-                return BadRequest($"Não há TipoAnimal cadastrado para a combinação ({request.Especie}, {request.Porte}).");
             }
 
             await _animalCadastroService.AtualizarAsync(id, request);

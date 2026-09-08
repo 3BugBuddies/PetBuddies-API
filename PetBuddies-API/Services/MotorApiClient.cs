@@ -26,7 +26,7 @@ namespace PetBuddies_API.Services
                 var client = _httpClientFactory.CreateClient();
                 var body = JsonSerializer.Serialize(new
                 {
-                    petNetApiAnimalId = animalId,
+                    animalId = animalId,
                     especie = especie.ToString(),
                     porte = porte.ToString(),
                     sexo = sexo.ToString(),
@@ -61,8 +61,8 @@ namespace PetBuddies_API.Services
                 var client = _httpClientFactory.CreateClient();
                 var body = JsonSerializer.Serialize(new
                 {
-                    petNetApiAnimalId = animalId,
-                    petNetApiConsultaId = consultaId
+                    animalId = animalId,
+                    consultaId = consultaId
                 });
                 var content = new StringContent(body, Encoding.UTF8, "application/json");
                 var response = await client.PostAsync($"{_baseUrl}/api/motor/planos/instanciar-pos-cirurgico", content);
@@ -76,35 +76,5 @@ namespace PetBuddies_API.Services
             }
         }
 
-        public async Task RecalcularScoreAsync(int animalId, string motivo)
-        {
-            try
-            {
-                var client = _httpClientFactory.CreateClient();
-                var body = JsonSerializer.Serialize(new
-                {
-                    petNetApiAnimalId = animalId,
-                    motivo
-                });
-                var content = new StringContent(body, Encoding.UTF8, "application/json");
-                var response = await client.PostAsync($"{_baseUrl}/api/motor/scores/recalcular", content);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    var errorBody = await response.Content.ReadAsStringAsync();
-                    _logger.LogWarning("Motor recalcular score falhou: animalId={AnimalId} motivo={Motivo} status={Status} body={Body}",
-                        animalId, motivo, (int)response.StatusCode, errorBody);
-                    return;
-                }
-
-                _logger.LogInformation("Motor score recalculado: animalId={AnimalId} motivo={Motivo}",
-                    animalId, motivo);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning("Motor indisponível ao recalcular score para animal {AnimalId} motivo {Motivo}: {Message}",
-                    animalId, motivo, ex.Message);
-            }
-        }
     }
 }

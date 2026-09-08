@@ -108,8 +108,6 @@ namespace PetBuddies_API.Services
             var janela = new JanelaAtendimentoEntity
             {
                 DataHoraInicio = request.DataHoraInicio!.Value,
-                DataHoraFim = request.DataHoraFim!.Value,
-                DuracaoSlot = request.DuracaoSlot,
                 VeterinarioId = request.VeterinarioId
             };
 
@@ -130,8 +128,6 @@ namespace PetBuddies_API.Services
             }
 
             janela.DataHoraInicio = request.DataHoraInicio!.Value;
-            janela.DataHoraFim = request.DataHoraFim!.Value;
-            janela.DuracaoSlot = request.DuracaoSlot;
             janela.VeterinarioId = request.VeterinarioId;
 
             await _context.SaveChangesAsync();
@@ -161,10 +157,9 @@ namespace PetBuddies_API.Services
             {
                 Id = janela.Id,
                 DataHoraInicio = janela.DataHoraInicio,
-                DataHoraFim = janela.DataHoraFim,
-                DuracaoSlot = janela.DuracaoSlot,
                 VeterinarioId = janela.VeterinarioId,
-                VeterinarioNome = janela.Veterinario?.Nome ?? string.Empty
+                VeterinarioNome = janela.Veterinario?.Nome ?? string.Empty,
+                ConsultaId = janela.ConsultaId
             };
         }
     }

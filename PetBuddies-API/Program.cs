@@ -19,13 +19,10 @@ builder.Services.AddScoped<AnimalMotorService>();
 builder.Services.AddScoped<AnimalCadastroService>();
 builder.Services.AddScoped<ConsultaService>();
 builder.Services.AddScoped<ClinicaService>();
-builder.Services.AddScoped<EnderecoService>();
 builder.Services.AddScoped<JanelaAtendimentoService>();
 builder.Services.AddScoped<ProcedimentoService>();
-builder.Services.AddScoped<ProntuarioService>();
 builder.Services.AddScoped<RegistroAtendimentoService>();
 builder.Services.AddScoped<ResponsavelService>();
-builder.Services.AddScoped<TipoAnimalService>();
 builder.Services.AddScoped<VeterinarioService>();
 
 

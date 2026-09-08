@@ -44,13 +44,6 @@ namespace PetBuddies_API.Services
             return clinicas.Select(ToDto).ToList();
         }
 
-        public async Task<bool> EnderecoExisteAsync(int enderecoId)
-        {
-            return await _context.Enderecos
-                .AsNoTracking()
-                .AnyAsync(item => item.Id == enderecoId);
-        }
-
         public async Task<bool> CnpjExisteAsync(string cnpj, int? ignorarClinicaId = null)
         {
             var cnpjNormalizado = cnpj.Trim();
@@ -112,7 +105,6 @@ namespace PetBuddies_API.Services
             clinica.Cnpj = request.Cnpj.Trim();
             clinica.Telefone = request.Telefone.Trim();
             clinica.Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim();
-            clinica.EnderecoId = request.EnderecoId;
         }
 
         private static ClinicaDto ToDto(ClinicaEntity clinica)
@@ -123,8 +115,7 @@ namespace PetBuddies_API.Services
                 Nome = clinica.Nome,
                 Cnpj = clinica.Cnpj,
                 Telefone = clinica.Telefone,
-                Email = clinica.Email,
-                EnderecoId = clinica.EnderecoId
+                Email = clinica.Email
             };
         }
     }

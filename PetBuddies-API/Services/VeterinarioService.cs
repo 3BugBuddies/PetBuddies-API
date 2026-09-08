@@ -51,13 +51,13 @@ namespace PetBuddies_API.Services
                 .AnyAsync(item => item.Id == clinicaId);
         }
 
-        public async Task<bool> CrmvExisteAsync(string crmv, int clinicaId, int? ignorarVeterinarioId = null)
+        public async Task<bool> CrmvExisteAsync(string crmv, int? ignorarVeterinarioId = null)
         {
             var crmvNormalizado = crmv.Trim();
 
             var query = _context.Veterinarios
                 .AsNoTracking()
-                .Where(item => item.Crmv == crmvNormalizado && item.ClinicaId == clinicaId);
+                .Where(item => item.Crmv == crmvNormalizado);
 
             if (ignorarVeterinarioId.HasValue)
                 query = query.Where(item => item.Id != ignorarVeterinarioId.Value);
@@ -110,10 +110,7 @@ namespace PetBuddies_API.Services
         {
             veterinario.Nome = request.Nome.Trim();
             veterinario.Crmv = request.Crmv.Trim();
-            veterinario.Especialidade = string.IsNullOrWhiteSpace(request.Especialidade) ? null : request.Especialidade.Trim();
-            veterinario.Telefone = string.IsNullOrWhiteSpace(request.Telefone) ? null : request.Telefone.Trim();
             veterinario.Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim();
-            veterinario.AtendeEmergencia = request.AtendeEmergencia;
             veterinario.Ativo = request.Ativo;
             veterinario.ClinicaId = request.ClinicaId;
         }
@@ -125,10 +122,7 @@ namespace PetBuddies_API.Services
                 Id = veterinario.Id,
                 Nome = veterinario.Nome,
                 Crmv = veterinario.Crmv,
-                Especialidade = veterinario.Especialidade,
-                Telefone = veterinario.Telefone,
                 Email = veterinario.Email,
-                AtendeEmergencia = veterinario.AtendeEmergencia,
                 Ativo = veterinario.Ativo,
                 ClinicaId = veterinario.ClinicaId
             };

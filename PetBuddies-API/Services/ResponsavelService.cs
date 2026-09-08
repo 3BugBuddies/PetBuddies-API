@@ -9,8 +9,6 @@ namespace PetBuddies_API.Services
 {
     public class ResponsavelService
     {
-        private const int ClinicaId = 1;
-
         private readonly ApplicationContext _context;
 
         public ResponsavelService(ApplicationContext context)
@@ -72,12 +70,8 @@ namespace PetBuddies_API.Services
             var responsavel = new ResponsavelEntity
             {
                 Nome = request.Nome.Trim(),
-                Cpf = null,
                 Telefone = NormalizarTelefone(request.Telefone),
-                Email = null,
-                Status = StatusTutorEnum.PRE_CADASTRO,
-                ClinicaId = ClinicaId,
-                EnderecoId = null
+                Email = null
             };
 
             _context.Responsaveis.Add(responsavel);
@@ -98,7 +92,6 @@ namespace PetBuddies_API.Services
 
             responsavel.Nome = request.Nome.Trim();
             responsavel.Telefone = NormalizarTelefone(request.Telefone);
-            responsavel.ClinicaId = ClinicaId;
 
             await _context.SaveChangesAsync();
 
@@ -134,17 +127,21 @@ namespace PetBuddies_API.Services
 
             return await _context.Animais
                 .AsNoTracking()
-                .Include(animal => animal.TipoAnimal)
                 .Where(animal => animal.ResponsavelId == responsavelId)
                 .Select(animal => new AnimalDto
                 {
                     Id = animal.Id,
                     Nome = animal.Nome,
-                    Especie = animal.TipoAnimal != null ? animal.TipoAnimal.Especie.ToString() : string.Empty,
-                    Porte = animal.TipoAnimal != null ? animal.TipoAnimal.Porte.ToString() : string.Empty,
+                    Especie = animal.Especie.ToString(),
+                    Raca = animal.Raca,
+                    Porte = animal.Porte.ToString(),
                     Sexo = animal.Sexo.ToString(),
                     Castrado = animal.Castrado,
-                    PreCadastro = animal.PreCadastro
+                    CondicaoCronica = animal.CondicaoCronica,
+                    DataNascimento = animal.DataNascimento,
+                    Peso = animal.Peso,
+                    Alergias = animal.Alergias,
+                    Observacoes = animal.Observacoes
                 })
                 .ToListAsync();
         }
@@ -156,7 +153,7 @@ namespace PetBuddies_API.Services
                 Id = responsavel.Id,
                 Nome = responsavel.Nome,
                 Telefone = responsavel.Telefone,
-                Status = responsavel.Status.ToString()
+                Email = responsavel.Email
             };
         }
 

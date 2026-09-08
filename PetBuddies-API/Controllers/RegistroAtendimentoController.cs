@@ -119,12 +119,6 @@ namespace PetBuddies_API.Controllers
                 return BadRequest("Consulta não encontrada ou não pertence ao animal.");
             }
 
-            if (request.ProntuarioId.HasValue
-                && !await _registroAtendimentoService.ProntuarioPertenceAoAnimalAsync(request.ProntuarioId.Value, request.AnimalId))
-            {
-                return BadRequest("Prontuário informado não pertence ao animal.");
-            }
-
             return null;
         }
     }

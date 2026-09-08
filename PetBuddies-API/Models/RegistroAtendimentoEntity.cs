@@ -43,13 +43,6 @@ namespace PetBuddies_API.Models
         [JsonIgnore]
         public AnimalEntity? Animal { get; set; }
 
-        [ForeignKey(nameof(Prontuario))]
-        [Column("ID_PRONTUARIO")]
-        public int ProntuarioId { get; set; }
-
-        [JsonIgnore]
-        public ProntuarioEntity? Prontuario { get; set; }
-
         [ForeignKey(nameof(Consulta))]
         [Column("ID_CONSULTA")]
         public int ConsultaId { get; set; }

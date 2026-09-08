@@ -69,15 +69,9 @@ namespace PetBuddies_API.Controllers
         [SwaggerOperation(Summary = "Cadastra clínica")]
         [SwaggerResponse(StatusCodes.Status201Created, "Clínica cadastrada com sucesso.")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Dados inválidos para cadastrar a clínica.")]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Endereço não encontrado.")]
         [SwaggerResponse(StatusCodes.Status409Conflict, "CNPJ já cadastrado.")]
         public async Task<ActionResult<ClinicaDto>> Cadastrar([FromBody] SalvarClinicaRequest request)
         {
-            if (!await _clinicaService.EnderecoExisteAsync(request.EnderecoId))
-            {
-                return NotFound("Endereço não encontrado para cadastrar clínica.");
-            }
-
             if (await _clinicaService.CnpjExisteAsync(request.Cnpj))
             {
                 return Conflict("Já existe uma clínica com este CNPJ.");
@@ -98,11 +92,6 @@ namespace PetBuddies_API.Controllers
             if (await _clinicaService.BuscarPorIdAsync(id) is null)
             {
                 return NotFound("Clínica não encontrada para o id informado.");
-            }
-
-            if (!await _clinicaService.EnderecoExisteAsync(request.EnderecoId))
-            {
-                return NotFound("Endereço não encontrado para atualizar clínica.");
             }
 
             if (await _clinicaService.CnpjExisteAsync(request.Cnpj, id))
