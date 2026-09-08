@@ -8,28 +8,31 @@ using PetBuddies_API.Infrastructure.Clients;
 
 namespace PetBuddies_API.Application.UseCases
 {
-    public class ConsultaUseCase : IConsultaUseCase
+    public class ConsultaService : IConsultaService
     {
         private readonly IConsultaRepository _consultaRepositorio;
         private readonly IJanelaAtendimentoRepository _janelaAtendimentoRepositorio;
+        private readonly IAnimalRepository _animalRepositorio;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMotorApiClient _motorApiClient;
 
-        public ConsultaUseCase(
+        public ConsultaService(
             IConsultaRepository consultaRepositorio,
             IJanelaAtendimentoRepository janelaAtendimentoRepositorio,
+            IAnimalRepository animalRepositorio,
             IUnitOfWork unitOfWork,
             IMotorApiClient motorApiClient)
         {
             _consultaRepositorio = consultaRepositorio;
             _janelaAtendimentoRepositorio = janelaAtendimentoRepositorio;
+            _animalRepositorio = animalRepositorio;
             _unitOfWork = unitOfWork;
             _motorApiClient = motorApiClient;
         }
 
         public Task<bool> AnimalExisteAsync(int animalId)
         {
-            return _consultaRepositorio.AnimalExisteAsync(animalId);
+            return _animalRepositorio.ExisteAsync(animalId);
         }
 
         public Task<bool> JanelaExisteAsync(int janelaId)

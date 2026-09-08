@@ -6,19 +6,22 @@ using PetBuddies_API.Domain.Interfaces;
 
 namespace PetBuddies_API.Application.UseCases
 {
-    public class RegistroAtendimentoUseCase : IRegistroAtendimentoUseCase
+    public class RegistroAtendimentoService : IRegistroAtendimentoService
     {
         private readonly IRegistroAtendimentoRepository _registroAtendimentoRepositorio;
         private readonly IConsultaRepository _consultaRepositorio;
+        private readonly IAnimalRepository _animalRepositorio;
         private readonly IUnitOfWork _unitOfWork;
 
-        public RegistroAtendimentoUseCase(
+        public RegistroAtendimentoService(
             IRegistroAtendimentoRepository registroAtendimentoRepositorio,
             IConsultaRepository consultaRepositorio,
+            IAnimalRepository animalRepositorio,
             IUnitOfWork unitOfWork)
         {
             _registroAtendimentoRepositorio = registroAtendimentoRepositorio;
             _consultaRepositorio = consultaRepositorio;
+            _animalRepositorio = animalRepositorio;
             _unitOfWork = unitOfWork;
         }
 
@@ -36,7 +39,7 @@ namespace PetBuddies_API.Application.UseCases
 
         public Task<bool> AnimalExisteAsync(int animalId)
         {
-            return _registroAtendimentoRepositorio.AnimalExisteAsync(animalId);
+            return _animalRepositorio.ExisteAsync(animalId);
         }
 
         public Task<bool> ConsultaPertenceAoAnimalAsync(int consultaId, int animalId)

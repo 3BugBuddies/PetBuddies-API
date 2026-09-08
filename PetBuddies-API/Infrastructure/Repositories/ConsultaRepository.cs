@@ -15,13 +15,6 @@ namespace PetBuddies_API.Infrastructure.Repositories
             _context = context;
         }
 
-        public Task<bool> AnimalExisteAsync(int animalId)
-        {
-            return _context.Animais
-                .AsNoTracking()
-                .AnyAsync(animal => animal.Id == animalId);
-        }
-
         public Task<bool> ExisteAtivaAsync(int veterinarioId, DateTime dataHora, int? ignorarConsultaId = null)
         {
             var query = _context.Consultas

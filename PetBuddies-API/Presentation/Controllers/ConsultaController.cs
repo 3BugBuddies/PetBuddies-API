@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PetBuddies_API.Application.Dtos.Consulta;
 using PetBuddies_API.Domain.Enums;
-using PetBuddies_API.Application.UseCases;
+using PetBuddies_API.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace PetBuddies_API.Presentation.Controllers
@@ -10,9 +10,9 @@ namespace PetBuddies_API.Presentation.Controllers
     [Route("api/consulta")]
     public class ConsultaController : ControllerBase
     {
-        private readonly ConsultaService _consultaService;
+        private readonly IConsultaService _consultaService;
 
-        public ConsultaController(ConsultaService consultaService)
+        public ConsultaController(IConsultaService consultaService)
         {
             _consultaService = consultaService;
         }

@@ -2,7 +2,7 @@ using PetBuddies_API.Application.Dtos.Veterinario;
 
 namespace PetBuddies_API.Application.Interfaces
 {
-    public interface IVeterinarioUseCase
+    public interface IVeterinarioService
     {
         Task<List<VeterinarioDto>> ListarAsync();
         Task<VeterinarioDto?> BuscarPorIdAsync(int veterinarioId);

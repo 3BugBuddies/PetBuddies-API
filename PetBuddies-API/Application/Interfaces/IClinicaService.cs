@@ -2,7 +2,7 @@ using PetBuddies_API.Application.Dtos.Clinica;
 
 namespace PetBuddies_API.Application.Interfaces
 {
-    public interface IClinicaUseCase
+    public interface IClinicaService
     {
         Task<List<ClinicaDto>> ListarAsync();
         Task<ClinicaDto?> BuscarPorIdAsync(int clinicaId);

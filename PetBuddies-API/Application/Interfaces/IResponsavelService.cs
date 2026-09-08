@@ -3,7 +3,7 @@ using PetBuddies_API.Application.Dtos.Responsavel;
 
 namespace PetBuddies_API.Application.Interfaces
 {
-    public interface IResponsavelUseCase
+    public interface IResponsavelService
     {
         Task<ResponsavelDto?> BuscarPorTelefoneAsync(string telefone);
         Task<List<ResponsavelDto>> ListarAsync();

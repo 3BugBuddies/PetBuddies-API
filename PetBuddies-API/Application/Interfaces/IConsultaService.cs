@@ -2,7 +2,7 @@ using PetBuddies_API.Application.Dtos.Consulta;
 
 namespace PetBuddies_API.Application.Interfaces
 {
-    public interface IConsultaUseCase
+    public interface IConsultaService
     {
         Task<bool> AnimalExisteAsync(int animalId);
         Task<bool> JanelaExisteAsync(int janelaId);

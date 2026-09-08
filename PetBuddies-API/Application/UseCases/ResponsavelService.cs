@@ -7,12 +7,12 @@ using PetBuddies_API.Domain.Interfaces;
 
 namespace PetBuddies_API.Application.UseCases
 {
-    public class ResponsavelUseCase : IResponsavelUseCase
+    public class ResponsavelService : IResponsavelService
     {
         private readonly IResponsavelRepository _repositorio;
         private readonly IUnitOfWork _unitOfWork;
 
-        public ResponsavelUseCase(IResponsavelRepository repositorio, IUnitOfWork unitOfWork)
+        public ResponsavelService(IResponsavelRepository repositorio, IUnitOfWork unitOfWork)
         {
             _repositorio = repositorio;
             _unitOfWork = unitOfWork;

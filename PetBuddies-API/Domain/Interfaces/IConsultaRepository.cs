@@ -4,10 +4,6 @@ namespace PetBuddies_API.Domain.Interfaces
 {
     public interface IConsultaRepository
     {
-        /// <summary>Animal não é domínio deste repositório — checagem preservada aqui
-        /// enquanto não existir um IAnimalRepository.</summary>
-        Task<bool> AnimalExisteAsync(int animalId);
-
         /// <summary>Existe consulta ativa (não cancelada) para o veterinário no horário informado.
         /// Usado tanto pela checagem de ocupação de janela quanto pela checagem de vínculo
         /// de consulta em uma janela (JanelaAtendimento).</summary>

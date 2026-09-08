@@ -9,11 +9,11 @@ namespace PetBuddies_API.Application.UseCases
     /// Projecao que o motor de cuidado do servico Java consome. So leitura — nao
     /// depende de IUnitOfWork.
     /// </summary>
-    public class AnimalMotorUseCase : IAnimalMotorUseCase
+    public class AnimalMotorService : IAnimalMotorService
     {
         private readonly IAnimalRepository _repositorio;
 
-        public AnimalMotorUseCase(IAnimalRepository repositorio)
+        public AnimalMotorService(IAnimalRepository repositorio)
         {
             _repositorio = repositorio;
         }

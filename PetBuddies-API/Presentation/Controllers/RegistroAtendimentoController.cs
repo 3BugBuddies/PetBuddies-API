@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PetBuddies_API.Application.Dtos.RegistroAtendimento;
-using PetBuddies_API.Application.UseCases;
+using PetBuddies_API.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace PetBuddies_API.Presentation.Controllers
@@ -10,9 +10,9 @@ namespace PetBuddies_API.Presentation.Controllers
     [Route("api/registro-atendimento")]
     public class RegistroAtendimentoController : ControllerBase
     {
-        private readonly RegistroAtendimentoService _registroAtendimentoService;
+        private readonly IRegistroAtendimentoService _registroAtendimentoService;
 
-        public RegistroAtendimentoController(RegistroAtendimentoService registroAtendimentoService)
+        public RegistroAtendimentoController(IRegistroAtendimentoService registroAtendimentoService)
         {
             _registroAtendimentoService = registroAtendimentoService;
         }

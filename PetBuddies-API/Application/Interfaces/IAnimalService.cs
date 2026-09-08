@@ -2,7 +2,7 @@ using PetBuddies_API.Application.Dtos.Animal;
 
 namespace PetBuddies_API.Application.Interfaces
 {
-    public interface IAnimalUseCase
+    public interface IAnimalService
     {
         Task<List<AnimalDto>> ListarAsync();
         Task<AnimalDto?> BuscarPorIdAsync(int animalId);

@@ -2,7 +2,7 @@ using PetBuddies_API.Application.Dtos.JanelaAtendimento;
 
 namespace PetBuddies_API.Application.Interfaces
 {
-    public interface IJanelaAtendimentoUseCase
+    public interface IJanelaAtendimentoService
     {
         Task<List<JanelaAtendimentoDto>> ListarDisponiveisAsync();
         Task<List<JanelaAtendimentoDto>> ListarAsync();

@@ -11,11 +11,11 @@ namespace PetBuddies_API.Presentation.Controllers
     [Route("api/clinica")]
     public class ClinicaController : ControllerBase
     {
-        private readonly IClinicaUseCase _clinicaUseCase;
+        private readonly IClinicaService _clinicaService;
 
-        public ClinicaController(IClinicaUseCase clinicaUseCase)
+        public ClinicaController(IClinicaService clinicaService)
         {
-            _clinicaUseCase = clinicaUseCase;
+            _clinicaService = clinicaService;
         }
 
         [HttpGet]
@@ -24,7 +24,7 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status204NoContent, "Nenhuma clínica cadastrada.")]
         public async Task<ActionResult<List<ClinicaDto>>> Listar()
         {
-            var response = await _clinicaUseCase.ListarAsync();
+            var response = await _clinicaService.ListarAsync();
 
             if (response.Count == 0)
             {
@@ -44,7 +44,7 @@ namespace PetBuddies_API.Presentation.Controllers
             if (string.IsNullOrWhiteSpace(nome))
                 return BadRequest("Parâmetro 'nome' é obrigatório.");
 
-            var response = await _clinicaUseCase.BuscarPorNomeAsync(nome);
+            var response = await _clinicaService.BuscarPorNomeAsync(nome);
 
             if (response.Count == 0)
             {
@@ -60,7 +60,7 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status404NotFound, "Clínica não encontrada.")]
         public async Task<ActionResult<ClinicaDto>> BuscarPorId(int id)
         {
-            var response = await _clinicaUseCase.BuscarPorIdAsync(id);
+            var response = await _clinicaService.BuscarPorIdAsync(id);
             return response is null
                 ? NotFound("Clínica não encontrada para o id informado.")
                 : Ok(response);
@@ -73,12 +73,12 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "CNPJ já cadastrado.")]
         public async Task<ActionResult<ClinicaDto>> Cadastrar([FromBody] SalvarClinicaRequest request)
         {
-            if (await _clinicaUseCase.CnpjExisteAsync(request.Cnpj))
+            if (await _clinicaService.CnpjExisteAsync(request.Cnpj))
             {
                 return Conflict("Já existe uma clínica com este CNPJ.");
             }
 
-            var response = await _clinicaUseCase.CadastrarAsync(request);
+            var response = await _clinicaService.CadastrarAsync(request);
             return CreatedAtAction(nameof(BuscarPorId), new { id = response.Id }, response);
         }
 
@@ -90,17 +90,17 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "CNPJ já cadastrado.")]
         public async Task<IActionResult> Atualizar(int id, [FromBody] SalvarClinicaRequest request)
         {
-            if (await _clinicaUseCase.BuscarPorIdAsync(id) is null)
+            if (await _clinicaService.BuscarPorIdAsync(id) is null)
             {
                 return NotFound("Clínica não encontrada para o id informado.");
             }
 
-            if (await _clinicaUseCase.CnpjExisteAsync(request.Cnpj, id))
+            if (await _clinicaService.CnpjExisteAsync(request.Cnpj, id))
             {
                 return Conflict("Já existe uma clínica com este CNPJ.");
             }
 
-            await _clinicaUseCase.AtualizarAsync(id, request);
+            await _clinicaService.AtualizarAsync(id, request);
             return NoContent();
         }
 
@@ -111,14 +111,14 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "Clínica possui vínculos e não pode ser removida.")]
         public async Task<IActionResult> Remover(int id)
         {
-            if (await _clinicaUseCase.BuscarPorIdAsync(id) is null)
+            if (await _clinicaService.BuscarPorIdAsync(id) is null)
             {
                 return NotFound("Clínica não encontrada para o id informado.");
             }
 
             try
             {
-                await _clinicaUseCase.RemoverAsync(id);
+                await _clinicaService.RemoverAsync(id);
                 return NoContent();
             }
             catch (DbUpdateException)

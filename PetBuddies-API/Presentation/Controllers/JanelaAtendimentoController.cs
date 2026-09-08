@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PetBuddies_API.Application.Dtos.JanelaAtendimento;
-using PetBuddies_API.Application.UseCases;
+using PetBuddies_API.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace PetBuddies_API.Presentation.Controllers
@@ -9,9 +9,9 @@ namespace PetBuddies_API.Presentation.Controllers
     [Route("api/janela-atendimento")]
     public class JanelaAtendimentoController : ControllerBase
     {
-        private readonly JanelaAtendimentoService _janelaAtendimentoService;
+        private readonly IJanelaAtendimentoService _janelaAtendimentoService;
 
-        public JanelaAtendimentoController(JanelaAtendimentoService janelaAtendimentoService)
+        public JanelaAtendimentoController(IJanelaAtendimentoService janelaAtendimentoService)
         {
             _janelaAtendimentoService = janelaAtendimentoService;
         }

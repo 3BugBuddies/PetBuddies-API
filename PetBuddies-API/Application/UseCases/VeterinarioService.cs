@@ -6,12 +6,12 @@ using PetBuddies_API.Domain.Interfaces;
 
 namespace PetBuddies_API.Application.UseCases
 {
-    public class VeterinarioUseCase : IVeterinarioUseCase
+    public class VeterinarioService : IVeterinarioService
     {
         private readonly IVeterinarioRepository _repositorio;
         private readonly IUnitOfWork _unitOfWork;
 
-        public VeterinarioUseCase(IVeterinarioRepository repositorio, IUnitOfWork unitOfWork)
+        public VeterinarioService(IVeterinarioRepository repositorio, IUnitOfWork unitOfWork)
         {
             _repositorio = repositorio;
             _unitOfWork = unitOfWork;

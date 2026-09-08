@@ -7,13 +7,13 @@ using PetBuddies_API.Infrastructure.Clients;
 
 namespace PetBuddies_API.Application.UseCases
 {
-    public class AnimalUseCase : IAnimalUseCase
+    public class AnimalService : IAnimalService
     {
         private readonly IAnimalRepository _repositorio;
         private readonly IMotorApiClient _motorApiClient;
         private readonly IUnitOfWork _unitOfWork;
 
-        public AnimalUseCase(IAnimalRepository repositorio, IMotorApiClient motorApiClient, IUnitOfWork unitOfWork)
+        public AnimalService(IAnimalRepository repositorio, IMotorApiClient motorApiClient, IUnitOfWork unitOfWork)
         {
             _repositorio = repositorio;
             _motorApiClient = motorApiClient;

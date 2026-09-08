@@ -2,7 +2,7 @@ using PetBuddies_API.Application.Dtos.RegistroAtendimento;
 
 namespace PetBuddies_API.Application.Interfaces
 {
-    public interface IRegistroAtendimentoUseCase
+    public interface IRegistroAtendimentoService
     {
         Task<List<RegistroAtendimentoDto>> ListarAsync(int? animalId = null);
         Task<RegistroAtendimentoDto?> BuscarPorIdAsync(int registroAtendimentoId);

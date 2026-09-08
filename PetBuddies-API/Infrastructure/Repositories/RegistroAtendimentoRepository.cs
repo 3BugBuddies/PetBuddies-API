@@ -41,13 +41,6 @@ namespace PetBuddies_API.Infrastructure.Repositories
             return _context.RegistrosAtendimento.SingleOrDefaultAsync(item => item.Id == registroAtendimentoId);
         }
 
-        public Task<bool> AnimalExisteAsync(int animalId)
-        {
-            return _context.Animais
-                .AsNoTracking()
-                .AnyAsync(item => item.Id == animalId);
-        }
-
         public Task<int> ObterConsultaIdAsync(int registroAtendimentoId)
         {
             return _context.RegistrosAtendimento

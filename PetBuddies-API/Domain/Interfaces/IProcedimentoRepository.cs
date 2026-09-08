@@ -10,12 +10,8 @@ namespace PetBuddies_API.Domain.Interfaces
         /// <summary>Sem <c>AsNoTracking</c>: a entidade será alterada ou removida.</summary>
         Task<ProcedimentoEntity?> ObterParaAlterarAsync(int procedimentoId);
 
-        /// <summary>Animal não é domínio deste repositório — checagem preservada aqui
-        /// enquanto não existir um IAnimalRepository.</summary>
-        Task<bool> AnimalExisteAsync(int animalId);
-
-        /// <summary>Veterinário não é domínio deste repositório — checagem preservada aqui
-        /// enquanto não existir um IVeterinarioRepository.</summary>
+        /// <summary>Veterinário não é domínio deste repositório. IVeterinarioRepository já existe,
+        /// mas não expõe um ExisteAsync genérico por id — checagem preservada aqui até que exponha.</summary>
         Task<bool> VeterinarioExisteAsync(int veterinarioId);
 
         Task AdicionarAsync(ProcedimentoEntity procedimento);

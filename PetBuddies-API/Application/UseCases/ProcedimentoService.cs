@@ -8,21 +8,24 @@ using PetBuddies_API.Infrastructure.Clients;
 
 namespace PetBuddies_API.Application.UseCases
 {
-    public class ProcedimentoUseCase : IProcedimentoUseCase
+    public class ProcedimentoService : IProcedimentoService
     {
         private readonly IProcedimentoRepository _procedimentoRepositorio;
         private readonly IRegistroAtendimentoRepository _registroAtendimentoRepositorio;
+        private readonly IAnimalRepository _animalRepositorio;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMotorApiClient _motorApiClient;
 
-        public ProcedimentoUseCase(
+        public ProcedimentoService(
             IProcedimentoRepository procedimentoRepositorio,
             IRegistroAtendimentoRepository registroAtendimentoRepositorio,
+            IAnimalRepository animalRepositorio,
             IUnitOfWork unitOfWork,
             IMotorApiClient motorApiClient)
         {
             _procedimentoRepositorio = procedimentoRepositorio;
             _registroAtendimentoRepositorio = registroAtendimentoRepositorio;
+            _animalRepositorio = animalRepositorio;
             _unitOfWork = unitOfWork;
             _motorApiClient = motorApiClient;
         }
@@ -41,7 +44,7 @@ namespace PetBuddies_API.Application.UseCases
 
         public Task<bool> AnimalExisteAsync(int animalId)
         {
-            return _procedimentoRepositorio.AnimalExisteAsync(animalId);
+            return _animalRepositorio.ExisteAsync(animalId);
         }
 
         public Task<bool> VeterinarioExisteAsync(int veterinarioId)

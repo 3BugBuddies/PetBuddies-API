@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PetBuddies_API.Application.Dtos.Procedimento;
-using PetBuddies_API.Application.UseCases;
+using PetBuddies_API.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace PetBuddies_API.Presentation.Controllers
@@ -10,9 +10,9 @@ namespace PetBuddies_API.Presentation.Controllers
     [Route("api/procedimento")]
     public class ProcedimentoController : ControllerBase
     {
-        private readonly ProcedimentoService _procedimentoService;
+        private readonly IProcedimentoService _procedimentoService;
 
-        public ProcedimentoController(ProcedimentoService procedimentoService)
+        public ProcedimentoController(IProcedimentoService procedimentoService)
         {
             _procedimentoService = procedimentoService;
         }

@@ -6,13 +6,13 @@ using PetBuddies_API.Domain.Interfaces;
 
 namespace PetBuddies_API.Application.UseCases
 {
-    public class JanelaAtendimentoUseCase : IJanelaAtendimentoUseCase
+    public class JanelaAtendimentoService : IJanelaAtendimentoService
     {
         private readonly IJanelaAtendimentoRepository _janelaAtendimentoRepositorio;
         private readonly IConsultaRepository _consultaRepositorio;
         private readonly IUnitOfWork _unitOfWork;
 
-        public JanelaAtendimentoUseCase(
+        public JanelaAtendimentoService(
             IJanelaAtendimentoRepository janelaAtendimentoRepositorio,
             IConsultaRepository consultaRepositorio,
             IUnitOfWork unitOfWork)

@@ -28,21 +28,23 @@ builder.Services.AddScoped<IMotorApiClient, MotorApiClient>();
 // Repositorios — Domain/Interfaces -> Infrastructure/Repositories
 builder.Services.AddScoped<IAnimalRepository, AnimalRepository>();
 builder.Services.AddScoped<IClinicaRepository, ClinicaRepository>();
+builder.Services.AddScoped<IConsultaRepository, ConsultaRepository>();
+builder.Services.AddScoped<IJanelaAtendimentoRepository, JanelaAtendimentoRepository>();
+builder.Services.AddScoped<IProcedimentoRepository, ProcedimentoRepository>();
+builder.Services.AddScoped<IRegistroAtendimentoRepository, RegistroAtendimentoRepository>();
 builder.Services.AddScoped<IResponsavelRepository, ResponsavelRepository>();
 builder.Services.AddScoped<IVeterinarioRepository, VeterinarioRepository>();
 
-// Casos de uso — Application/Interfaces -> Application/UseCases
-builder.Services.AddScoped<IAnimalUseCase, AnimalUseCase>();
-builder.Services.AddScoped<IAnimalMotorUseCase, AnimalMotorUseCase>();
-builder.Services.AddScoped<IClinicaUseCase, ClinicaUseCase>();
-builder.Services.AddScoped<IResponsavelUseCase, ResponsavelUseCase>();
-builder.Services.AddScoped<IVeterinarioUseCase, VeterinarioUseCase>();
-
-// Ainda no formato antigo — trocados quando as fatias restantes fecharem.
-builder.Services.AddScoped<ConsultaService>();
-builder.Services.AddScoped<JanelaAtendimentoService>();
-builder.Services.AddScoped<ProcedimentoService>();
-builder.Services.AddScoped<RegistroAtendimentoService>();
+// Servicos de aplicacao — Application/Interfaces -> Application/UseCases
+builder.Services.AddScoped<IAnimalService, AnimalService>();
+builder.Services.AddScoped<IAnimalMotorService, AnimalMotorService>();
+builder.Services.AddScoped<IClinicaService, ClinicaService>();
+builder.Services.AddScoped<IConsultaService, ConsultaService>();
+builder.Services.AddScoped<IJanelaAtendimentoService, JanelaAtendimentoService>();
+builder.Services.AddScoped<IProcedimentoService, ProcedimentoService>();
+builder.Services.AddScoped<IRegistroAtendimentoService, RegistroAtendimentoService>();
+builder.Services.AddScoped<IResponsavelService, ResponsavelService>();
+builder.Services.AddScoped<IVeterinarioService, VeterinarioService>();
 
 
 // serializa todos enums para string ao inves de number
