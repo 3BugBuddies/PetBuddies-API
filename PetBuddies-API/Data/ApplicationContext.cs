@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PetBuddies_API.Data.Converters;
 using PetBuddies_API.Models;
 
 namespace PetBuddies_API.Data
@@ -38,6 +39,17 @@ namespace PetBuddies_API.Data
 
                     if (property.ClrType == typeof(bool) || property.ClrType == typeof(bool?))
                         property.SetColumnType("NUMBER(1)");
+
+                    // DateOnly nao tem traducao nativa no provider Oracle: sem isto a coluna
+                    // nasce NVARCHAR2(10) e a data vira texto. Convencao global em vez de
+                    // atributo por coluna — a proxima coluna de data ja nasce certa.
+                    if (property.ClrType == typeof(DateOnly) || property.ClrType == typeof(DateOnly?))
+                    {
+                        property.SetColumnType("DATE");
+                        property.SetValueConverter(property.ClrType == typeof(DateOnly)
+                            ? new DateOnlyConverter()
+                            : new NullableDateOnlyConverter());
+                    }
                 }
             }
 

@@ -43,8 +43,12 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+// Em Testing a WebApplicationFactory sobe este mesmo Program: migrar aqui faria
+// todo teste de integracao abrir o Oracle. Fora de Testing a migracao continua,
+// porque com bancos separados (S1 = B) ela e a dona daquele schema.
+if (!app.Environment.IsEnvironment("Testing"))
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
     db.Database.Migrate();
 }
@@ -65,3 +69,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Necessario para WebApplicationFactory<Program> enxergar o tipo (PR N6).
+public partial class Program { }
