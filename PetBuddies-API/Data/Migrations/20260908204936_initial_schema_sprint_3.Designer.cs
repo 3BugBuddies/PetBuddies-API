@@ -12,7 +12,7 @@ using PetBuddies_API.Data;
 namespace PetBuddies_API.Data.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20260908202840_initial_schema_sprint_3")]
+    [Migration("20260908204936_initial_schema_sprint_3")]
     partial class initial_schema_sprint_3
     {
         /// <inheritdoc />
@@ -51,9 +51,8 @@ namespace PetBuddies_API.Data.Migrations
                         .HasColumnType("TIMESTAMP(7)")
                         .HasColumnName("CA_CREATED_AT");
 
-                    b.Property<string>("DataNascimento")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(10)")
+                    b.Property<DateTime>("DataNascimento")
+                        .HasColumnType("DATE")
                         .HasColumnName("DT_DATA_NASCIMENTO");
 
                     b.Property<string>("Especie")
@@ -184,9 +183,8 @@ namespace PetBuddies_API.Data.Migrations
                         .HasColumnType("TIMESTAMP(7)")
                         .HasColumnName("CA_CREATED_AT");
 
-                    b.Property<string>("DataReferencia")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(10)")
+                    b.Property<DateTime>("DataReferencia")
+                        .HasColumnType("DATE")
                         .HasColumnName("DT_REFERENCIA");
 
                     b.Property<string>("Desfecho")
@@ -505,9 +503,8 @@ namespace PetBuddies_API.Data.Migrations
                         .HasColumnType("TIMESTAMP(7)")
                         .HasColumnName("CA_CREATED_AT");
 
-                    b.Property<string>("DataInicio")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(10)")
+                    b.Property<DateTime>("DataInicio")
+                        .HasColumnType("DATE")
                         .HasColumnName("DT_INICIO");
 
                     b.Property<decimal>("DoseMax")
@@ -694,12 +691,12 @@ namespace PetBuddies_API.Data.Migrations
                         .HasColumnType("NVARCHAR2(2000)")
                         .HasColumnName("OB_OBSERVACAO");
 
-                    b.Property<string>("ProximaVacina")
-                        .HasColumnType("NVARCHAR2(10)")
+                    b.Property<DateTime?>("ProximaVacina")
+                        .HasColumnType("DATE")
                         .HasColumnName("PR_PROXIMA_VACINA");
 
-                    b.Property<string>("ProximoRetorno")
-                        .HasColumnType("NVARCHAR2(10)")
+                    b.Property<DateTime?>("ProximoRetorno")
+                        .HasColumnType("DATE")
                         .HasColumnName("PR_PROXIMO_RETORNO");
 
                     b.Property<string>("Tratamento")
