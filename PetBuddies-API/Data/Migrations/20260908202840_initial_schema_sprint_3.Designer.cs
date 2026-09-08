@@ -9,11 +9,11 @@ using PetBuddies_API.Data;
 
 #nullable disable
 
-namespace PetBuddies_API.Migrations
+namespace PetBuddies_API.Data.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20260520035650_make_cpf_peso_nullable")]
-    partial class make_cpf_peso_nullable
+    [Migration("20260908202840_initial_schema_sprint_3")]
+    partial class initial_schema_sprint_3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,6 +34,11 @@ namespace PetBuddies_API.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Alergias")
+                        .HasMaxLength(2000)
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("OB_ALERGIA");
+
                     b.Property<bool>("Castrado")
                         .HasColumnType("NUMBER(1)")
                         .HasColumnName("CT_CASTRADO");
@@ -51,6 +56,12 @@ namespace PetBuddies_API.Migrations
                         .HasColumnType("NVARCHAR2(10)")
                         .HasColumnName("DT_DATA_NASCIMENTO");
 
+                    b.Property<string>("Especie")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("ES_ESPECIE");
+
                     b.Property<string>("Foto")
                         .HasMaxLength(500)
                         .HasColumnType("NVARCHAR2(500)")
@@ -62,13 +73,26 @@ namespace PetBuddies_API.Migrations
                         .HasColumnType("NVARCHAR2(150)")
                         .HasColumnName("NM_NOME_ANIMAL");
 
+                    b.Property<string>("Observacoes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("OB_OBSERVACOES");
+
                     b.Property<decimal?>("Peso")
                         .HasColumnType("NUMBER(5,2)")
                         .HasColumnName("NR_PESO");
 
-                    b.Property<bool>("PreCadastro")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("PC_PRE_CADASTRO");
+                    b.Property<string>("Porte")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("PT_PORTE");
+
+                    b.Property<string>("Raca")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("RC_RACA");
 
                     b.Property<int>("ResponsavelId")
                         .HasColumnType("NUMBER(10)")
@@ -80,10 +104,6 @@ namespace PetBuddies_API.Migrations
                         .HasColumnType("NVARCHAR2(50)")
                         .HasColumnName("SX_SEXO");
 
-                    b.Property<int>("TipoAnimalId")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID_TIPO_ANIMAL");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TIMESTAMP(7)")
                         .HasColumnName("AT_UPDATED_AT");
@@ -92,9 +112,161 @@ namespace PetBuddies_API.Migrations
 
                     b.HasIndex("ResponsavelId");
 
-                    b.HasIndex("TipoAnimalId");
-
                     b.ToTable("T_PB_ANIMAL");
+                });
+
+            modelBuilder.Entity("PetBuddies_API.Models.CheckinExtracaoEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_CHECKIN_EXTRACAO");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CheckinTratamentoId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_CHECKIN_TRATAMENTO");
+
+                    b.Property<string>("CodigoCongelado")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("NVARCHAR2(60)")
+                        .HasColumnName("CD_CODIGO_CONGELADO");
+
+                    b.Property<int>("CondicaoClinicaId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_CONDICAO_CLINICA");
+
+                    b.Property<decimal>("Confianca")
+                        .HasColumnType("NUMBER(5,4)")
+                        .HasColumnName("NR_CONFIANCA");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CA_CREATED_AT");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("AT_UPDATED_AT");
+
+                    b.Property<bool?>("ValorBooleano")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("BL_VALOR_BOOLEANO");
+
+                    b.Property<decimal?>("ValorNumerico")
+                        .HasColumnType("NUMBER(10,3)")
+                        .HasColumnName("NR_VALOR_NUMERICO");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CheckinTratamentoId");
+
+                    b.HasIndex("CondicaoClinicaId");
+
+                    b.ToTable("T_PB_CHECKIN_EXTRACAO");
+                });
+
+            modelBuilder.Entity("PetBuddies_API.Models.CheckinResultadoEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_CHECKIN_RESULTADO");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CheckinTratamentoId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_CHECKIN_TRATAMENTO");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CA_CREATED_AT");
+
+                    b.Property<string>("DataReferencia")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(10)")
+                        .HasColumnName("DT_REFERENCIA");
+
+                    b.Property<string>("Desfecho")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("TP_DESFECHO");
+
+                    b.Property<decimal?>("DoseAplicada")
+                        .HasColumnType("NUMBER(8,3)")
+                        .HasColumnName("NR_DOSE_APLICADA");
+
+                    b.Property<int>("PrescricaoId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_PRESCRICAO");
+
+                    b.Property<int?>("RegraAplicadaId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_REGRA_APLICADA");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("AT_UPDATED_AT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CheckinTratamentoId");
+
+                    b.HasIndex("RegraAplicadaId");
+
+                    b.HasIndex("PrescricaoId", "DataReferencia")
+                        .IsUnique();
+
+                    b.ToTable("T_PB_CHECKIN_RESULTADO");
+                });
+
+            modelBuilder.Entity("PetBuddies_API.Models.CheckinTratamentoEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_CHECKIN_TRATAMENTO");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnimalId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_ANIMAL");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CA_CREATED_AT");
+
+                    b.Property<string>("Narrativa")
+                        .IsRequired()
+                        .HasColumnType("CLOB")
+                        .HasColumnName("TX_NARRATIVA");
+
+                    b.Property<string>("ObservacoesGerais")
+                        .HasColumnType("CLOB")
+                        .HasColumnName("TX_OBSERVACOES_GERAIS");
+
+                    b.Property<DateTime>("RegistradoEm")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("DH_REGISTRADO_EM");
+
+                    b.Property<string>("TicUtilizada")
+                        .HasMaxLength(120)
+                        .HasColumnType("NVARCHAR2(120)")
+                        .HasColumnName("DS_TIC_UTILIZADA");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("AT_UPDATED_AT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnimalId", "RegistradoEm");
+
+                    b.ToTable("T_PB_CHECKIN_TRATAMENTO");
                 });
 
             modelBuilder.Entity("PetBuddies_API.Models.ClinicaEntity", b =>
@@ -121,10 +293,6 @@ namespace PetBuddies_API.Migrations
                         .HasColumnType("NVARCHAR2(254)")
                         .HasColumnName("EM_EMAIL");
 
-                    b.Property<int>("EnderecoId")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID_ENDERECO");
-
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -143,10 +311,82 @@ namespace PetBuddies_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EnderecoId")
+                    b.HasIndex("Cnpj")
                         .IsUnique();
 
                     b.ToTable("T_PB_CLINICA");
+                });
+
+            modelBuilder.Entity("PetBuddies_API.Models.CondicaoClinicaEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_CONDICAO_CLINICA");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("AT_ATIVO");
+
+                    b.Property<int>("ClinicaId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_CLINICA");
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("NVARCHAR2(60)")
+                        .HasColumnName("CD_CODIGO");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CA_CREATED_AT");
+
+                    b.Property<bool>("Critica")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("FL_CRITICA");
+
+                    b.Property<string>("Fonte")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("TP_FONTE");
+
+                    b.Property<string>("Rotulo")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("NVARCHAR2(255)")
+                        .HasColumnName("DS_ROTULO");
+
+                    b.Property<string>("TipoValor")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("TP_VALOR");
+
+                    b.Property<string>("Unidade")
+                        .HasMaxLength(20)
+                        .HasColumnType("NVARCHAR2(20)")
+                        .HasColumnName("DS_UNIDADE");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("AT_UPDATED_AT");
+
+                    b.Property<int>("VeterinarioAutorId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_VETERINARIO_AUTOR");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VeterinarioAutorId");
+
+                    b.HasIndex("ClinicaId", "Codigo")
+                        .IsUnique();
+
+                    b.ToTable("T_PB_CONDICAO_CLINICA");
                 });
 
             modelBuilder.Entity("PetBuddies_API.Models.ConsultaEntity", b =>
@@ -162,10 +402,6 @@ namespace PetBuddies_API.Migrations
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("ID_ANIMAL");
 
-                    b.Property<int>("ClinicaId")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID_CLINICA");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TIMESTAMP(7)")
                         .HasColumnName("CA_CREATED_AT");
@@ -173,10 +409,6 @@ namespace PetBuddies_API.Migrations
                     b.Property<DateTime>("DataHora")
                         .HasColumnType("TIMESTAMP(7)")
                         .HasColumnName("DH_DATA_HORA");
-
-                    b.Property<bool>("Emergencia")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("EM_EMERGENCIA");
 
                     b.Property<string>("Motivo")
                         .HasMaxLength(2000)
@@ -187,10 +419,6 @@ namespace PetBuddies_API.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("NVARCHAR2(2000)")
                         .HasColumnName("OB_OBSERVACAO");
-
-                    b.Property<bool>("Prioridade")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("PR_PRIORIDADE");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -216,73 +444,9 @@ namespace PetBuddies_API.Migrations
 
                     b.HasIndex("AnimalId");
 
-                    b.HasIndex("ClinicaId");
-
                     b.HasIndex("VeterinarioId");
 
                     b.ToTable("T_PB_CONSULTA");
-                });
-
-            modelBuilder.Entity("PetBuddies_API.Models.EnderecoEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID_ENDERECO");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Bairro")
-                        .HasMaxLength(100)
-                        .HasColumnType("NVARCHAR2(100)")
-                        .HasColumnName("BR_BAIRRO");
-
-                    b.Property<string>("Cep")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("NVARCHAR2(8)")
-                        .HasColumnName("NR_CEP");
-
-                    b.Property<string>("Cidade")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("NVARCHAR2(100)")
-                        .HasColumnName("CD_CIDADE");
-
-                    b.Property<string>("Complemento")
-                        .HasMaxLength(100)
-                        .HasColumnType("NVARCHAR2(100)")
-                        .HasColumnName("CM_COMPLEMENTO");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("CA_CREATED_AT");
-
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasMaxLength(2)
-                        .HasColumnType("NVARCHAR2(2)")
-                        .HasColumnName("ES_ESTADO");
-
-                    b.Property<string>("Logradouro")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("NVARCHAR2(150)")
-                        .HasColumnName("LG_LOGRADOURO");
-
-                    b.Property<string>("Numero")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("NVARCHAR2(20)")
-                        .HasColumnName("NR_NUMERO");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("AT_UPDATED_AT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("T_PB_ENDERECO");
                 });
 
             modelBuilder.Entity("PetBuddies_API.Models.JanelaAtendimentoEntity", b =>
@@ -294,21 +458,17 @@ namespace PetBuddies_API.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ConsultaId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_CONSULTA");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TIMESTAMP(7)")
                         .HasColumnName("CA_CREATED_AT");
 
-                    b.Property<DateTime>("DataHoraFim")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("DH_DATA_HORA_FIM");
-
                     b.Property<DateTime>("DataHoraInicio")
                         .HasColumnType("TIMESTAMP(7)")
                         .HasColumnName("DH_DATA_HORA_INICIO");
-
-                    b.Property<int>("DuracaoSlot")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("DR_DURACAO_SLOT");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TIMESTAMP(7)")
@@ -320,9 +480,97 @@ namespace PetBuddies_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("VeterinarioId");
+                    b.HasIndex("ConsultaId");
+
+                    b.HasIndex("VeterinarioId", "DataHoraInicio")
+                        .IsUnique();
 
                     b.ToTable("T_PB_JANELA_ATENDIMENTO");
+                });
+
+            modelBuilder.Entity("PetBuddies_API.Models.PrescricaoEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_PRESCRICAO");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnimalId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_ANIMAL");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CA_CREATED_AT");
+
+                    b.Property<string>("DataInicio")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(10)")
+                        .HasColumnName("DT_INICIO");
+
+                    b.Property<decimal>("DoseMax")
+                        .HasColumnType("NUMBER(8,3)")
+                        .HasColumnName("NR_DOSE_MAX");
+
+                    b.Property<decimal>("DoseMin")
+                        .HasColumnType("NUMBER(8,3)")
+                        .HasColumnName("NR_DOSE_MIN");
+
+                    b.Property<int>("DuracaoDias")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("NR_DURACAO_DIAS");
+
+                    b.Property<int>("FrequenciaDia")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("NR_FREQUENCIA_DIA");
+
+                    b.Property<int?>("MaterialOrigemId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_MATERIAL_ORIGEM");
+
+                    b.Property<string>("Medicamento")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("NVARCHAR2(150)")
+                        .HasColumnName("NM_MEDICAMENTO");
+
+                    b.Property<string>("Orientacao")
+                        .HasColumnType("CLOB")
+                        .HasColumnName("TX_ORIENTACAO");
+
+                    b.Property<int>("RegistroAtendimentoId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_REGISTRO_ATENDIMENTO");
+
+                    b.Property<string>("Unidade")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("NVARCHAR2(20)")
+                        .HasColumnName("DS_UNIDADE");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("AT_UPDATED_AT");
+
+                    b.Property<int?>("VersaoOrigem")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("NR_VERSAO_ORIGEM");
+
+                    b.Property<int>("VeterinarioId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_VETERINARIO");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnimalId");
+
+                    b.HasIndex("RegistroAtendimentoId");
+
+                    b.HasIndex("VeterinarioId");
+
+                    b.ToTable("T_PB_PRESCRICAO");
                 });
 
             modelBuilder.Entity("PetBuddies_API.Models.ProcedimentoEntity", b =>
@@ -406,45 +654,6 @@ namespace PetBuddies_API.Migrations
                     b.ToTable("T_PB_PROCEDIMENTO");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.ProntuarioEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID_PRONTUARIO");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Alergias")
-                        .HasMaxLength(2000)
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("OB_ALERGIA");
-
-                    b.Property<int>("AnimalId")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID_ANIMAL");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("CA_CREATED_AT");
-
-                    b.Property<string>("Observacoes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("NVARCHAR2(2000)")
-                        .HasColumnName("OB_OBSERVACOES");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("AT_UPDATED_AT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AnimalId")
-                        .IsUnique();
-
-                    b.ToTable("T_PB_PRONTUARIO");
-                });
-
             modelBuilder.Entity("PetBuddies_API.Models.RegistroAtendimentoEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -485,10 +694,6 @@ namespace PetBuddies_API.Migrations
                         .HasColumnType("NVARCHAR2(2000)")
                         .HasColumnName("OB_OBSERVACAO");
 
-                    b.Property<int>("ProntuarioId")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID_PRONTUARIO");
-
                     b.Property<string>("ProximaVacina")
                         .HasColumnType("NVARCHAR2(10)")
                         .HasColumnName("PR_PROXIMA_VACINA");
@@ -513,9 +718,77 @@ namespace PetBuddies_API.Migrations
                     b.HasIndex("ConsultaId")
                         .IsUnique();
 
-                    b.HasIndex("ProntuarioId");
-
                     b.ToTable("T_PB_REGISTRO_ATENDIMENTO");
+                });
+
+            modelBuilder.Entity("PetBuddies_API.Models.RegraPrescricaoEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_REGRA_PRESCRICAO");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Acao")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("TP_ACAO");
+
+                    b.Property<int>("CondicaoClinicaId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_CONDICAO_CLINICA");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CA_CREATED_AT");
+
+                    b.Property<string>("FonteCongelada")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("TP_FONTE_CONGELADA");
+
+                    b.Property<decimal?>("Limite")
+                        .HasColumnType("NUMBER(10,3)")
+                        .HasColumnName("NR_LIMITE");
+
+                    b.Property<int?>("Operador")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("TP_OPERADOR");
+
+                    b.Property<int>("Ordem")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("NR_ORDEM");
+
+                    b.Property<int>("PrescricaoId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_PRESCRICAO");
+
+                    b.Property<string>("RotuloCongelado")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("NVARCHAR2(255)")
+                        .HasColumnName("DS_ROTULO_CONGELADO");
+
+                    b.Property<string>("TipoValorCongelado")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)")
+                        .HasColumnName("TP_VALOR_CONGELADO");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("AT_UPDATED_AT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CondicaoClinicaId");
+
+                    b.HasIndex("PrescricaoId");
+
+                    b.ToTable("T_PB_REGRA_PRESCRICAO");
                 });
 
             modelBuilder.Entity("PetBuddies_API.Models.ResponsavelEntity", b =>
@@ -527,43 +800,20 @@ namespace PetBuddies_API.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ClinicaId")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID_CLINICA");
-
-                    b.Property<string>("Cpf")
-                        .HasMaxLength(11)
-                        .HasColumnType("NVARCHAR2(11)")
-                        .HasColumnName("NR_CPF");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TIMESTAMP(7)")
                         .HasColumnName("CA_CREATED_AT");
-
-                    b.Property<string>("DataNascimento")
-                        .HasColumnType("NVARCHAR2(10)")
-                        .HasColumnName("DT_DATA_NASCIMENTO");
 
                     b.Property<string>("Email")
                         .HasMaxLength(254)
                         .HasColumnType("NVARCHAR2(254)")
                         .HasColumnName("EM_EMAIL");
 
-                    b.Property<int?>("EnderecoId")
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID_ENDERECO");
-
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("NVARCHAR2(150)")
                         .HasColumnName("NM_NOME_RESPONSAVEL");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)")
-                        .HasColumnName("ST_STATUS");
 
                     b.Property<string>("Telefone")
                         .IsRequired()
@@ -577,51 +827,7 @@ namespace PetBuddies_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClinicaId");
-
-                    b.HasIndex("EnderecoId");
-
                     b.ToTable("T_PB_RESPONSAVEL");
-                });
-
-            modelBuilder.Entity("PetBuddies_API.Models.TipoAnimalEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID_TIPO_ANIMAL");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("CA_CREATED_AT");
-
-                    b.Property<string>("Especie")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)")
-                        .HasColumnName("ES_ESPECIE");
-
-                    b.Property<string>("Porte")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)")
-                        .HasColumnName("PT_PORTE");
-
-                    b.Property<string>("Raca")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("NVARCHAR2(100)")
-                        .HasColumnName("RC_RACA");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TIMESTAMP(7)")
-                        .HasColumnName("AT_UPDATED_AT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("T_PB_TIPO_ANIMAL");
                 });
 
             modelBuilder.Entity("PetBuddies_API.Models.VeterinarioEntity", b =>
@@ -632,10 +838,6 @@ namespace PetBuddies_API.Migrations
                         .HasColumnName("ID_VETERINARIO");
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("AtendeEmergencia")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("AE_ATENDE_EMERGENCIA");
 
                     b.Property<bool>("Ativo")
                         .HasColumnType("NUMBER(1)")
@@ -660,21 +862,11 @@ namespace PetBuddies_API.Migrations
                         .HasColumnType("NVARCHAR2(254)")
                         .HasColumnName("EM_EMAIL");
 
-                    b.Property<string>("Especialidade")
-                        .HasMaxLength(100)
-                        .HasColumnType("NVARCHAR2(100)")
-                        .HasColumnName("ES_ESPECIALIDADE");
-
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("NVARCHAR2(150)")
                         .HasColumnName("NM_NOME_VETERINARIO");
-
-                    b.Property<string>("Telefone")
-                        .HasMaxLength(20)
-                        .HasColumnType("NVARCHAR2(20)")
-                        .HasColumnName("TL_TELEFONE");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TIMESTAMP(7)")
@@ -683,6 +875,9 @@ namespace PetBuddies_API.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ClinicaId");
+
+                    b.HasIndex("Crmv")
+                        .IsUnique();
 
                     b.ToTable("T_PB_VETERINARIO");
                 });
@@ -695,26 +890,82 @@ namespace PetBuddies_API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PetBuddies_API.Models.TipoAnimalEntity", "TipoAnimal")
-                        .WithMany("Animais")
-                        .HasForeignKey("TipoAnimalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Responsavel");
-
-                    b.Navigation("TipoAnimal");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.ClinicaEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Models.CheckinExtracaoEntity", b =>
                 {
-                    b.HasOne("PetBuddies_API.Models.EnderecoEntity", "Endereco")
-                        .WithOne("Clinica")
-                        .HasForeignKey("PetBuddies_API.Models.ClinicaEntity", "EnderecoId")
+                    b.HasOne("PetBuddies_API.Models.CheckinTratamentoEntity", "CheckinTratamento")
+                        .WithMany("Extracoes")
+                        .HasForeignKey("CheckinTratamentoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Endereco");
+                    b.HasOne("PetBuddies_API.Models.CondicaoClinicaEntity", "CondicaoClinica")
+                        .WithMany()
+                        .HasForeignKey("CondicaoClinicaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CheckinTratamento");
+
+                    b.Navigation("CondicaoClinica");
+                });
+
+            modelBuilder.Entity("PetBuddies_API.Models.CheckinResultadoEntity", b =>
+                {
+                    b.HasOne("PetBuddies_API.Models.CheckinTratamentoEntity", "CheckinTratamento")
+                        .WithMany("Resultados")
+                        .HasForeignKey("CheckinTratamentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PetBuddies_API.Models.PrescricaoEntity", "Prescricao")
+                        .WithMany()
+                        .HasForeignKey("PrescricaoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PetBuddies_API.Models.RegraPrescricaoEntity", "RegraAplicada")
+                        .WithMany()
+                        .HasForeignKey("RegraAplicadaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CheckinTratamento");
+
+                    b.Navigation("Prescricao");
+
+                    b.Navigation("RegraAplicada");
+                });
+
+            modelBuilder.Entity("PetBuddies_API.Models.CheckinTratamentoEntity", b =>
+                {
+                    b.HasOne("PetBuddies_API.Models.AnimalEntity", "Animal")
+                        .WithMany("Checkins")
+                        .HasForeignKey("AnimalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Animal");
+                });
+
+            modelBuilder.Entity("PetBuddies_API.Models.CondicaoClinicaEntity", b =>
+                {
+                    b.HasOne("PetBuddies_API.Models.ClinicaEntity", "Clinica")
+                        .WithMany("CondicoesClinicas")
+                        .HasForeignKey("ClinicaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PetBuddies_API.Models.VeterinarioEntity", "VeterinarioAutor")
+                        .WithMany()
+                        .HasForeignKey("VeterinarioAutorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Clinica");
+
+                    b.Navigation("VeterinarioAutor");
                 });
 
             modelBuilder.Entity("PetBuddies_API.Models.ConsultaEntity", b =>
@@ -722,12 +973,6 @@ namespace PetBuddies_API.Migrations
                     b.HasOne("PetBuddies_API.Models.AnimalEntity", "Animal")
                         .WithMany("Consultas")
                         .HasForeignKey("AnimalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PetBuddies_API.Models.ClinicaEntity", "Clinica")
-                        .WithMany("Consultas")
-                        .HasForeignKey("ClinicaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -739,18 +984,50 @@ namespace PetBuddies_API.Migrations
 
                     b.Navigation("Animal");
 
-                    b.Navigation("Clinica");
-
                     b.Navigation("Veterinario");
                 });
 
             modelBuilder.Entity("PetBuddies_API.Models.JanelaAtendimentoEntity", b =>
                 {
+                    b.HasOne("PetBuddies_API.Models.ConsultaEntity", "Consulta")
+                        .WithMany()
+                        .HasForeignKey("ConsultaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("PetBuddies_API.Models.VeterinarioEntity", "Veterinario")
                         .WithMany("JanelasAtendimento")
                         .HasForeignKey("VeterinarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Consulta");
+
+                    b.Navigation("Veterinario");
+                });
+
+            modelBuilder.Entity("PetBuddies_API.Models.PrescricaoEntity", b =>
+                {
+                    b.HasOne("PetBuddies_API.Models.AnimalEntity", "Animal")
+                        .WithMany("Prescricoes")
+                        .HasForeignKey("AnimalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PetBuddies_API.Models.RegistroAtendimentoEntity", "RegistroAtendimento")
+                        .WithMany()
+                        .HasForeignKey("RegistroAtendimentoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PetBuddies_API.Models.VeterinarioEntity", "Veterinario")
+                        .WithMany()
+                        .HasForeignKey("VeterinarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Animal");
+
+                    b.Navigation("RegistroAtendimento");
 
                     b.Navigation("Veterinario");
                 });
@@ -782,17 +1059,6 @@ namespace PetBuddies_API.Migrations
                     b.Navigation("Veterinario");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.ProntuarioEntity", b =>
-                {
-                    b.HasOne("PetBuddies_API.Models.AnimalEntity", "Animal")
-                        .WithOne("Prontuario")
-                        .HasForeignKey("PetBuddies_API.Models.ProntuarioEntity", "AnimalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Animal");
-                });
-
             modelBuilder.Entity("PetBuddies_API.Models.RegistroAtendimentoEntity", b =>
                 {
                     b.HasOne("PetBuddies_API.Models.AnimalEntity", "Animal")
@@ -807,34 +1073,28 @@ namespace PetBuddies_API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PetBuddies_API.Models.ProntuarioEntity", "Prontuario")
-                        .WithMany()
-                        .HasForeignKey("ProntuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Animal");
 
                     b.Navigation("Consulta");
-
-                    b.Navigation("Prontuario");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.ResponsavelEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Models.RegraPrescricaoEntity", b =>
                 {
-                    b.HasOne("PetBuddies_API.Models.ClinicaEntity", "Clinica")
-                        .WithMany("Responsaveis")
-                        .HasForeignKey("ClinicaId")
+                    b.HasOne("PetBuddies_API.Models.CondicaoClinicaEntity", "CondicaoClinica")
+                        .WithMany()
+                        .HasForeignKey("CondicaoClinicaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PetBuddies_API.Models.PrescricaoEntity", "Prescricao")
+                        .WithMany("Regras")
+                        .HasForeignKey("PrescricaoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PetBuddies_API.Models.EnderecoEntity", "Endereco")
-                        .WithMany("Responsaveis")
-                        .HasForeignKey("EnderecoId");
+                    b.Navigation("CondicaoClinica");
 
-                    b.Navigation("Clinica");
-
-                    b.Navigation("Endereco");
+                    b.Navigation("Prescricao");
                 });
 
             modelBuilder.Entity("PetBuddies_API.Models.VeterinarioEntity", b =>
@@ -850,20 +1110,27 @@ namespace PetBuddies_API.Migrations
 
             modelBuilder.Entity("PetBuddies_API.Models.AnimalEntity", b =>
                 {
+                    b.Navigation("Checkins");
+
                     b.Navigation("Consultas");
 
-                    b.Navigation("Procedimentos");
+                    b.Navigation("Prescricoes");
 
-                    b.Navigation("Prontuario");
+                    b.Navigation("Procedimentos");
 
                     b.Navigation("RegistroAtendimentos");
                 });
 
+            modelBuilder.Entity("PetBuddies_API.Models.CheckinTratamentoEntity", b =>
+                {
+                    b.Navigation("Extracoes");
+
+                    b.Navigation("Resultados");
+                });
+
             modelBuilder.Entity("PetBuddies_API.Models.ClinicaEntity", b =>
                 {
-                    b.Navigation("Consultas");
-
-                    b.Navigation("Responsaveis");
+                    b.Navigation("CondicoesClinicas");
 
                     b.Navigation("Veterinarios");
                 });
@@ -873,11 +1140,9 @@ namespace PetBuddies_API.Migrations
                     b.Navigation("RegistroAtendimento");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.EnderecoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Models.PrescricaoEntity", b =>
                 {
-                    b.Navigation("Clinica");
-
-                    b.Navigation("Responsaveis");
+                    b.Navigation("Regras");
                 });
 
             modelBuilder.Entity("PetBuddies_API.Models.RegistroAtendimentoEntity", b =>
@@ -886,11 +1151,6 @@ namespace PetBuddies_API.Migrations
                 });
 
             modelBuilder.Entity("PetBuddies_API.Models.ResponsavelEntity", b =>
-                {
-                    b.Navigation("Animais");
-                });
-
-            modelBuilder.Entity("PetBuddies_API.Models.TipoAnimalEntity", b =>
                 {
                     b.Navigation("Animais");
                 });
