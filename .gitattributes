@@ -1,0 +1,13 @@
+# Fim de linha normalizado para LF no repositório.
+# Sem isto, editores em Windows e macOS reescrevem os mesmos arquivos em CRLF e
+# cada PR nasce com centenas de linhas de ruído que não mudam conteúdo nenhum.
+* text=auto eol=lf
+
+# Binários não são normalizados.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
