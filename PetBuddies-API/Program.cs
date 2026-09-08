@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PetBuddies_API.Infrastructure.Data;
+using PetBuddies_API.Application.Interfaces;
 using PetBuddies_API.Application.UseCases;
+using PetBuddies_API.Domain.Interfaces;
+using PetBuddies_API.Infrastructure.Clients;
+using PetBuddies_API.Infrastructure.Repositories;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +22,9 @@ builder.Services.AddScoped<MotorApiClient>();
 builder.Services.AddScoped<AnimalMotorService>();
 builder.Services.AddScoped<AnimalCadastroService>();
 builder.Services.AddScoped<ConsultaService>();
-builder.Services.AddScoped<ClinicaService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IClinicaRepository, ClinicaRepository>();
+builder.Services.AddScoped<IClinicaUseCase, ClinicaUseCase>();
 builder.Services.AddScoped<JanelaAtendimentoService>();
 builder.Services.AddScoped<ProcedimentoService>();
 builder.Services.AddScoped<RegistroAtendimentoService>();
