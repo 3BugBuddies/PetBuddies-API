@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace PetBuddies_API.Models
+namespace PetBuddies_API.Domain.Entities
 {
     /// <summary>
     /// Cabeçalho de um check-in do tutor: <b>um relato, por pet, num momento</b>.

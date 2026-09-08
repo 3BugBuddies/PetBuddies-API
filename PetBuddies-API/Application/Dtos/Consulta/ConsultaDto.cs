@@ -1,4 +1,4 @@
-namespace PetBuddies_API.Dtos.Consulta
+namespace PetBuddies_API.Application.Dtos.Consulta
 {
     public class ConsultaDto
     {

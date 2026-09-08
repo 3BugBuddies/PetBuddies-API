@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
-namespace PetBuddies_API.Models
+namespace PetBuddies_API.Domain.Entities
 {
     [Table("T_PB_JANELA_ATENDIMENTO")]
     [Index(nameof(VeterinarioId), nameof(DataHoraInicio), IsUnique = true)]

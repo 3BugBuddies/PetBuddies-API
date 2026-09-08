@@ -1,4 +1,4 @@
-namespace PetBuddies_API.Enums
+namespace PetBuddies_API.Domain.Enums
 {
     /// <summary>O que a regra determina quando a condicao e satisfeita.</summary>
     public enum TipoAcaoRegraEnum

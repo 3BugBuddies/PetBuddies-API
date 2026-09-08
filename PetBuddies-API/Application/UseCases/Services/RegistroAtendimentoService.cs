@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using PetBuddies_API.Data;
-using PetBuddies_API.Dtos.RegistroAtendimento;
-using PetBuddies_API.Models;
+using PetBuddies_API.Infrastructure.Data;
+using PetBuddies_API.Application.Dtos.RegistroAtendimento;
+using PetBuddies_API.Domain.Entities;
 
-namespace PetBuddies_API.Services
+namespace PetBuddies_API.Application.UseCases
 {
     public class RegistroAtendimentoService
     {

@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using PetBuddies_API.Dtos.Consulta;
-using PetBuddies_API.Enums;
-using PetBuddies_API.Services;
+using PetBuddies_API.Application.Dtos.Consulta;
+using PetBuddies_API.Domain.Enums;
+using PetBuddies_API.Application.UseCases;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace PetBuddies_API.Controllers
+namespace PetBuddies_API.Presentation.Controllers
 {
     [ApiController]
     [Route("api/consulta")]

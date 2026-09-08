@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace PetBuddies_API.Models
+namespace PetBuddies_API.Domain.Entities
 {
     /// <summary>
     /// Ato assinado pelo veterinário no fechamento do atendimento: o que o animal

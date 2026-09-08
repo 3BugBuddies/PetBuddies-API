@@ -1,4 +1,4 @@
-namespace PetBuddies_API.Dtos.Clinica
+namespace PetBuddies_API.Application.Dtos.Clinica
 {
     public class ClinicaDto
     {

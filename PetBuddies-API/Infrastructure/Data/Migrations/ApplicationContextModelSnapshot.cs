@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
-using PetBuddies_API.Data;
+using PetBuddies_API.Infrastructure.Data;
 
 #nullable disable
 
-namespace PetBuddies_API.Data.Migrations
+namespace PetBuddies_API.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
     partial class ApplicationContextModelSnapshot : ModelSnapshot
@@ -22,7 +22,7 @@ namespace PetBuddies_API.Data.Migrations
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("PetBuddies_API.Models.AnimalEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.AnimalEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -111,7 +111,7 @@ namespace PetBuddies_API.Data.Migrations
                     b.ToTable("T_PB_ANIMAL");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.CheckinExtracaoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.CheckinExtracaoEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -163,7 +163,7 @@ namespace PetBuddies_API.Data.Migrations
                     b.ToTable("T_PB_CHECKIN_EXTRACAO");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.CheckinResultadoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.CheckinResultadoEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -218,7 +218,7 @@ namespace PetBuddies_API.Data.Migrations
                     b.ToTable("T_PB_CHECKIN_RESULTADO");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.CheckinTratamentoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.CheckinTratamentoEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -264,7 +264,7 @@ namespace PetBuddies_API.Data.Migrations
                     b.ToTable("T_PB_CHECKIN_TRATAMENTO");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.ClinicaEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.ClinicaEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -312,7 +312,7 @@ namespace PetBuddies_API.Data.Migrations
                     b.ToTable("T_PB_CLINICA");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.CondicaoClinicaEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.CondicaoClinicaEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -384,7 +384,7 @@ namespace PetBuddies_API.Data.Migrations
                     b.ToTable("T_PB_CONDICAO_CLINICA");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.ConsultaEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.ConsultaEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -444,7 +444,7 @@ namespace PetBuddies_API.Data.Migrations
                     b.ToTable("T_PB_CONSULTA");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.JanelaAtendimentoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.JanelaAtendimentoEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -483,7 +483,7 @@ namespace PetBuddies_API.Data.Migrations
                     b.ToTable("T_PB_JANELA_ATENDIMENTO");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.PrescricaoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.PrescricaoEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -567,7 +567,7 @@ namespace PetBuddies_API.Data.Migrations
                     b.ToTable("T_PB_PRESCRICAO");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.ProcedimentoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.ProcedimentoEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -648,7 +648,7 @@ namespace PetBuddies_API.Data.Migrations
                     b.ToTable("T_PB_PROCEDIMENTO");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.RegistroAtendimentoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.RegistroAtendimentoEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -715,7 +715,7 @@ namespace PetBuddies_API.Data.Migrations
                     b.ToTable("T_PB_REGISTRO_ATENDIMENTO");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.RegraPrescricaoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.RegraPrescricaoEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -785,7 +785,7 @@ namespace PetBuddies_API.Data.Migrations
                     b.ToTable("T_PB_REGRA_PRESCRICAO");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.ResponsavelEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.ResponsavelEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -824,7 +824,7 @@ namespace PetBuddies_API.Data.Migrations
                     b.ToTable("T_PB_RESPONSAVEL");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.VeterinarioEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.VeterinarioEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -876,9 +876,9 @@ namespace PetBuddies_API.Data.Migrations
                     b.ToTable("T_PB_VETERINARIO");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.AnimalEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.AnimalEntity", b =>
                 {
-                    b.HasOne("PetBuddies_API.Models.ResponsavelEntity", "Responsavel")
+                    b.HasOne("PetBuddies_API.Domain.Entities.ResponsavelEntity", "Responsavel")
                         .WithMany("Animais")
                         .HasForeignKey("ResponsavelId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -887,15 +887,15 @@ namespace PetBuddies_API.Data.Migrations
                     b.Navigation("Responsavel");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.CheckinExtracaoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.CheckinExtracaoEntity", b =>
                 {
-                    b.HasOne("PetBuddies_API.Models.CheckinTratamentoEntity", "CheckinTratamento")
+                    b.HasOne("PetBuddies_API.Domain.Entities.CheckinTratamentoEntity", "CheckinTratamento")
                         .WithMany("Extracoes")
                         .HasForeignKey("CheckinTratamentoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PetBuddies_API.Models.CondicaoClinicaEntity", "CondicaoClinica")
+                    b.HasOne("PetBuddies_API.Domain.Entities.CondicaoClinicaEntity", "CondicaoClinica")
                         .WithMany()
                         .HasForeignKey("CondicaoClinicaId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -906,21 +906,21 @@ namespace PetBuddies_API.Data.Migrations
                     b.Navigation("CondicaoClinica");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.CheckinResultadoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.CheckinResultadoEntity", b =>
                 {
-                    b.HasOne("PetBuddies_API.Models.CheckinTratamentoEntity", "CheckinTratamento")
+                    b.HasOne("PetBuddies_API.Domain.Entities.CheckinTratamentoEntity", "CheckinTratamento")
                         .WithMany("Resultados")
                         .HasForeignKey("CheckinTratamentoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PetBuddies_API.Models.PrescricaoEntity", "Prescricao")
+                    b.HasOne("PetBuddies_API.Domain.Entities.PrescricaoEntity", "Prescricao")
                         .WithMany()
                         .HasForeignKey("PrescricaoId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("PetBuddies_API.Models.RegraPrescricaoEntity", "RegraAplicada")
+                    b.HasOne("PetBuddies_API.Domain.Entities.RegraPrescricaoEntity", "RegraAplicada")
                         .WithMany()
                         .HasForeignKey("RegraAplicadaId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -932,9 +932,9 @@ namespace PetBuddies_API.Data.Migrations
                     b.Navigation("RegraAplicada");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.CheckinTratamentoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.CheckinTratamentoEntity", b =>
                 {
-                    b.HasOne("PetBuddies_API.Models.AnimalEntity", "Animal")
+                    b.HasOne("PetBuddies_API.Domain.Entities.AnimalEntity", "Animal")
                         .WithMany("Checkins")
                         .HasForeignKey("AnimalId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -943,15 +943,15 @@ namespace PetBuddies_API.Data.Migrations
                     b.Navigation("Animal");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.CondicaoClinicaEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.CondicaoClinicaEntity", b =>
                 {
-                    b.HasOne("PetBuddies_API.Models.ClinicaEntity", "Clinica")
+                    b.HasOne("PetBuddies_API.Domain.Entities.ClinicaEntity", "Clinica")
                         .WithMany("CondicoesClinicas")
                         .HasForeignKey("ClinicaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("PetBuddies_API.Models.VeterinarioEntity", "VeterinarioAutor")
+                    b.HasOne("PetBuddies_API.Domain.Entities.VeterinarioEntity", "VeterinarioAutor")
                         .WithMany()
                         .HasForeignKey("VeterinarioAutorId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -962,15 +962,15 @@ namespace PetBuddies_API.Data.Migrations
                     b.Navigation("VeterinarioAutor");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.ConsultaEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.ConsultaEntity", b =>
                 {
-                    b.HasOne("PetBuddies_API.Models.AnimalEntity", "Animal")
+                    b.HasOne("PetBuddies_API.Domain.Entities.AnimalEntity", "Animal")
                         .WithMany("Consultas")
                         .HasForeignKey("AnimalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PetBuddies_API.Models.VeterinarioEntity", "Veterinario")
+                    b.HasOne("PetBuddies_API.Domain.Entities.VeterinarioEntity", "Veterinario")
                         .WithMany("Consultas")
                         .HasForeignKey("VeterinarioId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -981,14 +981,14 @@ namespace PetBuddies_API.Data.Migrations
                     b.Navigation("Veterinario");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.JanelaAtendimentoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.JanelaAtendimentoEntity", b =>
                 {
-                    b.HasOne("PetBuddies_API.Models.ConsultaEntity", "Consulta")
+                    b.HasOne("PetBuddies_API.Domain.Entities.ConsultaEntity", "Consulta")
                         .WithMany()
                         .HasForeignKey("ConsultaId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("PetBuddies_API.Models.VeterinarioEntity", "Veterinario")
+                    b.HasOne("PetBuddies_API.Domain.Entities.VeterinarioEntity", "Veterinario")
                         .WithMany("JanelasAtendimento")
                         .HasForeignKey("VeterinarioId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -999,21 +999,21 @@ namespace PetBuddies_API.Data.Migrations
                     b.Navigation("Veterinario");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.PrescricaoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.PrescricaoEntity", b =>
                 {
-                    b.HasOne("PetBuddies_API.Models.AnimalEntity", "Animal")
+                    b.HasOne("PetBuddies_API.Domain.Entities.AnimalEntity", "Animal")
                         .WithMany("Prescricoes")
                         .HasForeignKey("AnimalId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("PetBuddies_API.Models.RegistroAtendimentoEntity", "RegistroAtendimento")
+                    b.HasOne("PetBuddies_API.Domain.Entities.RegistroAtendimentoEntity", "RegistroAtendimento")
                         .WithMany()
                         .HasForeignKey("RegistroAtendimentoId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("PetBuddies_API.Models.VeterinarioEntity", "Veterinario")
+                    b.HasOne("PetBuddies_API.Domain.Entities.VeterinarioEntity", "Veterinario")
                         .WithMany()
                         .HasForeignKey("VeterinarioId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1026,21 +1026,21 @@ namespace PetBuddies_API.Data.Migrations
                     b.Navigation("Veterinario");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.ProcedimentoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.ProcedimentoEntity", b =>
                 {
-                    b.HasOne("PetBuddies_API.Models.AnimalEntity", "Animal")
+                    b.HasOne("PetBuddies_API.Domain.Entities.AnimalEntity", "Animal")
                         .WithMany("Procedimentos")
                         .HasForeignKey("AnimalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PetBuddies_API.Models.RegistroAtendimentoEntity", "RegistroAtendimento")
+                    b.HasOne("PetBuddies_API.Domain.Entities.RegistroAtendimentoEntity", "RegistroAtendimento")
                         .WithMany("Procedimentos")
                         .HasForeignKey("RegistroAtendimentoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PetBuddies_API.Models.VeterinarioEntity", "Veterinario")
+                    b.HasOne("PetBuddies_API.Domain.Entities.VeterinarioEntity", "Veterinario")
                         .WithMany("Procedimentos")
                         .HasForeignKey("VeterinarioId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1053,17 +1053,17 @@ namespace PetBuddies_API.Data.Migrations
                     b.Navigation("Veterinario");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.RegistroAtendimentoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.RegistroAtendimentoEntity", b =>
                 {
-                    b.HasOne("PetBuddies_API.Models.AnimalEntity", "Animal")
+                    b.HasOne("PetBuddies_API.Domain.Entities.AnimalEntity", "Animal")
                         .WithMany("RegistroAtendimentos")
                         .HasForeignKey("AnimalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PetBuddies_API.Models.ConsultaEntity", "Consulta")
+                    b.HasOne("PetBuddies_API.Domain.Entities.ConsultaEntity", "Consulta")
                         .WithOne("RegistroAtendimento")
-                        .HasForeignKey("PetBuddies_API.Models.RegistroAtendimentoEntity", "ConsultaId")
+                        .HasForeignKey("PetBuddies_API.Domain.Entities.RegistroAtendimentoEntity", "ConsultaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1072,15 +1072,15 @@ namespace PetBuddies_API.Data.Migrations
                     b.Navigation("Consulta");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.RegraPrescricaoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.RegraPrescricaoEntity", b =>
                 {
-                    b.HasOne("PetBuddies_API.Models.CondicaoClinicaEntity", "CondicaoClinica")
+                    b.HasOne("PetBuddies_API.Domain.Entities.CondicaoClinicaEntity", "CondicaoClinica")
                         .WithMany()
                         .HasForeignKey("CondicaoClinicaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("PetBuddies_API.Models.PrescricaoEntity", "Prescricao")
+                    b.HasOne("PetBuddies_API.Domain.Entities.PrescricaoEntity", "Prescricao")
                         .WithMany("Regras")
                         .HasForeignKey("PrescricaoId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1091,9 +1091,9 @@ namespace PetBuddies_API.Data.Migrations
                     b.Navigation("Prescricao");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.VeterinarioEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.VeterinarioEntity", b =>
                 {
-                    b.HasOne("PetBuddies_API.Models.ClinicaEntity", "Clinica")
+                    b.HasOne("PetBuddies_API.Domain.Entities.ClinicaEntity", "Clinica")
                         .WithMany("Veterinarios")
                         .HasForeignKey("ClinicaId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1102,7 +1102,7 @@ namespace PetBuddies_API.Data.Migrations
                     b.Navigation("Clinica");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.AnimalEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.AnimalEntity", b =>
                 {
                     b.Navigation("Checkins");
 
@@ -1115,41 +1115,41 @@ namespace PetBuddies_API.Data.Migrations
                     b.Navigation("RegistroAtendimentos");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.CheckinTratamentoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.CheckinTratamentoEntity", b =>
                 {
                     b.Navigation("Extracoes");
 
                     b.Navigation("Resultados");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.ClinicaEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.ClinicaEntity", b =>
                 {
                     b.Navigation("CondicoesClinicas");
 
                     b.Navigation("Veterinarios");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.ConsultaEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.ConsultaEntity", b =>
                 {
                     b.Navigation("RegistroAtendimento");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.PrescricaoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.PrescricaoEntity", b =>
                 {
                     b.Navigation("Regras");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.RegistroAtendimentoEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.RegistroAtendimentoEntity", b =>
                 {
                     b.Navigation("Procedimentos");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.ResponsavelEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.ResponsavelEntity", b =>
                 {
                     b.Navigation("Animais");
                 });
 
-            modelBuilder.Entity("PetBuddies_API.Models.VeterinarioEntity", b =>
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.VeterinarioEntity", b =>
                 {
                     b.Navigation("Consultas");
 

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PetBuddies_API.Models
+namespace PetBuddies_API.Domain.Entities
 {
     public abstract class BaseEntity
     {

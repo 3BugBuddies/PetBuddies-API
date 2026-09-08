@@ -1,4 +1,4 @@
-namespace PetBuddies_API.Enums
+namespace PetBuddies_API.Domain.Enums
 {
     /// <summary>Comparacao aplicada ao limite de uma regra de prescricao. So vale para condicao NUMERICO.</summary>
     public enum OperadorRegraEnum

@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using PetBuddies_API.Data.Converters;
-using PetBuddies_API.Models;
+using PetBuddies_API.Infrastructure.Data.Converters;
+using PetBuddies_API.Domain.Entities;
 
-namespace PetBuddies_API.Data
+namespace PetBuddies_API.Infrastructure.Data
 {
     public class ApplicationContext : DbContext
     {

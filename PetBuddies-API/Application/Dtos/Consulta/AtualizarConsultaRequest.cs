@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using PetBuddies_API.Enums;
+using PetBuddies_API.Domain.Enums;
 
-namespace PetBuddies_API.Dtos.Consulta
+namespace PetBuddies_API.Application.Dtos.Consulta
 {
     public class AtualizarConsultaRequest
     {

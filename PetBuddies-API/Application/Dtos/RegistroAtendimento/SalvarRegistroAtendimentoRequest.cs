@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace PetBuddies_API.Dtos.RegistroAtendimento
+namespace PetBuddies_API.Application.Dtos.RegistroAtendimento
 {
     public class SalvarRegistroAtendimentoRequest
     {

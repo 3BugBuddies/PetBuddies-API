@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace PetBuddies_API.Data.Converters
+namespace PetBuddies_API.Infrastructure.Data.Converters
 {
     /// <summary>
     /// A variante nulável de <see cref="DateOnlyConverter"/>.

@@ -1,9 +1,9 @@
-using PetBuddies_API.Enums;
+using PetBuddies_API.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace PetBuddies_API.Models
+namespace PetBuddies_API.Domain.Entities
 {
     [Table("T_PB_CONSULTA")]
     public class ConsultaEntity : BaseEntity

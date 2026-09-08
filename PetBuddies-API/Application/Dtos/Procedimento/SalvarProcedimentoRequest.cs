@@ -1,7 +1,7 @@
-using PetBuddies_API.Enums;
+using PetBuddies_API.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace PetBuddies_API.Dtos.Procedimento
+namespace PetBuddies_API.Application.Dtos.Procedimento
 {
     public class SalvarProcedimentoRequest
     {

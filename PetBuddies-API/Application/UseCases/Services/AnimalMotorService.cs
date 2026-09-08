@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using PetBuddies_API.Data;
-using PetBuddies_API.Dtos.Animal;
-using PetBuddies_API.Enums;
+using PetBuddies_API.Infrastructure.Data;
+using PetBuddies_API.Application.Dtos.Animal;
+using PetBuddies_API.Domain.Enums;
 
-namespace PetBuddies_API.Services
+namespace PetBuddies_API.Application.UseCases
 {
     public class AnimalMotorService
     {

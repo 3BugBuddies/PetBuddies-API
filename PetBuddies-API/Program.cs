@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PetBuddies_API.Data;
-using PetBuddies_API.Services;
+using PetBuddies_API.Infrastructure.Data;
+using PetBuddies_API.Application.UseCases;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);

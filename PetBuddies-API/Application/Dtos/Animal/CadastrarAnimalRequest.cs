@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using PetBuddies_API.Enums;
+using PetBuddies_API.Domain.Enums;
 
-namespace PetBuddies_API.Dtos.Animal
+namespace PetBuddies_API.Application.Dtos.Animal
 {
     public class CadastrarAnimalRequest
     {

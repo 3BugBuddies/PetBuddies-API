@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using PetBuddies_API.Data;
-using PetBuddies_API.Dtos.Animal;
-using PetBuddies_API.Dtos.Responsavel;
-using PetBuddies_API.Enums;
-using PetBuddies_API.Models;
+using PetBuddies_API.Infrastructure.Data;
+using PetBuddies_API.Application.Dtos.Animal;
+using PetBuddies_API.Application.Dtos.Responsavel;
+using PetBuddies_API.Domain.Enums;
+using PetBuddies_API.Domain.Entities;
 
-namespace PetBuddies_API.Services
+namespace PetBuddies_API.Application.UseCases
 {
     public class ResponsavelService
     {

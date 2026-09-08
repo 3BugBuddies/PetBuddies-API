@@ -1,4 +1,4 @@
-namespace PetBuddies_API.Dtos.Veterinario
+namespace PetBuddies_API.Application.Dtos.Veterinario
 {
     public class VeterinarioDto
     {

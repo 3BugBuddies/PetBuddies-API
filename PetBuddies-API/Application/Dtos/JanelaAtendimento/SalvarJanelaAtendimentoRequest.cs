@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace PetBuddies_API.Dtos.JanelaAtendimento
+namespace PetBuddies_API.Application.Dtos.JanelaAtendimento
 {
     public class SalvarJanelaAtendimentoRequest
     {

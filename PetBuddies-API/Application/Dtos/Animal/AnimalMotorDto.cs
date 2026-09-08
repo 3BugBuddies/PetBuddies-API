@@ -1,4 +1,4 @@
-namespace PetBuddies_API.Dtos.Animal
+namespace PetBuddies_API.Application.Dtos.Animal
 {
     /// <summary>Projeção que o motor de cuidado do serviço Java consome.</summary>
     public class AnimalMotorDto

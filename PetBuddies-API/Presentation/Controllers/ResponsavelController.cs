@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using PetBuddies_API.Dtos.Animal;
-using PetBuddies_API.Dtos.Responsavel;
-using PetBuddies_API.Services;
+using PetBuddies_API.Application.Dtos.Animal;
+using PetBuddies_API.Application.Dtos.Responsavel;
+using PetBuddies_API.Application.UseCases;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace PetBuddies_API.Controllers
+namespace PetBuddies_API.Presentation.Controllers
 {
     [ApiController]
     [Route("api/responsavel")]

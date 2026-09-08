@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using PetBuddies_API.Data;
-using PetBuddies_API.Dtos.Consulta;
-using PetBuddies_API.Enums;
-using PetBuddies_API.Models;
+using PetBuddies_API.Infrastructure.Data;
+using PetBuddies_API.Application.Dtos.Consulta;
+using PetBuddies_API.Domain.Enums;
+using PetBuddies_API.Domain.Entities;
 
-namespace PetBuddies_API.Services
+namespace PetBuddies_API.Application.UseCases
 {
     public class ConsultaService
     {

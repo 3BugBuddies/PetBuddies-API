@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using PetBuddies_API.Enums;
+using PetBuddies_API.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace PetBuddies_API.Models
+namespace PetBuddies_API.Domain.Entities
 {
     /// <summary>
     /// Vocabulário clínico de uma clínica: o conjunto de condições que uma regra de

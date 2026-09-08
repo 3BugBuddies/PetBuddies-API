@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PetBuddies_API.Dtos.Procedimento;
-using PetBuddies_API.Services;
+using PetBuddies_API.Application.Dtos.Procedimento;
+using PetBuddies_API.Application.UseCases;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace PetBuddies_API.Controllers
+namespace PetBuddies_API.Presentation.Controllers
 {
     [ApiController]
     [Route("api/procedimento")]

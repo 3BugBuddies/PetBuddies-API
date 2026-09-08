@@ -1,4 +1,4 @@
-namespace PetBuddies_API.Dtos.Responsavel
+namespace PetBuddies_API.Application.Dtos.Responsavel
 {
     public class ResponsavelDto
     {

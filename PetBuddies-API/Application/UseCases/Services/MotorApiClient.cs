@@ -1,8 +1,8 @@
 using System.Text;
 using System.Text.Json;
-using PetBuddies_API.Enums;
+using PetBuddies_API.Domain.Enums;
 
-namespace PetBuddies_API.Services
+namespace PetBuddies_API.Application.UseCases
 {
     public class MotorApiClient
     {

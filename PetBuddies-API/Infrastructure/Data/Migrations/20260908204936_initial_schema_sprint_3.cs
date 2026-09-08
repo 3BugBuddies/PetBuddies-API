@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace PetBuddies_API.Data.Migrations
+namespace PetBuddies_API.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
     public partial class initial_schema_sprint_3 : Migration

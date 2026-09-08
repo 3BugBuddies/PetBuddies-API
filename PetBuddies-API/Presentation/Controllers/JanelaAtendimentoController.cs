@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using PetBuddies_API.Dtos.JanelaAtendimento;
-using PetBuddies_API.Services;
+using PetBuddies_API.Application.Dtos.JanelaAtendimento;
+using PetBuddies_API.Application.UseCases;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace PetBuddies_API.Controllers
+namespace PetBuddies_API.Presentation.Controllers
 {
     [ApiController]
     [Route("api/janela-atendimento")]
