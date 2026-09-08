@@ -107,36 +107,6 @@ namespace PetBuddies_API.Infrastructure.Data
                 .HasForeignKey(regra => regra.CondicaoClinicaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<CheckinTratamentoEntity>()
-                .HasOne(checkin => checkin.Animal).WithMany(animal => animal.Checkins)
-                .HasForeignKey(checkin => checkin.AnimalId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<CheckinExtracaoEntity>()
-                .HasOne(extracao => extracao.CheckinTratamento).WithMany(checkin => checkin.Extracoes)
-                .HasForeignKey(extracao => extracao.CheckinTratamentoId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<CheckinExtracaoEntity>()
-                .HasOne(extracao => extracao.CondicaoClinica).WithMany()
-                .HasForeignKey(extracao => extracao.CondicaoClinicaId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<CheckinResultadoEntity>()
-                .HasOne(resultado => resultado.CheckinTratamento).WithMany(checkin => checkin.Resultados)
-                .HasForeignKey(resultado => resultado.CheckinTratamentoId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<CheckinResultadoEntity>()
-                .HasOne(resultado => resultado.Prescricao).WithMany()
-                .HasForeignKey(resultado => resultado.PrescricaoId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<CheckinResultadoEntity>()
-                .HasOne(resultado => resultado.RegraAplicada).WithMany()
-                .HasForeignKey(resultado => resultado.RegraAplicadaId)
-                .OnDelete(DeleteBehavior.SetNull);
-
             // A janela solta a reserva quando a consulta e excluida. Cancelamento e outro
             // caminho, e nao passa por aqui: quem cuida dele e o PR N8.
             modelBuilder.Entity<JanelaAtendimentoEntity>()
@@ -159,8 +129,5 @@ namespace PetBuddies_API.Infrastructure.Data
         public DbSet<PrescricaoEntity> Prescricoes { get; set; }
         public DbSet<RegraPrescricaoEntity> RegrasPrescricao { get; set; }
         public DbSet<CondicaoClinicaEntity> CondicoesClinicas { get; set; }
-        public DbSet<CheckinTratamentoEntity> CheckinsTratamento { get; set; }
-        public DbSet<CheckinExtracaoEntity> CheckinsExtracao { get; set; }
-        public DbSet<CheckinResultadoEntity> CheckinsResultado { get; set; }
     }
 }

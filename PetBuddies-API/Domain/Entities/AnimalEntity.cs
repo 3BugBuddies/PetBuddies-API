@@ -85,8 +85,5 @@ namespace PetBuddies_API.Domain.Entities
 
         [JsonIgnore]
         public ICollection<PrescricaoEntity> Prescricoes { get; set; } = [];
-
-        [JsonIgnore]
-        public ICollection<CheckinTratamentoEntity> Checkins { get; set; } = [];
     }
 }
