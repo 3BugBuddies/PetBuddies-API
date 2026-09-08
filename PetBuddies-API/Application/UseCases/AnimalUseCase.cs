@@ -1,60 +1,50 @@
-using Microsoft.EntityFrameworkCore;
-using PetBuddies_API.Infrastructure.Clients;
-using PetBuddies_API.Infrastructure.Data;
 using PetBuddies_API.Application.Dtos.Animal;
+using PetBuddies_API.Application.Interfaces;
+using PetBuddies_API.Application.Mappers;
 using PetBuddies_API.Domain.Entities;
+using PetBuddies_API.Domain.Interfaces;
+using PetBuddies_API.Infrastructure.Clients;
 
 namespace PetBuddies_API.Application.UseCases
 {
-    public class AnimalCadastroService
+    public class AnimalUseCase : IAnimalUseCase
     {
-        private readonly ApplicationContext _context;
-        private readonly MotorApiClient _motorApiClient;
+        private readonly IAnimalRepository _repositorio;
+        private readonly IMotorApiClient _motorApiClient;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public AnimalCadastroService(ApplicationContext context, MotorApiClient motorApiClient)
+        public AnimalUseCase(IAnimalRepository repositorio, IMotorApiClient motorApiClient, IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _repositorio = repositorio;
             _motorApiClient = motorApiClient;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<AnimalDto>> ListarAsync()
         {
-            var animais = await _context.Animais
-                .AsNoTracking()
-                .OrderBy(animal => animal.Id)
-                .ToListAsync();
-
-            return animais.Select(ToDto).ToList();
+            var animais = await _repositorio.ListarAsync();
+            return animais.Select(animal => animal.ToDto()).ToList();
         }
 
         public async Task<AnimalDto?> BuscarPorIdAsync(int animalId)
         {
-            var animal = await _context.Animais
-                .AsNoTracking()
-                .SingleOrDefaultAsync(animal => animal.Id == animalId);
-
-            return animal is null ? null : ToDto(animal);
+            var animal = await _repositorio.ObterPorIdAsync(animalId);
+            return animal?.ToDto();
         }
 
-        public async Task<bool> ExisteAsync(int animalId)
+        public Task<bool> ExisteAsync(int animalId)
         {
-            return await _context.Animais
-                .AsNoTracking()
-                .AnyAsync(animal => animal.Id == animalId);
+            return _repositorio.ExisteAsync(animalId);
         }
 
-        public async Task<bool> ResponsavelExisteAsync(int responsavelId)
+        public Task<bool> ResponsavelExisteAsync(int responsavelId)
         {
-            return await _context.Responsaveis
-                .AsNoTracking()
-                .AnyAsync(responsavel => responsavel.Id == responsavelId);
+            return _repositorio.ResponsavelExisteAsync(responsavelId);
         }
 
-        public async Task<bool> PossuiConsultasAsync(int animalId)
+        public Task<bool> PossuiConsultasAsync(int animalId)
         {
-            return await _context.Consultas
-                .AsNoTracking()
-                .AnyAsync(consulta => consulta.AnimalId == animalId);
+            return _repositorio.PossuiConsultasAsync(animalId);
         }
 
         public async Task<AnimalDto> CadastrarAsync(CadastrarAnimalRequest request)
@@ -78,8 +68,8 @@ namespace PetBuddies_API.Application.UseCases
                 Observacoes = request.Observacoes
             };
 
-            _context.Animais.Add(animal);
-            await _context.SaveChangesAsync();
+            await _repositorio.AdicionarAsync(animal);
+            await _unitOfWork.SalvarAsync();
 
             // Best-effort: falha do serviço de cuidado não desfaz o cadastro clínico.
             await _motorApiClient.InstanciarPlanoPreventivoAsync(
@@ -90,13 +80,12 @@ namespace PetBuddies_API.Application.UseCases
                 animal.Castrado,
                 animal.DataNascimento);
 
-            return ToDto(animal);
+            return animal.ToDto();
         }
 
         public async Task<AnimalDto?> AtualizarAsync(int animalId, AtualizarAnimalRequest request)
         {
-            var animal = await _context.Animais
-                .SingleOrDefaultAsync(item => item.Id == animalId);
+            var animal = await _repositorio.ObterParaAlterarAsync(animalId);
 
             if (animal is null)
             {
@@ -115,43 +104,24 @@ namespace PetBuddies_API.Application.UseCases
             animal.Alergias = request.Alergias;
             animal.Observacoes = request.Observacoes;
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SalvarAsync();
 
-            return ToDto(animal);
+            return animal.ToDto();
         }
 
         public async Task<bool> RemoverAsync(int animalId)
         {
-            var animal = await _context.Animais.SingleOrDefaultAsync(item => item.Id == animalId);
+            var animal = await _repositorio.ObterParaAlterarAsync(animalId);
 
             if (animal is null)
             {
                 return false;
             }
 
-            _context.Animais.Remove(animal);
-            await _context.SaveChangesAsync();
+            _repositorio.Remover(animal);
+            await _unitOfWork.SalvarAsync();
 
             return true;
-        }
-
-        private static AnimalDto ToDto(AnimalEntity animal)
-        {
-            return new AnimalDto
-            {
-                Id = animal.Id,
-                Nome = animal.Nome,
-                Especie = animal.Especie.ToString(),
-                Raca = animal.Raca,
-                Porte = animal.Porte.ToString(),
-                Sexo = animal.Sexo.ToString(),
-                Castrado = animal.Castrado,
-                CondicaoCronica = animal.CondicaoCronica,
-                DataNascimento = animal.DataNascimento,
-                Peso = animal.Peso,
-                Alergias = animal.Alergias,
-                Observacoes = animal.Observacoes
-            };
         }
     }
 }

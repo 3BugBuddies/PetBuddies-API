@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PetBuddies_API.Application.Dtos.Animal;
-using PetBuddies_API.Application.UseCases;
+using PetBuddies_API.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace PetBuddies_API.Presentation.Controllers
@@ -9,15 +9,15 @@ namespace PetBuddies_API.Presentation.Controllers
     [Route("api/animal")]
     public class AnimalController : ControllerBase
     {
-        private readonly AnimalMotorService _animalMotorService;
-        private readonly AnimalCadastroService _animalCadastroService;
+        private readonly IAnimalMotorUseCase _animalMotorUseCase;
+        private readonly IAnimalUseCase _animalUseCase;
 
         public AnimalController(
-            AnimalMotorService animalMotorService,
-            AnimalCadastroService animalCadastroService)
+            IAnimalMotorUseCase animalMotorUseCase,
+            IAnimalUseCase animalUseCase)
         {
-            _animalMotorService = animalMotorService;
-            _animalCadastroService = animalCadastroService;
+            _animalMotorUseCase = animalMotorUseCase;
+            _animalUseCase = animalUseCase;
         }
 
         [HttpGet("{id:int}/motor")]
@@ -26,7 +26,7 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status404NotFound, "Animal não encontrado.")]
         public async Task<ActionResult<AnimalMotorDto>> GetDadosMotor(int id)
         {
-            var response = await _animalMotorService.GetDadosMotorAsync(id);
+            var response = await _animalMotorUseCase.GetDadosMotorAsync(id);
 
             if (response is null)
             {
@@ -42,7 +42,7 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status204NoContent, "Nenhum animal cadastrado.")]
         public async Task<ActionResult<List<AnimalDto>>> Listar()
         {
-            var response = await _animalCadastroService.ListarAsync();
+            var response = await _animalUseCase.ListarAsync();
 
             if (response.Count == 0)
             {
@@ -58,7 +58,7 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status404NotFound, "Animal não encontrado.")]
         public async Task<ActionResult<AnimalDto>> BuscarPorId(int id)
         {
-            var response = await _animalCadastroService.BuscarPorIdAsync(id);
+            var response = await _animalUseCase.BuscarPorIdAsync(id);
 
             if (response is null)
             {
@@ -74,7 +74,7 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status404NotFound, "Nenhuma consulta realizada encontrada.")]
         public async Task<ActionResult<UltimaConsultaDto>> GetUltimaConsulta(int id)
         {
-            var response = await _animalMotorService.GetUltimaConsultaAsync(id);
+            var response = await _animalMotorUseCase.GetUltimaConsultaAsync(id);
 
             if (response is null)
             {
@@ -91,12 +91,12 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status404NotFound, "Responsável não encontrado.")]
         public async Task<ActionResult<AnimalDto>> Cadastrar([FromBody] CadastrarAnimalRequest request)
         {
-            if (!await _animalCadastroService.ResponsavelExisteAsync(request.ResponsavelId))
+            if (!await _animalUseCase.ResponsavelExisteAsync(request.ResponsavelId))
             {
                 return NotFound("Responsável não encontrado para vincular o animal.");
             }
 
-            var response = await _animalCadastroService.CadastrarAsync(request);
+            var response = await _animalUseCase.CadastrarAsync(request);
             return CreatedAtAction(nameof(BuscarPorId), new { id = response.Id }, response);
         }
 
@@ -107,17 +107,17 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status404NotFound, "Animal ou responsável não encontrado.")]
         public async Task<IActionResult> Atualizar(int id, [FromBody] AtualizarAnimalRequest request)
         {
-            if (!await _animalCadastroService.ExisteAsync(id))
+            if (!await _animalUseCase.ExisteAsync(id))
             {
                 return NotFound("Animal não encontrado para o id informado.");
             }
 
-            if (!await _animalCadastroService.ResponsavelExisteAsync(request.ResponsavelId))
+            if (!await _animalUseCase.ResponsavelExisteAsync(request.ResponsavelId))
             {
                 return NotFound("Responsável não encontrado para vincular o animal.");
             }
 
-            await _animalCadastroService.AtualizarAsync(id, request);
+            await _animalUseCase.AtualizarAsync(id, request);
             return NoContent();
         }
 
@@ -128,17 +128,17 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "Animal possui vínculos e não pode ser removido.")]
         public async Task<IActionResult> Remover(int id)
         {
-            if (!await _animalCadastroService.ExisteAsync(id))
+            if (!await _animalUseCase.ExisteAsync(id))
             {
                 return NotFound("Animal não encontrado para o id informado.");
             }
 
-            if (await _animalCadastroService.PossuiConsultasAsync(id))
+            if (await _animalUseCase.PossuiConsultasAsync(id))
             {
                 return Conflict("Animal possui consultas vinculadas e não pode ser removido.");
             }
 
-            await _animalCadastroService.RemoverAsync(id);
+            await _animalUseCase.RemoverAsync(id);
             return NoContent();
         }
     }

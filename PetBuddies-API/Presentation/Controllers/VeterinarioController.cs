@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PetBuddies_API.Application.Dtos.Veterinario;
-using PetBuddies_API.Application.UseCases;
+using PetBuddies_API.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace PetBuddies_API.Presentation.Controllers
@@ -10,11 +10,11 @@ namespace PetBuddies_API.Presentation.Controllers
     [Route("api/veterinario")]
     public class VeterinarioController : ControllerBase
     {
-        private readonly VeterinarioService _veterinarioService;
+        private readonly IVeterinarioUseCase _veterinarioUseCase;
 
-        public VeterinarioController(VeterinarioService veterinarioService)
+        public VeterinarioController(IVeterinarioUseCase veterinarioUseCase)
         {
-            _veterinarioService = veterinarioService;
+            _veterinarioUseCase = veterinarioUseCase;
         }
 
         [HttpGet]
@@ -23,7 +23,7 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status204NoContent, "Nenhum veterinário cadastrado.")]
         public async Task<ActionResult<List<VeterinarioDto>>> Listar()
         {
-            var response = await _veterinarioService.ListarAsync();
+            var response = await _veterinarioUseCase.ListarAsync();
 
             if (response.Count == 0)
             {
@@ -39,7 +39,7 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status204NoContent, "Nenhum veterinário encontrado para a clínica.")]
         public async Task<ActionResult<List<VeterinarioDto>>> ListarPorClinica(int clinicaId)
         {
-            var response = await _veterinarioService.ListarPorClinicaAsync(clinicaId);
+            var response = await _veterinarioUseCase.ListarPorClinicaAsync(clinicaId);
 
             if (response.Count == 0)
             {
@@ -55,7 +55,7 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status404NotFound, "Veterinário não encontrado.")]
         public async Task<ActionResult<VeterinarioDto>> BuscarPorId(int id)
         {
-            var response = await _veterinarioService.BuscarPorIdAsync(id);
+            var response = await _veterinarioUseCase.BuscarPorIdAsync(id);
             return response is null
                 ? NotFound("Veterinário não encontrado para o id informado.")
                 : Ok(response);
@@ -69,17 +69,17 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "CRMV já cadastrado na clínica.")]
         public async Task<ActionResult<VeterinarioDto>> Cadastrar([FromBody] SalvarVeterinarioRequest request)
         {
-            if (!await _veterinarioService.ClinicaExisteAsync(request.ClinicaId))
+            if (!await _veterinarioUseCase.ClinicaExisteAsync(request.ClinicaId))
             {
                 return NotFound("Clínica não encontrada para cadastrar veterinário.");
             }
 
-            if (await _veterinarioService.CrmvExisteAsync(request.Crmv))
+            if (await _veterinarioUseCase.CrmvExisteAsync(request.Crmv))
             {
                 return Conflict("Já existe veterinário com este CRMV na clínica informada.");
             }
 
-            var response = await _veterinarioService.CadastrarAsync(request);
+            var response = await _veterinarioUseCase.CadastrarAsync(request);
             return CreatedAtAction(nameof(BuscarPorId), new { id = response.Id }, response);
         }
 
@@ -91,22 +91,22 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "CRMV já cadastrado na clínica.")]
         public async Task<IActionResult> Atualizar(int id, [FromBody] SalvarVeterinarioRequest request)
         {
-            if (await _veterinarioService.BuscarPorIdAsync(id) is null)
+            if (await _veterinarioUseCase.BuscarPorIdAsync(id) is null)
             {
                 return NotFound("Veterinário não encontrado para o id informado.");
             }
 
-            if (!await _veterinarioService.ClinicaExisteAsync(request.ClinicaId))
+            if (!await _veterinarioUseCase.ClinicaExisteAsync(request.ClinicaId))
             {
                 return NotFound("Clínica não encontrada para atualizar veterinário.");
             }
 
-            if (await _veterinarioService.CrmvExisteAsync(request.Crmv, id))
+            if (await _veterinarioUseCase.CrmvExisteAsync(request.Crmv, id))
             {
                 return Conflict("Já existe veterinário com este CRMV na clínica informada.");
             }
 
-            await _veterinarioService.AtualizarAsync(id, request);
+            await _veterinarioUseCase.AtualizarAsync(id, request);
             return NoContent();
         }
 
@@ -117,14 +117,14 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "Veterinário possui vínculos e não pode ser removido.")]
         public async Task<IActionResult> Remover(int id)
         {
-            if (await _veterinarioService.BuscarPorIdAsync(id) is null)
+            if (await _veterinarioUseCase.BuscarPorIdAsync(id) is null)
             {
                 return NotFound("Veterinário não encontrado para o id informado.");
             }
 
             try
             {
-                await _veterinarioService.RemoverAsync(id);
+                await _veterinarioUseCase.RemoverAsync(id);
                 return NoContent();
             }
             catch (DbUpdateException)

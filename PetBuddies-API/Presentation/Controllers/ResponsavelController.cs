@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PetBuddies_API.Application.Dtos.Animal;
 using PetBuddies_API.Application.Dtos.Responsavel;
-using PetBuddies_API.Application.UseCases;
+using PetBuddies_API.Application.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace PetBuddies_API.Presentation.Controllers
@@ -10,11 +10,11 @@ namespace PetBuddies_API.Presentation.Controllers
     [Route("api/responsavel")]
     public class ResponsavelController : ControllerBase
     {
-        private readonly ResponsavelService _responsavelService;
+        private readonly IResponsavelUseCase _responsavelUseCase;
 
-        public ResponsavelController(ResponsavelService responsavelService)
+        public ResponsavelController(IResponsavelUseCase responsavelUseCase)
         {
-            _responsavelService = responsavelService;
+            _responsavelUseCase = responsavelUseCase;
         }
 
         [HttpGet("buscar/{telefone}")]
@@ -23,7 +23,7 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status404NotFound, "Responsável não encontrado.")]
         public async Task<ActionResult<ResponsavelDto>> BuscarPorTelefone(string telefone)
         {
-            var response = await _responsavelService.BuscarPorTelefoneAsync(telefone);
+            var response = await _responsavelUseCase.BuscarPorTelefoneAsync(telefone);
 
             if (response is null)
             {
@@ -39,7 +39,7 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status204NoContent, "Nenhum responsável cadastrado.")]
         public async Task<ActionResult<List<ResponsavelDto>>> Listar()
         {
-            var response = await _responsavelService.ListarAsync();
+            var response = await _responsavelUseCase.ListarAsync();
 
             if (response.Count == 0)
             {
@@ -55,7 +55,7 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status404NotFound, "Responsável não encontrado.")]
         public async Task<ActionResult<ResponsavelDto>> BuscarPorId(int id)
         {
-            var response = await _responsavelService.BuscarPorIdAsync(id);
+            var response = await _responsavelUseCase.BuscarPorIdAsync(id);
 
             if (response is null)
             {
@@ -72,12 +72,12 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "Telefone já cadastrado.")]
         public async Task<ActionResult<ResponsavelDto>> Cadastrar([FromBody] CadastrarResponsavelRequest request)
         {
-            if (await _responsavelService.TelefoneExisteAsync(request.Telefone))
+            if (await _responsavelUseCase.TelefoneExisteAsync(request.Telefone))
             {
                 return Conflict("Já existe um responsável cadastrado com este telefone.");
             }
 
-            var response = await _responsavelService.CadastrarAsync(request);
+            var response = await _responsavelUseCase.CadastrarAsync(request);
             return CreatedAtAction(nameof(BuscarPorId), new { id = response.Id }, response);
         }
 
@@ -89,17 +89,17 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "Telefone já cadastrado.")]
         public async Task<IActionResult> Atualizar(int id, [FromBody] CadastrarResponsavelRequest request)
         {
-            if (await _responsavelService.BuscarPorIdAsync(id) is null)
+            if (await _responsavelUseCase.BuscarPorIdAsync(id) is null)
             {
                 return NotFound("Responsável não encontrado para o id informado.");
             }
 
-            if (await _responsavelService.TelefoneExisteAsync(request.Telefone, id))
+            if (await _responsavelUseCase.TelefoneExisteAsync(request.Telefone, id))
             {
                 return Conflict("Já existe um responsável cadastrado com este telefone.");
             }
 
-            await _responsavelService.AtualizarAsync(id, request);
+            await _responsavelUseCase.AtualizarAsync(id, request);
             return NoContent();
         }
 
@@ -110,7 +110,7 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status404NotFound, "Responsável não encontrado.")]
         public async Task<ActionResult<List<AnimalDto>>> ListarAnimais(int id)
         {
-            var response = await _responsavelService.ListarAnimaisAsync(id);
+            var response = await _responsavelUseCase.ListarAnimaisAsync(id);
 
             if (response is null)
             {
@@ -132,17 +132,17 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerResponse(StatusCodes.Status409Conflict, "Responsável possui vínculos e não pode ser removido.")]
         public async Task<IActionResult> Remover(int id)
         {
-            if (await _responsavelService.BuscarPorIdAsync(id) is null)
+            if (await _responsavelUseCase.BuscarPorIdAsync(id) is null)
             {
                 return NotFound("Responsável não encontrado para o id informado.");
             }
 
-            if (await _responsavelService.PossuiAnimaisAsync(id))
+            if (await _responsavelUseCase.PossuiAnimaisAsync(id))
             {
                 return Conflict("Responsável possui animais vinculados e não pode ser removido.");
             }
 
-            await _responsavelService.RemoverAsync(id);
+            await _responsavelUseCase.RemoverAsync(id);
             return NoContent();
         }
     }

@@ -18,18 +18,31 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
     );
 });
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<MotorApiClient>();
-builder.Services.AddScoped<AnimalMotorService>();
-builder.Services.AddScoped<AnimalCadastroService>();
-builder.Services.AddScoped<ConsultaService>();
+// Confirmacao da unidade de trabalho: quem chama SalvarAsync e o caso de uso,
+// nunca o repositorio — e o que permite o fechamento do N7 ser atomico.
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Cliente do servico de cuidado (Java), por interface para poder ser dublado.
+builder.Services.AddScoped<IMotorApiClient, MotorApiClient>();
+
+// Repositorios — Domain/Interfaces -> Infrastructure/Repositories
+builder.Services.AddScoped<IAnimalRepository, AnimalRepository>();
 builder.Services.AddScoped<IClinicaRepository, ClinicaRepository>();
+builder.Services.AddScoped<IResponsavelRepository, ResponsavelRepository>();
+builder.Services.AddScoped<IVeterinarioRepository, VeterinarioRepository>();
+
+// Casos de uso — Application/Interfaces -> Application/UseCases
+builder.Services.AddScoped<IAnimalUseCase, AnimalUseCase>();
+builder.Services.AddScoped<IAnimalMotorUseCase, AnimalMotorUseCase>();
 builder.Services.AddScoped<IClinicaUseCase, ClinicaUseCase>();
+builder.Services.AddScoped<IResponsavelUseCase, ResponsavelUseCase>();
+builder.Services.AddScoped<IVeterinarioUseCase, VeterinarioUseCase>();
+
+// Ainda no formato antigo — trocados quando as fatias restantes fecharem.
+builder.Services.AddScoped<ConsultaService>();
 builder.Services.AddScoped<JanelaAtendimentoService>();
 builder.Services.AddScoped<ProcedimentoService>();
 builder.Services.AddScoped<RegistroAtendimentoService>();
-builder.Services.AddScoped<ResponsavelService>();
-builder.Services.AddScoped<VeterinarioService>();
 
 
 // serializa todos enums para string ao inves de number
