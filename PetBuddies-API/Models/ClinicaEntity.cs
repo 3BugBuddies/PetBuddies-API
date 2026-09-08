@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
@@ -5,6 +6,7 @@ using System.Text.Json.Serialization;
 namespace PetBuddies_API.Models
 {
     [Table("T_PB_CLINICA")]
+    [Index(nameof(Cnpj), IsUnique = true)]
     public class ClinicaEntity : BaseEntity
     {
         [Key]
@@ -34,18 +36,8 @@ namespace PetBuddies_API.Models
         [StringLength(254)]
         public string? Email { get; set; }
 
-        [ForeignKey(nameof(Endereco))]
-        [Column("ID_ENDERECO")]
-        public int EnderecoId { get; set; }
-
         [JsonIgnore]
-        public EnderecoEntity? Endereco { get; set; }
-
-        [JsonIgnore]
-        public ICollection<ResponsavelEntity> Responsaveis { get; set; } = [];
-
-        [JsonIgnore]
-        public ICollection<ConsultaEntity> Consultas { get; set; } = [];
+        public ICollection<CondicaoClinicaEntity> CondicoesClinicas { get; set; } = [];
 
         [JsonIgnore]
         public ICollection<VeterinarioEntity> Veterinarios { get; set; } = [];

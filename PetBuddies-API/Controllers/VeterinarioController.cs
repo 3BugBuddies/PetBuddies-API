@@ -74,7 +74,7 @@ namespace PetBuddies_API.Controllers
                 return NotFound("Clínica não encontrada para cadastrar veterinário.");
             }
 
-            if (await _veterinarioService.CrmvExisteAsync(request.Crmv, request.ClinicaId))
+            if (await _veterinarioService.CrmvExisteAsync(request.Crmv))
             {
                 return Conflict("Já existe veterinário com este CRMV na clínica informada.");
             }
@@ -101,7 +101,7 @@ namespace PetBuddies_API.Controllers
                 return NotFound("Clínica não encontrada para atualizar veterinário.");
             }
 
-            if (await _veterinarioService.CrmvExisteAsync(request.Crmv, request.ClinicaId, id))
+            if (await _veterinarioService.CrmvExisteAsync(request.Crmv, id))
             {
                 return Conflict("Já existe veterinário com este CRMV na clínica informada.");
             }

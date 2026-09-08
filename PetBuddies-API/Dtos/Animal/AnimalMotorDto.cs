@@ -1,5 +1,6 @@
 namespace PetBuddies_API.Dtos.Animal
 {
+    /// <summary>Projeção que o motor de cuidado do serviço Java consome.</summary>
     public class AnimalMotorDto
     {
         public int Id { get; init; }
@@ -12,11 +13,11 @@ namespace PetBuddies_API.Dtos.Animal
 
         public bool Castrado { get; init; }
 
-        public bool PreCadastro { get; init; }
-
         public string Sexo { get; init; } = string.Empty;
 
         public string Especie { get; init; } = string.Empty;
+
+        public string Raca { get; init; } = string.Empty;
 
         public string Porte { get; init; } = string.Empty;
     }

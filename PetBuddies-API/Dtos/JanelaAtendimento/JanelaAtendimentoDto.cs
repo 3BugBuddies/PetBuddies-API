@@ -6,12 +6,11 @@ namespace PetBuddies_API.Dtos.JanelaAtendimento
 
         public DateTime DataHoraInicio { get; init; }
 
-        public DateTime DataHoraFim { get; init; }
-
-        public int DuracaoSlot { get; init; }
-
         public int VeterinarioId { get; init; }
 
         public string VeterinarioNome { get; init; } = string.Empty;
+
+        /// <summary>A consulta que reservou o slot, ou nulo se o horário está livre.</summary>
+        public int? ConsultaId { get; init; }
     }
 }

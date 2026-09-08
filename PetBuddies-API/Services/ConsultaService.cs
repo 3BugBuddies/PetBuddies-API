@@ -8,8 +8,6 @@ namespace PetBuddies_API.Services
 {
     public class ConsultaService
     {
-        private const int ClinicaId = 1;
-
         private readonly ApplicationContext _context;
         private readonly MotorApiClient _motorApiClient;
 
@@ -77,10 +75,7 @@ namespace PetBuddies_API.Services
                 TipoConsulta = request.TipoConsulta!.Value,
                 DataHora = dataHora,
                 Status = StatusConsultaEnum.AGENDADA,
-                Emergencia = false,
-                Prioridade = false,
-                VeterinarioId = janela.VeterinarioId,
-                ClinicaId = ClinicaId
+                VeterinarioId = janela.VeterinarioId
             };
 
             _context.Consultas.Add(consulta);
@@ -170,14 +165,8 @@ namespace PetBuddies_API.Services
             consulta.Status = request.Status!.Value;
             consulta.Observacao = request.Observacao;
             consulta.VeterinarioId = janela.VeterinarioId;
-            consulta.ClinicaId = ClinicaId;
 
             await _context.SaveChangesAsync();
-
-            bool ficouRealizada = statusAnterior != StatusConsultaEnum.REALIZADA
-                               && consulta.Status == StatusConsultaEnum.REALIZADA;
-            if (ficouRealizada)
-                await _motorApiClient.RecalcularScoreAsync(consulta.AnimalId, "CONSULTA_REALIZADA");
 
             return ToDto(consulta);
         }

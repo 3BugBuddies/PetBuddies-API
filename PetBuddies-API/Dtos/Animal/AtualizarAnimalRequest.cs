@@ -17,6 +17,14 @@ namespace PetBuddies_API.Dtos.Animal
         [EnumDataType(typeof(EspecieEnum), ErrorMessage = "Espécie do animal inválida.")]
         public EspecieEnum? Especie { get; set; }
 
+        /// <summary>
+        /// Passou a ser pedida no cadastro. Antes o campo nascia vazio porque o bot
+        /// não tinha como perguntar; com a fusão do tipo de animal, raça é do
+        /// indivíduo e o app do vet pede.
+        /// </summary>
+        [StringLength(100, ErrorMessage = "Raça deve ter no máximo 100 caracteres.")]
+        public string Raca { get; set; } = "SEM_RACA";
+
         [Required(ErrorMessage = "Porte do animal é obrigatório.")]
         [EnumDataType(typeof(PorteEnum), ErrorMessage = "Porte do animal inválido.")]
         public PorteEnum? Porte { get; set; }
@@ -32,6 +40,10 @@ namespace PetBuddies_API.Dtos.Animal
         [Required(ErrorMessage = "Data de nascimento do animal é obrigatória.")]
         public DateOnly? DataNascimento { get; set; }
 
-        public bool PreCadastro { get; set; }
+        [StringLength(2000, ErrorMessage = "Alergias deve ter no máximo 2000 caracteres.")]
+        public string? Alergias { get; set; }
+
+        [StringLength(2000, ErrorMessage = "Observações deve ter no máximo 2000 caracteres.")]
+        public string? Observacoes { get; set; }
     }
 }

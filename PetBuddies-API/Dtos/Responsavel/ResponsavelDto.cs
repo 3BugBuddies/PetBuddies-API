@@ -8,6 +8,6 @@ namespace PetBuddies_API.Dtos.Responsavel
 
         public string Telefone { get; init; } = string.Empty;
 
-        public string Status { get; init; } = string.Empty;
+        public string? Email { get; init; }
     }
 }

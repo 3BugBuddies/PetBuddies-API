@@ -18,7 +18,6 @@ namespace PetBuddies_API.Services
         {
             return _context.Animais
                 .AsNoTracking()
-                .Include(animal => animal.TipoAnimal)
                 .Where(animal => animal.Id == animalId)
                 .Select(animal => new AnimalMotorDto
                 {
@@ -27,10 +26,10 @@ namespace PetBuddies_API.Services
                     DataNascimento = animal.DataNascimento,
                     CondicaoCronica = animal.CondicaoCronica,
                     Castrado = animal.Castrado,
-                    PreCadastro = animal.PreCadastro,
                     Sexo = animal.Sexo.ToString(),
-                    Especie = animal.TipoAnimal != null ? animal.TipoAnimal.Especie.ToString() : string.Empty,
-                    Porte = animal.TipoAnimal != null ? animal.TipoAnimal.Porte.ToString() : string.Empty
+                    Especie = animal.Especie.ToString(),
+                    Raca = animal.Raca,
+                    Porte = animal.Porte.ToString()
                 })
                 .SingleOrDefaultAsync();
         }

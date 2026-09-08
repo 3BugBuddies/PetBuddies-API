@@ -19,8 +19,5 @@ namespace PetBuddies_API.Dtos.Clinica
         [EmailAddress]
         [StringLength(254)]
         public string? Email { get; set; }
-
-        [Range(1, int.MaxValue, ErrorMessage = "EnderecoId deve ser maior que zero.")]
-        public int EnderecoId { get; set; }
     }
 }

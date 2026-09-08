@@ -9,7 +9,6 @@ namespace PetBuddies_API.Dtos.RegistroAtendimento
         public string? Tratamento { get; set; }
         public string? Observacao { get; set; }
         public int AnimalId { get; set; }
-        public int ProntuarioId { get; set; }
         public int ConsultaId { get; set; }
     }
 }
