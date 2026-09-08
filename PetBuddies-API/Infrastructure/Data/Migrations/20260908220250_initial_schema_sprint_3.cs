@@ -140,31 +140,6 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "T_PB_CHECKIN_TRATAMENTO",
-                columns: table => new
-                {
-                    ID_CHECKIN_TRATAMENTO = table.Column<int>(type: "NUMBER(10)", nullable: false)
-                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
-                    ID_ANIMAL = table.Column<int>(type: "NUMBER(10)", nullable: false),
-                    DH_REGISTRADO_EM = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
-                    TX_NARRATIVA = table.Column<string>(type: "CLOB", nullable: false),
-                    TX_OBSERVACOES_GERAIS = table.Column<string>(type: "CLOB", nullable: true),
-                    DS_TIC_UTILIZADA = table.Column<string>(type: "NVARCHAR2(120)", maxLength: 120, nullable: true),
-                    CA_CREATED_AT = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
-                    AT_UPDATED_AT = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_T_PB_CHECKIN_TRATAMENTO", x => x.ID_CHECKIN_TRATAMENTO);
-                    table.ForeignKey(
-                        name: "FK_T_PB_CHECKIN_TRATAMENTO_T_PB_ANIMAL_ID_ANIMAL",
-                        column: x => x.ID_ANIMAL,
-                        principalTable: "T_PB_ANIMAL",
-                        principalColumn: "ID_ANIMAL",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "T_PB_CONSULTA",
                 columns: table => new
                 {
@@ -195,38 +170,6 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
                         principalTable: "T_PB_VETERINARIO",
                         principalColumn: "ID_VETERINARIO",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "T_PB_CHECKIN_EXTRACAO",
-                columns: table => new
-                {
-                    ID_CHECKIN_EXTRACAO = table.Column<int>(type: "NUMBER(10)", nullable: false)
-                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
-                    ID_CHECKIN_TRATAMENTO = table.Column<int>(type: "NUMBER(10)", nullable: false),
-                    ID_CONDICAO_CLINICA = table.Column<int>(type: "NUMBER(10)", nullable: false),
-                    CD_CODIGO_CONGELADO = table.Column<string>(type: "NVARCHAR2(60)", maxLength: 60, nullable: false),
-                    BL_VALOR_BOOLEANO = table.Column<bool>(type: "NUMBER(1)", nullable: true),
-                    NR_VALOR_NUMERICO = table.Column<decimal>(type: "NUMBER(10,3)", nullable: true),
-                    NR_CONFIANCA = table.Column<decimal>(type: "NUMBER(5,4)", nullable: false),
-                    CA_CREATED_AT = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
-                    AT_UPDATED_AT = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_T_PB_CHECKIN_EXTRACAO", x => x.ID_CHECKIN_EXTRACAO);
-                    table.ForeignKey(
-                        name: "FK_T_PB_CHECKIN_EXTRACAO_T_PB_CHECKIN_TRATAMENTO_ID_CHECKIN_TRATAMENTO",
-                        column: x => x.ID_CHECKIN_TRATAMENTO,
-                        principalTable: "T_PB_CHECKIN_TRATAMENTO",
-                        principalColumn: "ID_CHECKIN_TRATAMENTO",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_T_PB_CHECKIN_EXTRACAO_T_PB_CONDICAO_CLINICA_ID_CONDICAO_CLINICA",
-                        column: x => x.ID_CONDICAO_CLINICA,
-                        principalTable: "T_PB_CONDICAO_CLINICA",
-                        principalColumn: "ID_CONDICAO_CLINICA",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -416,79 +359,10 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "T_PB_CHECKIN_RESULTADO",
-                columns: table => new
-                {
-                    ID_CHECKIN_RESULTADO = table.Column<int>(type: "NUMBER(10)", nullable: false)
-                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
-                    ID_CHECKIN_TRATAMENTO = table.Column<int>(type: "NUMBER(10)", nullable: false),
-                    ID_PRESCRICAO = table.Column<int>(type: "NUMBER(10)", nullable: false),
-                    DT_REFERENCIA = table.Column<DateTime>(type: "DATE", nullable: false),
-                    TP_DESFECHO = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: false),
-                    NR_DOSE_APLICADA = table.Column<decimal>(type: "NUMBER(8,3)", nullable: true),
-                    ID_REGRA_APLICADA = table.Column<int>(type: "NUMBER(10)", nullable: true),
-                    CA_CREATED_AT = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
-                    AT_UPDATED_AT = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_T_PB_CHECKIN_RESULTADO", x => x.ID_CHECKIN_RESULTADO);
-                    table.ForeignKey(
-                        name: "FK_T_PB_CHECKIN_RESULTADO_T_PB_CHECKIN_TRATAMENTO_ID_CHECKIN_TRATAMENTO",
-                        column: x => x.ID_CHECKIN_TRATAMENTO,
-                        principalTable: "T_PB_CHECKIN_TRATAMENTO",
-                        principalColumn: "ID_CHECKIN_TRATAMENTO",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_T_PB_CHECKIN_RESULTADO_T_PB_PRESCRICAO_ID_PRESCRICAO",
-                        column: x => x.ID_PRESCRICAO,
-                        principalTable: "T_PB_PRESCRICAO",
-                        principalColumn: "ID_PRESCRICAO",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_T_PB_CHECKIN_RESULTADO_T_PB_REGRA_PRESCRICAO_ID_REGRA_APLICADA",
-                        column: x => x.ID_REGRA_APLICADA,
-                        principalTable: "T_PB_REGRA_PRESCRICAO",
-                        principalColumn: "ID_REGRA_PRESCRICAO",
-                        onDelete: ReferentialAction.SetNull);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_T_PB_ANIMAL_ID_RESPONSAVEL",
                 table: "T_PB_ANIMAL",
                 column: "ID_RESPONSAVEL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_PB_CHECKIN_EXTRACAO_ID_CHECKIN_TRATAMENTO",
-                table: "T_PB_CHECKIN_EXTRACAO",
-                column: "ID_CHECKIN_TRATAMENTO");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_PB_CHECKIN_EXTRACAO_ID_CONDICAO_CLINICA",
-                table: "T_PB_CHECKIN_EXTRACAO",
-                column: "ID_CONDICAO_CLINICA");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_PB_CHECKIN_RESULTADO_ID_CHECKIN_TRATAMENTO",
-                table: "T_PB_CHECKIN_RESULTADO",
-                column: "ID_CHECKIN_TRATAMENTO");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_PB_CHECKIN_RESULTADO_ID_PRESCRICAO_DT_REFERENCIA",
-                table: "T_PB_CHECKIN_RESULTADO",
-                columns: new[] { "ID_PRESCRICAO", "DT_REFERENCIA" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_PB_CHECKIN_RESULTADO_ID_REGRA_APLICADA",
-                table: "T_PB_CHECKIN_RESULTADO",
-                column: "ID_REGRA_APLICADA");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_PB_CHECKIN_TRATAMENTO_ID_ANIMAL_DH_REGISTRADO_EM",
-                table: "T_PB_CHECKIN_TRATAMENTO",
-                columns: new[] { "ID_ANIMAL", "DH_REGISTRADO_EM" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_PB_CLINICA_NR_CNPJ",
@@ -595,19 +469,10 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "T_PB_CHECKIN_EXTRACAO");
-
-            migrationBuilder.DropTable(
-                name: "T_PB_CHECKIN_RESULTADO");
-
-            migrationBuilder.DropTable(
                 name: "T_PB_JANELA_ATENDIMENTO");
 
             migrationBuilder.DropTable(
                 name: "T_PB_PROCEDIMENTO");
-
-            migrationBuilder.DropTable(
-                name: "T_PB_CHECKIN_TRATAMENTO");
 
             migrationBuilder.DropTable(
                 name: "T_PB_REGRA_PRESCRICAO");
