@@ -49,8 +49,8 @@ namespace PetBuddies_API.Infrastructure.Clients
             }
             catch (Exception ex)
             {
-                _logger.LogWarning("Motor indisponível ao instanciar plano para animal {AnimalId}: {Message}",
-                    animalId, ex.Message);
+                _logger.LogWarning(ex, "Motor indisponível ao instanciar plano preventivo para o animal {AnimalId}",
+                    animalId);
             }
         }
 
@@ -66,13 +66,21 @@ namespace PetBuddies_API.Infrastructure.Clients
                 });
                 var content = new StringContent(body, Encoding.UTF8, "application/json");
                 var response = await client.PostAsync($"{_baseUrl}/api/motor/planos/instanciar-pos-cirurgico", content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Motor plano pós-cirúrgico falhou: animalId={AnimalId} consultaId={ConsultaId} status={Status}",
+                        animalId, consultaId, (int)response.StatusCode);
+                    return;
+                }
+
                 _logger.LogInformation("Motor plano pós-cirúrgico: animalId={AnimalId} consultaId={ConsultaId} status={Status}",
                     animalId, consultaId, (int)response.StatusCode);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning("Motor indisponível ao instanciar plano pós-cirúrgico para animal {AnimalId} consulta {ConsultaId}: {Message}",
-                    animalId, consultaId, ex.Message);
+                _logger.LogWarning(ex, "Motor indisponível ao instanciar plano pós-cirúrgico para o animal {AnimalId} e a consulta {ConsultaId}",
+                    animalId, consultaId);
             }
         }
 
