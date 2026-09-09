@@ -15,7 +15,7 @@ namespace PetBuddies_API.Presentation.Controllers
     /// </summary>
     [ApiController]
     [Route("api/ofertas")]
-    [Authorize]
+    [Authorize(Roles = "VET")]
     public class OfertaController : ControllerBase
     {
         private readonly IOfertaService _ofertaService;

@@ -12,7 +12,7 @@ namespace PetBuddies_API.Presentation.Controllers
     /// </summary>
     [ApiController]
     [Route("api/regras-protocolo")]
-    [Authorize]
+    [Authorize(Roles = "VET")]
     public class RegraProtocoloController : ControllerBase
     {
         private readonly IRegraProtocoloService _regraProtocoloService;

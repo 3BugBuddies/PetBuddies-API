@@ -15,7 +15,7 @@ namespace PetBuddies_API.Presentation.Controllers
     /// </summary>
     [ApiController]
     [Route("api/protocolos")]
-    [Authorize]
+    [Authorize(Roles = "VET")]
     public class ProtocoloController : ControllerBase
     {
         private readonly IProtocoloService _protocoloService;

@@ -14,7 +14,7 @@ namespace PetBuddies_API.Presentation.Controllers
     /// </summary>
     [ApiController]
     [Route("api/regras-pontuacao")]
-    [Authorize]
+    [Authorize(Roles = "VET")]
     public class RegraPontuacaoController : ControllerBase
     {
         private readonly IRegraPontuacaoService _regraPontuacaoService;
