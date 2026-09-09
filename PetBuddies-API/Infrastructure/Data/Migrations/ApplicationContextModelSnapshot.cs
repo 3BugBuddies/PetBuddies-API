@@ -194,7 +194,7 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("NVARCHAR2(50)")
-                        .HasColumnName("TP_FONTE");
+                        .HasColumnName("TP_FONTE_VALOR");
 
                     b.Property<string>("Rotulo")
                         .IsRequired()
@@ -206,7 +206,7 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("NVARCHAR2(50)")
-                        .HasColumnName("TP_VALOR");
+                        .HasColumnName("TP_DADO");
 
                     b.Property<string>("Unidade")
                         .HasMaxLength(20)
@@ -575,7 +575,7 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("NVARCHAR2(50)")
-                        .HasColumnName("TP_ACAO");
+                        .HasColumnName("TP_ACAO_DOSE");
 
                     b.Property<int>("CondicaoClinicaId")
                         .HasColumnType("NUMBER(10)")
@@ -589,7 +589,7 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("NVARCHAR2(50)")
-                        .HasColumnName("TP_FONTE_CONGELADA");
+                        .HasColumnName("TP_FONTE_VALOR_CONGELADA");
 
                     b.Property<decimal?>("Limite")
                         .HasColumnType("NUMBER(10,3)")
@@ -617,7 +617,7 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("NVARCHAR2(50)")
-                        .HasColumnName("TP_VALOR_CONGELADO");
+                        .HasColumnName("TP_DADO_CONGELADO");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TIMESTAMP(7)")

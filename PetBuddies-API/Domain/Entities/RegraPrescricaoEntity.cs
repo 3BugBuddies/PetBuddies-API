@@ -41,11 +41,11 @@ namespace PetBuddies_API.Domain.Entities
         [StringLength(255)]
         public string RotuloCongelado { get; set; } = string.Empty;
 
-        [Column("TP_VALOR_CONGELADO")]
+        [Column("TP_DADO_CONGELADO")]
         [EnumDataType(typeof(TipoValorCondicaoEnum))]
         public TipoValorCondicaoEnum TipoValorCongelado { get; set; }
 
-        [Column("TP_FONTE_CONGELADA")]
+        [Column("TP_FONTE_VALOR_CONGELADA")]
         [EnumDataType(typeof(FonteCondicaoEnum))]
         public FonteCondicaoEnum FonteCongelada { get; set; }
 
@@ -58,7 +58,7 @@ namespace PetBuddies_API.Domain.Entities
         [Column("NR_LIMITE", TypeName = "NUMBER(10,3)")]
         public decimal? Limite { get; set; }
 
-        [Column("TP_ACAO")]
+        [Column("TP_ACAO_DOSE")]
         [EnumDataType(typeof(TipoAcaoRegraEnum))]
         public TipoAcaoRegraEnum Acao { get; set; }
 
