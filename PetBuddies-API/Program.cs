@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using PetBuddies_API.Infrastructure.Data;
 using PetBuddies_API.Application.Interfaces;
 using PetBuddies_API.Application.UseCases;
@@ -120,6 +123,59 @@ builder.Services.AddHealthChecks()
         name: "motor-java",
         tags: ["externo"],
         timeout: TimeSpan.FromSeconds(3));
+
+// Rastreamento e metricas (decisao N3 = A). As tres instrumentacoes sao o que
+// produz os spans: ASP.NET Core da o span do controlador, HttpClient o da chamada
+// ao Java, e Entity Framework Core o do banco. As metricas de ASP.NET Core dao
+// duracao da requisicao e contagem por codigo de status — o tempo de resposta e a
+// taxa de erro que a rubrica pede.
+//
+// Sem coletor OTLP configurado o exportador e o console: e a unica forma de ver
+// span rodando local, onde nao ha coletor nenhum. Com OTEL_EXPORTER_OTLP_ENDPOINT
+// definido, a saida vai para o coletor.
+var endpointOtlp = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
+var exportarNoConsole = string.IsNullOrWhiteSpace(endpointOtlp);
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(recurso => recurso.AddService(
+        serviceName: "petbuddies-api",
+        serviceVersion: "1.0.0"))
+    .WithTracing(rastreamento =>
+    {
+        rastreamento
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddEntityFrameworkCoreInstrumentation();
+
+        if (exportarNoConsole)
+        {
+            rastreamento.AddConsoleExporter();
+        }
+        else
+        {
+            rastreamento.AddOtlpExporter();
+        }
+    })
+    .WithMetrics(metricas =>
+    {
+        metricas.AddAspNetCoreInstrumentation();
+
+        if (exportarNoConsole)
+        {
+            metricas.AddConsoleExporter();
+        }
+        else
+        {
+            metricas.AddOtlpExporter();
+        }
+    });
+
+// Gancho da Sprint 4: a chave e lida da configuracao e nao usada. O valor nunca
+// entra em linha de log — so o fato de existir ou nao.
+var chaveApplicationInsights = builder.Configuration["ApplicationInsights:ConnectionString"];
+Log.Information(
+    "Application Insights {Estado} — gancho da Sprint 4, lido e nao usado nesta sprint",
+    string.IsNullOrWhiteSpace(chaveApplicationInsights) ? "nao configurado" : "configurado");
 
 var app = builder.Build();
 
