@@ -1,0 +1,31 @@
+# Banco de desenvolvimento do back-office.
+#
+# Só o Oracle sobe aqui — a aplicação roda no terminal (`dotnet run`), onde o log
+# fica visível e o restart é imediato.
+#
+#   docker compose up -d          sobe o banco
+#   docker compose down -v        derruba e APAGA o volume
+#
+# A porta é 1522: o serviço de cuidado usa 1521, e os dois bancos são separados
+# desde o ADR s3-25 — nenhum objeto de um existe no schema do outro.
+services:
+  oracle:
+    image: gvenzl/oracle-free:23-slim
+    container_name: petbuddies-oracle-backoffice
+    ports:
+      - "${ORACLE_PORT:-1522}:1521"
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_SYS_PASSWORD:-oracle}
+      APP_USER: ${ORACLE_USER:-PETBUDDIES}
+      APP_USER_PASSWORD: ${ORACLE_PASSWORD:-petbuddies}
+    volumes:
+      - oracle-backoffice:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+volumes:
+  oracle-backoffice:
