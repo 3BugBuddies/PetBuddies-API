@@ -1,8 +1,13 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using PetBuddies_API.Infrastructure.Data;
 using PetBuddies_API.Application.Interfaces;
 using PetBuddies_API.Application.UseCases;
@@ -10,10 +15,45 @@ using PetBuddies_API.Domain.Interfaces;
 using PetBuddies_API.Infrastructure.Clients;
 using PetBuddies_API.Infrastructure.Repositories;
 using PetBuddies_API.Infrastructure.Security;
+using PetBuddies_API.Presentation;
+using PetBuddies_API.Presentation.Middlewares;
+using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Compact;
 using System.Text;
 using System.Text.Json.Serialization;
 
+// Serilog e a primeira coisa que sobe. Configurado depois do host, as linhas da
+// subida sairiam no logger padrao e nunca chegariam ao arquivo.
+var ambiente = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+var configuracaoDoLog = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+    .AddJsonFile($"appsettings.{ambiente}.json", optional: true, reloadOnChange: false)
+    .AddEnvironmentVariables()
+    .Build();
+
+// Os niveis vem do codigo e podem ser sobrescritos pela secao Serilog do appsettings.
+// O arquivo sai em JSON compacto: e nele que as propriedades enriquecidas — entre
+// elas o CorrelationId — ficam legiveis por maquina.
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .ReadFrom.Configuration(configuracaoDoLog)
+    .WriteTo.Console(outputTemplate:
+        "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File(
+        new CompactJsonFormatter(),
+        "logs/api-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7)
+    .CreateLogger();
+
+Log.Information("PetBuddies-API subindo no ambiente {Ambiente}", ambiente);
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 
 const string PoliticaCorsDoPainel = "painel-clinica";
 
@@ -170,6 +210,81 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Saude — tres verificacoes, quatro rotas. "self" nao toca em nada: e ele que
+// distingue "processo caiu" de "banco caiu". A cadeia do Oracle pode nem existir
+// (Testing nao carrega appsettings.Development.json); nesse caso a verificacao
+// falha e reporta indisponivel, que e a resposta correta.
+// O timeout de tres segundos evita que um monitor batendo de segundo em segundo
+// segure o pool, que a cadeia ja limita a tres conexoes.
+var cadeiaOracle = builder.Configuration.GetConnectionString("Oracle");
+var urlDoMotor = (builder.Configuration["MotorApi:BaseUrl"] ?? "http://localhost:8080").TrimEnd('/');
+
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
+    .AddOracle(
+        string.IsNullOrWhiteSpace(cadeiaOracle) ? "Data Source=oracle-nao-configurado;" : cadeiaOracle,
+        name: "oracle",
+        tags: ["db"],
+        timeout: TimeSpan.FromSeconds(3))
+    .AddUrlGroup(
+        new Uri($"{urlDoMotor}/actuator/health"),
+        name: "motor-java",
+        tags: ["externo"],
+        timeout: TimeSpan.FromSeconds(3));
+
+// Rastreamento e metricas (decisao N3 = A). As tres instrumentacoes sao o que
+// produz os spans: ASP.NET Core da o span do controlador, HttpClient o da chamada
+// ao Java, e Entity Framework Core o do banco. As metricas de ASP.NET Core dao
+// duracao da requisicao e contagem por codigo de status — o tempo de resposta e a
+// taxa de erro que a rubrica pede.
+//
+// Sem coletor OTLP configurado o exportador e o console: e a unica forma de ver
+// span rodando local, onde nao ha coletor nenhum. Com OTEL_EXPORTER_OTLP_ENDPOINT
+// definido, a saida vai para o coletor.
+var endpointOtlp = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
+var exportarNoConsole = string.IsNullOrWhiteSpace(endpointOtlp);
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(recurso => recurso.AddService(
+        serviceName: "petbuddies-api",
+        serviceVersion: "1.0.0"))
+    .WithTracing(rastreamento =>
+    {
+        rastreamento
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddEntityFrameworkCoreInstrumentation();
+
+        if (exportarNoConsole)
+        {
+            rastreamento.AddConsoleExporter();
+        }
+        else
+        {
+            rastreamento.AddOtlpExporter();
+        }
+    })
+    .WithMetrics(metricas =>
+    {
+        metricas.AddAspNetCoreInstrumentation();
+
+        if (exportarNoConsole)
+        {
+            metricas.AddConsoleExporter();
+        }
+        else
+        {
+            metricas.AddOtlpExporter();
+        }
+    });
+
+// Gancho da Sprint 4: a chave e lida da configuracao e nao usada. O valor nunca
+// entra em linha de log — so o fato de existir ou nao.
+var chaveApplicationInsights = builder.Configuration["ApplicationInsights:ConnectionString"];
+Log.Information(
+    "Application Insights {Estado} — gancho da Sprint 4, lido e nao usado nesta sprint",
+    string.IsNullOrWhiteSpace(chaveApplicationInsights) ? "nao configurado" : "configurado");
+
 var app = builder.Build();
 
 // Em Testing a WebApplicationFactory sobe este mesmo Program: migrar aqui faria
@@ -181,6 +296,10 @@ if (!app.Environment.IsEnvironment("Testing"))
     var db = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
     db.Database.Migrate();
 }
+
+// Primeiro middleware do pipeline: toda linha de log da requisicao — inclusive as
+// do Swagger e das rotas de saude — nasce dentro do escopo da correlacao.
+app.UseMiddleware<CorrelacaoMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -201,6 +320,33 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// As quatro rotas de saude nao exigem token e precisam continuar assim quando a
+// validacao do token (N4) entrar — por isso o AllowAnonymous explicito agora.
+// motor-java responde indisponivel ate o endereco de saude do Java (J5) existir:
+// uma verificacao que reporta dependencia ausente como ausente esta funcionando.
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = verificacao => verificacao.Tags.Contains("live"),
+    ResponseWriter = HealthCheckResponseWriter.EscreverAsync
+}).AllowAnonymous();
+
+app.MapHealthChecks("/health/db", new HealthCheckOptions
+{
+    Predicate = verificacao => verificacao.Tags.Contains("db"),
+    ResponseWriter = HealthCheckResponseWriter.EscreverAsync
+}).AllowAnonymous();
+
+app.MapHealthChecks("/health/externo", new HealthCheckOptions
+{
+    Predicate = verificacao => verificacao.Tags.Contains("externo"),
+    ResponseWriter = HealthCheckResponseWriter.EscreverAsync
+}).AllowAnonymous();
+
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = HealthCheckResponseWriter.EscreverAsync
+}).AllowAnonymous();
 
 app.Run();
 
