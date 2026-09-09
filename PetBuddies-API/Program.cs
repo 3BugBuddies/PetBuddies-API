@@ -9,6 +9,7 @@ using PetBuddies_API.Domain.Interfaces;
 using PetBuddies_API.Infrastructure.Clients;
 using PetBuddies_API.Infrastructure.Repositories;
 using PetBuddies_API.Presentation;
+using PetBuddies_API.Presentation.Middlewares;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
@@ -131,6 +132,10 @@ if (!app.Environment.IsEnvironment("Testing"))
     var db = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
     db.Database.Migrate();
 }
+
+// Primeiro middleware do pipeline: toda linha de log da requisicao — inclusive as
+// do Swagger e das rotas de saude — nasce dentro do escopo da correlacao.
+app.UseMiddleware<CorrelacaoMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
