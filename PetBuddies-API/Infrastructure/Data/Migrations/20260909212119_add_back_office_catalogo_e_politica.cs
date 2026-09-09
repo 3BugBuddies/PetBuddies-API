@@ -27,9 +27,6 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_T_PB_PROTOCOLO", x => x.ID_PROTOCOLO);
-                    table.CheckConstraint("CK_PROTOCOLO_ATIVO", "AT_ATIVO IN (0,1)");
-                    table.CheckConstraint("CK_PROTOCOLO_CATEGORIA", "TP_CATEGORIA_PROTOCOLO IN ('PREVENTIVO','POS_CIRURGICO')");
-                    table.CheckConstraint("CK_PROTOCOLO_ESPECIE", "ES_ESPECIE IN ('CACHORRO','GATO','PASSARO','COELHO','HAMSTER','OUTRO')");
                 });
 
             migrationBuilder.CreateTable(
@@ -48,8 +45,6 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_T_PB_REGRA_PONTUACAO", x => x.ID_REGRA_PONTUACAO);
-                    table.CheckConstraint("CK_PONTUACAO_GESTO", "TP_GESTO IN ('PLANO_CRIADO','CONSULTA_AGENDADA','CONSULTA_REALIZADA','PROCEDIMENTO_EXECUTADO')");
-                    table.CheckConstraint("CK_PONTUACAO_PONTOS", "NR_PONTOS > 0");
                 });
 
             migrationBuilder.CreateTable(
@@ -71,9 +66,6 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_T_PB_OFERTA", x => x.ID_OFERTA);
-                    table.CheckConstraint("CK_OFERTA_ALVO", "(TP_ATO IN ('PROCEDIMENTO','CONSULTA') AND TP_SUBTIPO IS NOT NULL AND ID_PROTOCOLO IS NULL) OR (TP_ATO = 'PROTOCOLO' AND ID_PROTOCOLO IS NOT NULL AND TP_SUBTIPO IS NULL)");
-                    table.CheckConstraint("CK_OFERTA_ATO", "TP_ATO IN ('PROCEDIMENTO','CONSULTA','PROTOCOLO')");
-                    table.CheckConstraint("CK_OFERTA_VALOR", "NR_VALOR >= 0");
                     table.ForeignKey(
                         name: "FK_OFERTA_PROTOCOLO",
                         column: x => x.ID_PROTOCOLO,
@@ -102,12 +94,6 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_T_PB_REGRA_PROTOCOLO", x => x.ID_REGRA_PROTOCOLO);
-                    table.CheckConstraint("CK_REGPROT_ANCORA", "TP_DATA_BASE IN ('NASCIMENTO','DATA_CIRURGIA','ULTIMA_REALIZACAO')");
-                    table.CheckConstraint("CK_REGPROT_RECORRENCIA", "(NR_INTERVALO IS NULL AND TP_UNIDADE_INTERVALO IS NULL) OR (NR_INTERVALO IS NOT NULL AND TP_UNIDADE_INTERVALO IS NOT NULL)");
-                    table.CheckConstraint("CK_REGPROT_REPETICOES", "NR_REPETICOES >= 1");
-                    table.CheckConstraint("CK_REGPROT_TIPO", "TP_TIPO_CUIDADO IN ('VACINACAO','VERMIFUGACAO','EXAME','RETORNO','CIRURGIA','MEDICACAO','HIGIENE')");
-                    table.CheckConstraint("CK_REGPROT_UNID_INTERV", "TP_UNIDADE_INTERVALO IN ('DIAS','SEMANAS','MESES')");
-                    table.CheckConstraint("CK_REGPROT_UNID_OFFSET", "TP_UNIDADE_OFFSET IN ('DIAS','SEMANAS','MESES')");
                     table.ForeignKey(
                         name: "FK_REGPROT_PROTOCOLO",
                         column: x => x.ID_PROTOCOLO,
@@ -137,6 +123,38 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
                 name: "IX_T_PB_REGRA_PROTOCOLO_ID_PROTOCOLO",
                 table: "T_PB_REGRA_PROTOCOLO",
                 column: "ID_PROTOCOLO");
+
+            // Os CHECK saem do CreateTable de proposito: o provider Oracle embrulha o
+            // CREATE TABLE em EXECUTE IMMEDIATE '...' e nao escapa as aspas dos literais,
+            // gerando ORA-06550 na subida. migrationBuilder.Sql emite DDL direto.
+            migrationBuilder.Sql(
+                "ALTER TABLE T_PB_PROTOCOLO ADD CONSTRAINT CK_PROTOCOLO_ATIVO CHECK (AT_ATIVO IN (0,1))");
+            migrationBuilder.Sql(
+                "ALTER TABLE T_PB_PROTOCOLO ADD CONSTRAINT CK_PROTOCOLO_CATEGORIA CHECK (TP_CATEGORIA_PROTOCOLO IN ('PREVENTIVO','POS_CIRURGICO'))");
+            migrationBuilder.Sql(
+                "ALTER TABLE T_PB_PROTOCOLO ADD CONSTRAINT CK_PROTOCOLO_ESPECIE CHECK (ES_ESPECIE IN ('CACHORRO','GATO','PASSARO','COELHO','HAMSTER','OUTRO'))");
+            migrationBuilder.Sql(
+                "ALTER TABLE T_PB_REGRA_PONTUACAO ADD CONSTRAINT CK_PONTUACAO_GESTO CHECK (TP_GESTO IN ('PLANO_CRIADO','CONSULTA_AGENDADA','CONSULTA_REALIZADA','PROCEDIMENTO_EXECUTADO'))");
+            migrationBuilder.Sql(
+                "ALTER TABLE T_PB_REGRA_PONTUACAO ADD CONSTRAINT CK_PONTUACAO_PONTOS CHECK (NR_PONTOS > 0)");
+            migrationBuilder.Sql(
+                "ALTER TABLE T_PB_OFERTA ADD CONSTRAINT CK_OFERTA_ALVO CHECK ((TP_ATO IN ('PROCEDIMENTO','CONSULTA') AND TP_SUBTIPO IS NOT NULL AND ID_PROTOCOLO IS NULL) OR (TP_ATO = 'PROTOCOLO' AND ID_PROTOCOLO IS NOT NULL AND TP_SUBTIPO IS NULL))");
+            migrationBuilder.Sql(
+                "ALTER TABLE T_PB_OFERTA ADD CONSTRAINT CK_OFERTA_ATO CHECK (TP_ATO IN ('PROCEDIMENTO','CONSULTA','PROTOCOLO'))");
+            migrationBuilder.Sql(
+                "ALTER TABLE T_PB_OFERTA ADD CONSTRAINT CK_OFERTA_VALOR CHECK (NR_VALOR >= 0)");
+            migrationBuilder.Sql(
+                "ALTER TABLE T_PB_REGRA_PROTOCOLO ADD CONSTRAINT CK_REGPROT_ANCORA CHECK (TP_DATA_BASE IN ('NASCIMENTO','DATA_CIRURGIA','ULTIMA_REALIZACAO'))");
+            migrationBuilder.Sql(
+                "ALTER TABLE T_PB_REGRA_PROTOCOLO ADD CONSTRAINT CK_REGPROT_RECORRENCIA CHECK ((NR_INTERVALO IS NULL AND TP_UNIDADE_INTERVALO IS NULL) OR (NR_INTERVALO IS NOT NULL AND TP_UNIDADE_INTERVALO IS NOT NULL))");
+            migrationBuilder.Sql(
+                "ALTER TABLE T_PB_REGRA_PROTOCOLO ADD CONSTRAINT CK_REGPROT_REPETICOES CHECK (NR_REPETICOES >= 1)");
+            migrationBuilder.Sql(
+                "ALTER TABLE T_PB_REGRA_PROTOCOLO ADD CONSTRAINT CK_REGPROT_TIPO CHECK (TP_TIPO_CUIDADO IN ('VACINACAO','VERMIFUGACAO','EXAME','RETORNO','CIRURGIA','MEDICACAO','HIGIENE'))");
+            migrationBuilder.Sql(
+                "ALTER TABLE T_PB_REGRA_PROTOCOLO ADD CONSTRAINT CK_REGPROT_UNID_INTERV CHECK (TP_UNIDADE_INTERVALO IN ('DIAS','SEMANAS','MESES'))");
+            migrationBuilder.Sql(
+                "ALTER TABLE T_PB_REGRA_PROTOCOLO ADD CONSTRAINT CK_REGPROT_UNID_OFFSET CHECK (TP_UNIDADE_OFFSET IN ('DIAS','SEMANAS','MESES'))");
         }
 
         /// <inheritdoc />
