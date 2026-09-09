@@ -1,11 +1,14 @@
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using PetBuddies_API.Infrastructure.Data;
 using PetBuddies_API.Application.Interfaces;
 using PetBuddies_API.Application.UseCases;
 using PetBuddies_API.Domain.Interfaces;
 using PetBuddies_API.Infrastructure.Clients;
 using PetBuddies_API.Infrastructure.Repositories;
+using PetBuddies_API.Presentation;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
@@ -95,6 +98,28 @@ builder.Services.AddSwaggerGen(c =>
     c.EnableAnnotations();
 });
 
+// Saude — tres verificacoes, quatro rotas. "self" nao toca em nada: e ele que
+// distingue "processo caiu" de "banco caiu". A cadeia do Oracle pode nem existir
+// (Testing nao carrega appsettings.Development.json); nesse caso a verificacao
+// falha e reporta indisponivel, que e a resposta correta.
+// O timeout de tres segundos evita que um monitor batendo de segundo em segundo
+// segure o pool, que a cadeia ja limita a tres conexoes.
+var cadeiaOracle = builder.Configuration.GetConnectionString("Oracle");
+var urlDoMotor = (builder.Configuration["MotorApi:BaseUrl"] ?? "http://localhost:8080").TrimEnd('/');
+
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
+    .AddOracle(
+        string.IsNullOrWhiteSpace(cadeiaOracle) ? "Data Source=oracle-nao-configurado;" : cadeiaOracle,
+        name: "oracle",
+        tags: ["db"],
+        timeout: TimeSpan.FromSeconds(3))
+    .AddUrlGroup(
+        new Uri($"{urlDoMotor}/actuator/health"),
+        name: "motor-java",
+        tags: ["externo"],
+        timeout: TimeSpan.FromSeconds(3));
+
 var app = builder.Build();
 
 // Em Testing a WebApplicationFactory sobe este mesmo Program: migrar aqui faria
@@ -121,6 +146,33 @@ if (!app.Environment.IsDevelopment())
 app.UseAuthorization();
 
 app.MapControllers();
+
+// As quatro rotas de saude nao exigem token e precisam continuar assim quando a
+// validacao do token (N4) entrar — por isso o AllowAnonymous explicito agora.
+// motor-java responde indisponivel ate o endereco de saude do Java (J5) existir:
+// uma verificacao que reporta dependencia ausente como ausente esta funcionando.
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = verificacao => verificacao.Tags.Contains("live"),
+    ResponseWriter = HealthCheckResponseWriter.EscreverAsync
+}).AllowAnonymous();
+
+app.MapHealthChecks("/health/db", new HealthCheckOptions
+{
+    Predicate = verificacao => verificacao.Tags.Contains("db"),
+    ResponseWriter = HealthCheckResponseWriter.EscreverAsync
+}).AllowAnonymous();
+
+app.MapHealthChecks("/health/externo", new HealthCheckOptions
+{
+    Predicate = verificacao => verificacao.Tags.Contains("externo"),
+    ResponseWriter = HealthCheckResponseWriter.EscreverAsync
+}).AllowAnonymous();
+
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = HealthCheckResponseWriter.EscreverAsync
+}).AllowAnonymous();
 
 app.Run();
 
