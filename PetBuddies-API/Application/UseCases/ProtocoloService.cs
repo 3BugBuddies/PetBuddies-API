@@ -34,11 +34,7 @@ namespace PetBuddies_API.Application.UseCases
             return protocolo?.ToDto();
         }
 
-        /// <summary>
-        /// Categoria fora de <c>PREVENTIVO</c>/<c>POS_CIRURGICO</c> é rejeitada
-        /// (<c>CK_PROTOCOLO_CATEGORIA</c>). <c>TRATAMENTO</c> não é molde: nasce de prescrição
-        /// assinada, e por isso nem sequer existe no enum (ADR s3-24 §4b).
-        /// </summary>
+        // Espelha CK_PROTOCOLO_CATEGORIA e CK_PROTOCOLO_ESPECIE.
         public string? Validar(SalvarProtocoloRequest request)
         {
             if (request.Categoria is null)

@@ -8,10 +8,6 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace PetBuddies_API.Presentation.Controllers
 {
-    /// <summary>
-    /// Quanto vale cada gesto no programa Pata Segura. Política configurada: nesta sprint
-    /// nenhuma aplicação lê a tabela — o consumo com congelamento no fato é Sprint 4.
-    /// </summary>
     [ApiController]
     [Route("api/regras-pontuacao")]
     [Authorize(Roles = "VET")]

@@ -55,9 +55,7 @@ namespace PetBuddies_API.Infrastructure.Data
 
             ConfigurarDelecoes(modelBuilder);
 
-            // Por último de propósito: as tabelas do back-office (N11) mapeiam por
-            // IEntityTypeConfiguration, e a configuração explícita tem de vencer a convenção
-            // do laço acima — tamanho de coluna de enum, precisão de decimal e tipo do id.
+            // Depois do laço de propósito: a configuração explícita tem de vencer a convenção.
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationContext).Assembly);
 
             base.OnModelCreating(modelBuilder);
@@ -135,7 +133,7 @@ namespace PetBuddies_API.Infrastructure.Data
         public DbSet<RegraPrescricaoEntity> RegrasPrescricao { get; set; }
         public DbSet<CondicaoClinicaEntity> CondicoesClinicas { get; set; }
 
-        // Back-office da clínica (N11): catálogo de cuidado e política comercial.
+        // Back-office da clínica
         public DbSet<ProtocoloEntity> Protocolos { get; set; }
         public DbSet<RegraProtocoloEntity> RegrasProtocolo { get; set; }
         public DbSet<OfertaEntity> Ofertas { get; set; }

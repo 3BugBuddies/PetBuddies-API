@@ -8,11 +8,6 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace PetBuddies_API.Presentation.Controllers
 {
-    /// <summary>
-    /// O catálogo de cuidado da clínica. É o único recurso deste serviço que outro serviço lê:
-    /// o motor do Java consulta <c>GET /api/protocolos?especie=&amp;categoria=</c> no momento de
-    /// criar um plano, e materializa os itens a partir das regras que vêm no corpo.
-    /// </summary>
     [ApiController]
     [Route("api/protocolos")]
     [Authorize(Roles = "VET")]

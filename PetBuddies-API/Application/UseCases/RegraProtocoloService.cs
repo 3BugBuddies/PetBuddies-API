@@ -36,17 +36,7 @@ namespace PetBuddies_API.Application.UseCases
             return regra?.ToDto();
         }
 
-        /// <summary>
-        /// Duas invariantes, e as duas existem para o motor do Java não entrar em laço.
-        ///
-        /// <para><b>Repetições é obrigatório e nunca menor que 1.</b> "Para sempre" vira número
-        /// explícito: o plano não tem fim, então nulo aqui expandiria infinito na
-        /// materialização (<c>NR_REPETICOES NOT NULL</c> + <c>CK_REGPROT_REPETICOES</c>).</para>
-        ///
-        /// <para><b>Intervalo e unidade andam juntos</b> (<c>CK_REGPROT_RECORRENCIA</c>):
-        /// intervalo sem unidade não sabe se repete em dias ou em meses, e unidade sem
-        /// intervalo não repete nada.</para>
-        /// </summary>
+        // Espelha CK_REGPROT_REPETICOES e CK_REGPROT_RECORRENCIA.
         public string? Validar(SalvarRegraProtocoloRequest request)
         {
             if (request.Tipo is null || !Enum.IsDefined(request.Tipo.Value))

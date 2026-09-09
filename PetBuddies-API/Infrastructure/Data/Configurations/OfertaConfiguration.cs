@@ -4,14 +4,6 @@ using PetBuddies_API.Domain.Entities;
 
 namespace PetBuddies_API.Infrastructure.Data.Configurations
 {
-    /// <summary>
-    /// <c>T_PB_OFERTA</c> (<c>01_ddl.sql:466</c>).
-    /// </summary>
-    /// <remarks>
-    /// <c>FK_OFERTA_CLINICA</c> do DDL <b>não</b> é declarada aqui: <c>T_PB_CLINICA</c> sai do
-    /// .NET quando o Java absorver o registro (ADR s3-25), e o schema deste serviço termina com
-    /// as quatro tabelas do back-office. <c>ID_CLINICA</c> fica como referência solta.
-    /// </remarks>
     public class OfertaConfiguration : IEntityTypeConfiguration<OfertaEntity>
     {
         public void Configure(EntityTypeBuilder<OfertaEntity> builder)
@@ -21,13 +13,10 @@ namespace PetBuddies_API.Infrastructure.Data.Configurations
                 tabela.HasCheckConstraint(
                     "CK_OFERTA_ATO",
                     "TP_ATO IN ('PROCEDIMENTO','CONSULTA','PROTOCOLO')");
-                // O alvo tem de casar com o tipo do ato: enum nos dois primeiros, linha no
-                // terceiro, e nunca os dois nem nenhum.
                 tabela.HasCheckConstraint(
                     "CK_OFERTA_ALVO",
                     "(TP_ATO IN ('PROCEDIMENTO','CONSULTA') AND TP_SUBTIPO IS NOT NULL AND ID_PROTOCOLO IS NULL) "
                     + "OR (TP_ATO = 'PROTOCOLO' AND ID_PROTOCOLO IS NOT NULL AND TP_SUBTIPO IS NULL)");
-                // Preco negativo nao e desconto, e erro de digitacao.
                 tabela.HasCheckConstraint("CK_OFERTA_VALOR", "NR_VALOR >= 0");
             });
 
@@ -39,6 +28,7 @@ namespace PetBuddies_API.Infrastructure.Data.Configurations
                 .HasColumnType("NUMBER(10)")
                 .ValueGeneratedOnAdd();
 
+            // Sem FK: T_PB_CLINICA sai do .NET quando o Java absorver o registro.
             builder.Property(oferta => oferta.ClinicaId)
                 .HasColumnName("ID_CLINICA")
                 .HasColumnType("NUMBER(10)")
@@ -63,14 +53,12 @@ namespace PetBuddies_API.Infrastructure.Data.Configurations
                 .HasMaxLength(255)
                 .IsRequired();
 
-            // Precisao explicita: sem ela o provider arredonda em silencio.
             builder.Property(oferta => oferta.Valor)
                 .HasColumnName("NR_VALOR")
                 .HasColumnType("NUMBER(10,2)")
                 .HasPrecision(10, 2)
                 .IsRequired();
 
-            // DateOnly, convertida para DATE pela convencao global do N2 — vigencia nao e texto.
             builder.Property(oferta => oferta.InicioVigencia)
                 .HasColumnName("DT_INICIO_VIGENCIA")
                 .IsRequired();
@@ -82,9 +70,7 @@ namespace PetBuddies_API.Infrastructure.Data.Configurations
             builder.Property(oferta => oferta.UpdatedAt)
                 .HasColumnName("AT_UPDATED_AT");
 
-            // A chave natural da vigencia por sucessao. O DDL usa indice funcional com NVL; a
-            // composta simples entrega a mesma garantia no Oracle, que conta chave
-            // parcialmente nula para a unicidade (o proprio comentario do DDL diz isso).
+            // O DDL usa indice funcional com NVL; no Oracle a composta simples equivale.
             builder.HasIndex(oferta => new
             {
                 oferta.ClinicaId,
@@ -95,8 +81,7 @@ namespace PetBuddies_API.Infrastructure.Data.Configurations
             })
                 .HasDatabaseName("UX_OFERTA_VIGENCIA")
                 .IsUnique()
-                // Sem filtro: o EF filtraria as colunas nulaveis por padrao, e como uma das
-                // duas do alvo e SEMPRE nula, o indice cobriria zero linhas.
+                // Sem HasFilter(null) o EF filtra as colunas nulaveis e o indice cobre zero linhas.
                 .HasFilter(null);
 
             builder.HasOne(oferta => oferta.Protocolo)

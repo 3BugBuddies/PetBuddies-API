@@ -13,10 +13,6 @@ namespace PetBuddies_API.Application.Interfaces
 
         Task<ProtocoloDto?> BuscarPorIdAsync(long protocoloId, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// As invariantes de domínio do protocolo. Devolve <c>null</c> quando o request é
-        /// válido, e a mensagem da primeira violação quando não é.
-        /// </summary>
         string? Validar(SalvarProtocoloRequest request);
 
         Task<ProtocoloDto> CadastrarAsync(SalvarProtocoloRequest request, CancellationToken cancellationToken = default);

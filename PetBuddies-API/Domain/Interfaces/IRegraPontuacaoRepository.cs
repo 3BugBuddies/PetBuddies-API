@@ -12,10 +12,8 @@ namespace PetBuddies_API.Domain.Interfaces
 
         Task<RegraPontuacaoEntity?> ObterPorIdAsync(int regraId, CancellationToken cancellationToken = default);
 
-        /// <summary>Sem <c>AsNoTracking</c>: a entidade será alterada ou removida.</summary>
         Task<RegraPontuacaoEntity?> ObterParaAlterarAsync(int regraId, CancellationToken cancellationToken = default);
 
-        /// <summary>Um valor por clínica, gesto e vigência — o <c>UK_PONTUACAO_VIGENCIA</c>.</summary>
         Task<bool> VigenciaExisteAsync(
             int clinicaId,
             TipoGestoEnum gesto,

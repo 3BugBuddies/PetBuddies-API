@@ -32,7 +32,6 @@ namespace PetBuddies_API.Infrastructure.Repositories
                 query = query.Where(oferta => oferta.Ato == ato.Value);
             }
 
-            // A vigencia e por sucessao: a mais recente primeiro e o preco que vale hoje.
             return query
                 .OrderByDescending(oferta => oferta.InicioVigencia)
                 .ThenBy(oferta => oferta.Id)
@@ -46,7 +45,6 @@ namespace PetBuddies_API.Infrastructure.Repositories
                 .SingleOrDefaultAsync(oferta => oferta.Id == ofertaId, cancellationToken);
         }
 
-        /// <summary>Sem <c>AsNoTracking</c>: o caso de uso vai alterar ou remover a entidade.</summary>
         public Task<OfertaEntity?> ObterParaAlterarAsync(int ofertaId, CancellationToken cancellationToken = default)
         {
             return _context.Ofertas.SingleOrDefaultAsync(oferta => oferta.Id == ofertaId, cancellationToken);

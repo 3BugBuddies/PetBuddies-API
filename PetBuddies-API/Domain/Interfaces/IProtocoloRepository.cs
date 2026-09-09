@@ -5,10 +5,6 @@ namespace PetBuddies_API.Domain.Interfaces
 {
     public interface IProtocoloRepository
     {
-        /// <summary>
-        /// O catálogo que o motor do Java lê ao criar um plano: os protocolos vêm com as
-        /// regras dentro, porque é delas que os itens são materializados.
-        /// </summary>
         Task<List<ProtocoloEntity>> ListarAsync(
             EspecieEnum? especie = null,
             CategoriaProtocoloEnum? categoria = null,
@@ -17,7 +13,6 @@ namespace PetBuddies_API.Domain.Interfaces
 
         Task<ProtocoloEntity?> ObterPorIdAsync(long protocoloId, CancellationToken cancellationToken = default);
 
-        /// <summary>Sem <c>AsNoTracking</c>: a entidade será alterada ou removida.</summary>
         Task<ProtocoloEntity?> ObterParaAlterarAsync(long protocoloId, CancellationToken cancellationToken = default);
 
         Task<bool> ExisteAsync(long protocoloId, CancellationToken cancellationToken = default);

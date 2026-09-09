@@ -4,10 +4,6 @@ using PetBuddies_API.Domain.Entities;
 
 namespace PetBuddies_API.Infrastructure.Data.Configurations
 {
-    /// <summary>
-    /// <c>T_PB_REGRA_PROTOCOLO</c> (<c>01_ddl.sql:661</c>). Traduzida de
-    /// <c>RegraProtocoloEntity.java</c>.
-    /// </summary>
     public class RegraProtocoloConfiguration : IEntityTypeConfiguration<RegraProtocoloEntity>
     {
         public void Configure(EntityTypeBuilder<RegraProtocoloEntity> builder)
@@ -26,8 +22,6 @@ namespace PetBuddies_API.Infrastructure.Data.Configurations
                 tabela.HasCheckConstraint(
                     "CK_REGPROT_UNID_INTERV",
                     "TP_UNIDADE_INTERVALO IN ('DIAS','SEMANAS','MESES')");
-                // Intervalo sem unidade nao sabe se repete em dias ou em meses; unidade sem
-                // intervalo nao repete nada.
                 tabela.HasCheckConstraint(
                     "CK_REGPROT_RECORRENCIA",
                     "(NR_INTERVALO IS NULL AND TP_UNIDADE_INTERVALO IS NULL) "
@@ -60,8 +54,7 @@ namespace PetBuddies_API.Infrastructure.Data.Configurations
                 .IsRequired();
 
             // HasPrecision, e nao HasColumnType("NUMBER(4)"): com o tipo cru o provider
-            // resolve o CLR de volta para byte na migration, e um deslocamento acima de 255
-            // estouraria o parametro.
+            // Oracle resolve o CLR de volta para byte.
             builder.Property(regra => regra.Offset)
                 .HasColumnName("NR_OFFSET")
                 .HasPrecision(4)
@@ -97,9 +90,6 @@ namespace PetBuddies_API.Infrastructure.Data.Configurations
                 .HasColumnName("DS_DESCRICAO")
                 .HasMaxLength(2000);
 
-            // Restrict, e nao Cascade: o DDL declara FK_REGPROT_PROTOCOLO sem ON DELETE, e a
-            // regua desta base e Restrict em tudo que aponta para catalogo. Apagar protocolo
-            // com regra vira DbUpdateException, que o controller traduz em 409.
             builder.HasOne(regra => regra.Protocolo)
                 .WithMany(protocolo => protocolo.Regras)
                 .HasForeignKey(regra => regra.ProtocoloId)

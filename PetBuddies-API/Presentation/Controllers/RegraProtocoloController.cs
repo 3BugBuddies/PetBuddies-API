@@ -7,9 +7,6 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace PetBuddies_API.Presentation.Controllers
 {
-    /// <summary>
-    /// As regras de um protocolo: o molde de cada item que o motor materializa.
-    /// </summary>
     [ApiController]
     [Route("api/regras-protocolo")]
     [Authorize(Roles = "VET")]
@@ -31,8 +28,6 @@ namespace PetBuddies_API.Presentation.Controllers
             [FromQuery] long? protocoloId,
             CancellationToken cancellationToken)
         {
-            // Sem o filtro a rota devolveria a tabela inteira; exigir o pai e mais honesto
-            // que deixar o binder assumir zero e responder 204.
             if (protocoloId is null)
             {
                 return BadRequest("Informe protocoloId para listar as regras.");

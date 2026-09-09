@@ -23,10 +23,6 @@ namespace PetBuddies_API.Application.Mappers
             };
         }
 
-        /// <summary>
-        /// Zera o lado do alvo que o ato não usa: gravar os dois violaria o
-        /// <c>CK_OFERTA_ALVO</c>, e o service já garantiu qual dos dois veio preenchido.
-        /// </summary>
         public static void Aplicar(this OfertaEntity oferta, SalvarOfertaRequest request)
         {
             var ato = request.Ato!.Value;

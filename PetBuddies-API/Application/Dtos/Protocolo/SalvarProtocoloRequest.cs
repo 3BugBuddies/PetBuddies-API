@@ -3,10 +3,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PetBuddies_API.Application.Dtos.Protocolo
 {
-    /// <summary>
-    /// Só o cabeçalho do protocolo. As regras entram e saem pelo próprio recurso — corpo
-    /// aninhado exigiria decidir aqui o que fazer com regra ausente numa atualização.
-    /// </summary>
     public record SalvarProtocoloRequest
     {
         [Required(ErrorMessage = "Nome do protocolo é obrigatório.")]

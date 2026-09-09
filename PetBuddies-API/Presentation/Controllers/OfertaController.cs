@@ -8,11 +8,6 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace PetBuddies_API.Presentation.Controllers
 {
-    /// <summary>
-    /// O que a clínica cobra, e desde quando. A vigência é por sucessão: cadastrar uma oferta
-    /// nova para o mesmo alvo não edita a anterior — o preço antigo vale até o dia em que o
-    /// novo começa.
-    /// </summary>
     [ApiController]
     [Route("api/ofertas")]
     [Authorize(Roles = "VET")]

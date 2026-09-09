@@ -4,13 +4,6 @@ using PetBuddies_API.Domain.Entities;
 
 namespace PetBuddies_API.Infrastructure.Data.Configurations
 {
-    /// <summary>
-    /// <c>T_PB_REGRA_PONTUACAO</c> (<c>01_ddl.sql:499</c>).
-    /// </summary>
-    /// <remarks>
-    /// <c>FK_PONTUACAO_CLINICA</c> do DDL não é declarada aqui, pelo mesmo motivo de
-    /// <see cref="OfertaConfiguration"/>.
-    /// </remarks>
     public class RegraPontuacaoConfiguration : IEntityTypeConfiguration<RegraPontuacaoEntity>
     {
         public void Configure(EntityTypeBuilder<RegraPontuacaoEntity> builder)
@@ -20,7 +13,6 @@ namespace PetBuddies_API.Infrastructure.Data.Configurations
                 tabela.HasCheckConstraint(
                     "CK_PONTUACAO_GESTO",
                     "TP_GESTO IN ('PLANO_CRIADO','CONSULTA_AGENDADA','CONSULTA_REALIZADA','PROCEDIMENTO_EXECUTADO')");
-                // Gesto que tira ponto nao existe no programa.
                 tabela.HasCheckConstraint("CK_PONTUACAO_PONTOS", "NR_PONTOS > 0");
             });
 
@@ -32,6 +24,7 @@ namespace PetBuddies_API.Infrastructure.Data.Configurations
                 .HasColumnType("NUMBER(10)")
                 .ValueGeneratedOnAdd();
 
+            // Sem FK: T_PB_CLINICA sai do .NET quando o Java absorver o registro.
             builder.Property(regra => regra.ClinicaId)
                 .HasColumnName("ID_CLINICA")
                 .HasColumnType("NUMBER(10)")
@@ -59,8 +52,6 @@ namespace PetBuddies_API.Infrastructure.Data.Configurations
             builder.Property(regra => regra.UpdatedAt)
                 .HasColumnName("AT_UPDATED_AT");
 
-            // Um valor por clinica, gesto e vigencia. Aqui a unicidade e simples: nenhuma
-            // coluna da chave e nulavel.
             builder.HasIndex(regra => new { regra.ClinicaId, regra.Gesto, regra.InicioVigencia })
                 .HasDatabaseName("UK_PONTUACAO_VIGENCIA")
                 .IsUnique();

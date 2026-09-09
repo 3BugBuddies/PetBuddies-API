@@ -33,10 +33,7 @@ namespace PetBuddies_API.Application.UseCases
             return regra?.ToDto();
         }
 
-        /// <summary>
-        /// <b>Pontos têm de ser positivos</b> (<c>CK_PONTUACAO_PONTOS</c>): gesto que tira ponto
-        /// não existe no programa Pata Segura.
-        /// </summary>
+        // Espelha CK_PONTUACAO_PONTOS e CK_PONTUACAO_GESTO.
         public string? Validar(SalvarRegraPontuacaoRequest request)
         {
             if (request.Gesto is null || !Enum.IsDefined(request.Gesto.Value))
@@ -62,7 +59,7 @@ namespace PetBuddies_API.Application.UseCases
             return null;
         }
 
-        /// <summary>Um valor por clínica, gesto e vigência — o <c>UK_PONTUACAO_VIGENCIA</c>.</summary>
+        // Espelha UK_PONTUACAO_VIGENCIA.
         public Task<bool> VigenciaExisteAsync(
             SalvarRegraPontuacaoRequest request,
             int? ignorarRegraId = null,

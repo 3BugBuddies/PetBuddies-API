@@ -38,19 +38,7 @@ namespace PetBuddies_API.Application.UseCases
             return oferta?.ToDto();
         }
 
-        /// <summary>
-        /// <para><b>O alvo tem de casar com o ato</b> (<c>CK_OFERTA_ALVO</c>): oferta de
-        /// <c>PROTOCOLO</c> exige <c>ProtocoloId</c> e proíbe <c>Subtipo</c>; oferta de
-        /// <c>CONSULTA</c> ou <c>PROCEDIMENTO</c> exige <c>Subtipo</c> e proíbe
-        /// <c>ProtocoloId</c>. São duas colunas porque tipo de consulta e tipo de procedimento
-        /// são enums com <c>CHECK</c>, não tabelas — não há catálogo para apontar.</para>
-        ///
-        /// <para><b>Valor não pode ser negativo</b> (<c>CK_OFERTA_VALOR</c>): preço negativo não
-        /// é desconto, é erro de digitação.</para>
-        ///
-        /// <para>Não há validação de sobreposição de vigência: a vigência é por sucessão, e
-        /// sem intervalo não existe o que sobrepor.</para>
-        /// </summary>
+        // Espelha CK_OFERTA_ALVO e CK_OFERTA_VALOR.
         public string? Validar(SalvarOfertaRequest request)
         {
             if (request.Ato is null || !Enum.IsDefined(request.Ato.Value))
@@ -114,6 +102,7 @@ namespace PetBuddies_API.Application.UseCases
             return _protocoloRepositorio.ExisteAsync(protocoloId, cancellationToken);
         }
 
+        // Espelha UX_OFERTA_VIGENCIA.
         public Task<bool> VigenciaExisteAsync(
             SalvarOfertaRequest request,
             int? ignorarOfertaId = null,

@@ -82,7 +82,7 @@ builder.Services.AddScoped<IRegistroAtendimentoRepository, RegistroAtendimentoRe
 builder.Services.AddScoped<IResponsavelRepository, ResponsavelRepository>();
 builder.Services.AddScoped<IVeterinarioRepository, VeterinarioRepository>();
 
-// Back-office da clinica (N11): catalogo de cuidado e politica comercial.
+// Back-office da clinica
 builder.Services.AddScoped<IProtocoloRepository, ProtocoloRepository>();
 builder.Services.AddScoped<IRegraProtocoloRepository, RegraProtocoloRepository>();
 builder.Services.AddScoped<IOfertaRepository, OfertaRepository>();
@@ -104,17 +104,8 @@ builder.Services.AddScoped<IRegraProtocoloService, RegraProtocoloService>();
 builder.Services.AddScoped<IOfertaService, OfertaService>();
 builder.Services.AddScoped<IRegraPontuacaoService, RegraPontuacaoService>();
 
-// ---------------------------------------------------------------------------
-// Autenticacao: o token e emitido pelo Java e apenas VALIDADO aqui (ADR s3-20).
-// HS256 com segredo simetrico, conferindo assinatura, exp e iss.
-//
-// O segredo vem da variavel de ambiente PETBUDDIES_JWT_SECRET, nunca do
-// appsettings versionado — credencial no fonte custa 20 pontos na frente de
-// DevOps. ValidateOnStart derruba a subida se ela faltar; o design-time do
-// EF nao chega la, porque para no Build().
-//
-// Identity nao entra: o PDF so o pede na Sprint 4.
-// ---------------------------------------------------------------------------
+// ValidateOnStart derruba a subida quando PETBUDDIES_JWT_SECRET falta; o
+// design-time do EF nao chega la, porque para no Build().
 builder.Services
     .AddOptions<JwtOptions>()
     .Bind(builder.Configuration.GetSection(JwtOptions.SecaoConfiguracao))
@@ -145,21 +136,15 @@ builder.Services
                     : segredo)),
             ValidateIssuer = true,
             ValidIssuer = jwt.Issuer,
-            // O s3-20 nao define claim aud; validar audiencia rejeitaria todo token do Java.
             ValidateAudience = false,
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromMinutes(1),
-            // O perfil (VET | TUTOR) vira role, e autorizacao por rota fica a um atributo.
             RoleClaimType = "perfil"
         };
     });
 
 builder.Services.AddAuthorization();
 
-// ---------------------------------------------------------------------------
-// CORS: sem ele o painel web nao fala com esta API, e o erro so aparece no
-// browser. Origens vem da configuracao — nada de AllowAnyOrigin com credencial.
-// ---------------------------------------------------------------------------
 builder.Services.AddCors(opcoes =>
 {
     var origens = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
@@ -186,8 +171,6 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.EnableAnnotations();
 
-    // Sem isto o Swagger nao tem onde colar o token, e os endpoints do back-office
-    // ficam intestaveis pela UI depois que ganharam [Authorize].
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -312,8 +295,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
-// A ordem importa: CORS antes de autenticar, e autenticar antes de autorizar.
-// Sem UseAuthentication, [Authorize] devolve 500 em vez de 401.
 app.UseCors(PoliticaCorsDoPainel);
 
 app.UseAuthentication();

@@ -12,13 +12,8 @@ namespace PetBuddies_API.Domain.Interfaces
 
         Task<OfertaEntity?> ObterPorIdAsync(int ofertaId, CancellationToken cancellationToken = default);
 
-        /// <summary>Sem <c>AsNoTracking</c>: a entidade será alterada ou removida.</summary>
         Task<OfertaEntity?> ObterParaAlterarAsync(int ofertaId, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// A chave natural da vigência por sucessão: clínica, ato, alvo e data de início.
-        /// Duas ofertas do mesmo alvo não podem começar a valer no mesmo dia.
-        /// </summary>
         Task<bool> VigenciaExisteAsync(
             int clinicaId,
             TipoAtoOfertaEnum ato,

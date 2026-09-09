@@ -32,7 +32,6 @@ namespace PetBuddies_API.Infrastructure.Repositories
                 .SingleOrDefaultAsync(regra => regra.Id == regraId, cancellationToken);
         }
 
-        /// <summary>Sem <c>AsNoTracking</c>: o caso de uso vai alterar ou remover a entidade.</summary>
         public Task<RegraProtocoloEntity?> ObterParaAlterarAsync(long regraId, CancellationToken cancellationToken = default)
         {
             return _context.RegrasProtocolo
