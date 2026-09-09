@@ -6,9 +6,42 @@ using PetBuddies_API.Application.UseCases;
 using PetBuddies_API.Domain.Interfaces;
 using PetBuddies_API.Infrastructure.Clients;
 using PetBuddies_API.Infrastructure.Repositories;
+using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Compact;
 using System.Text.Json.Serialization;
 
+// Serilog e a primeira coisa que sobe. Configurado depois do host, as linhas da
+// subida sairiam no logger padrao e nunca chegariam ao arquivo.
+var ambiente = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+var configuracaoDoLog = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+    .AddJsonFile($"appsettings.{ambiente}.json", optional: true, reloadOnChange: false)
+    .AddEnvironmentVariables()
+    .Build();
+
+// Os niveis vem do codigo e podem ser sobrescritos pela secao Serilog do appsettings.
+// O arquivo sai em JSON compacto: e nele que as propriedades enriquecidas — entre
+// elas o CorrelationId — ficam legiveis por maquina.
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .ReadFrom.Configuration(configuracaoDoLog)
+    .WriteTo.Console(outputTemplate:
+        "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File(
+        new CompactJsonFormatter(),
+        "logs/api-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7)
+    .CreateLogger();
+
+Log.Information("PetBuddies-API subindo no ambiente {Ambiente}", ambiente);
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 
 builder.Services.AddDbContext<ApplicationContext>(options =>
 {
