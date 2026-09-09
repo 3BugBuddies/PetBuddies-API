@@ -52,18 +52,35 @@ namespace PetBuddies_API.Presentation.Middlewares
             using (LogContext.PushProperty("CorrelationId", identificador))
             using (EscopoDoCliente(correlacaoDoCliente))
             {
+                var falhou = false;
+
                 try
                 {
                     await _proximo(contexto);
                 }
+                catch
+                {
+                    // Marca e relanca — nao trata. O padrao de erros simples do
+                    // controller continua e nao existe handler global de excecao.
+                    falhou = true;
+                    throw;
+                }
                 finally
                 {
                     cronometro.Stop();
+
+                    // Numa excecao nao tratada o Kestrel so escreve o 500 depois
+                    // deste bloco: sem a marca, a linha diria "respondeu 200"
+                    // para uma requisicao que o cliente recebeu como 500.
+                    var status = falhou && !contexto.Response.HasStarted
+                        ? StatusCodes.Status500InternalServerError
+                        : contexto.Response.StatusCode;
+
                     _logger.LogInformation(
                         "{Metodo} {Caminho} respondeu {StatusCode} em {DuracaoMs:F1} ms",
                         contexto.Request.Method,
                         contexto.Request.Path.Value,
-                        contexto.Response.StatusCode,
+                        status,
                         cronometro.Elapsed.TotalMilliseconds);
                 }
             }
