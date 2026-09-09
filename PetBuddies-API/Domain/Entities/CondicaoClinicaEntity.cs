@@ -31,11 +31,11 @@ namespace PetBuddies_API.Domain.Entities
         [RegularExpression(@".*\S.*", ErrorMessage = "Rótulo da condição é obrigatório.")]
         public string Rotulo { get; set; } = string.Empty;
 
-        [Column("TP_VALOR")]
+        [Column("TP_DADO")]
         [EnumDataType(typeof(TipoValorCondicaoEnum))]
         public TipoValorCondicaoEnum TipoValor { get; set; }
 
-        [Column("TP_FONTE")]
+        [Column("TP_FONTE_VALOR")]
         [EnumDataType(typeof(FonteCondicaoEnum))]
         public FonteCondicaoEnum Fonte { get; set; } = FonteCondicaoEnum.RELATO;
 
