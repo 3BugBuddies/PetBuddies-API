@@ -55,6 +55,9 @@ namespace PetBuddies_API.Infrastructure.Data
 
             ConfigurarDelecoes(modelBuilder);
 
+            // Depois do laço de propósito: a configuração explícita tem de vencer a convenção.
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationContext).Assembly);
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -129,5 +132,11 @@ namespace PetBuddies_API.Infrastructure.Data
         public DbSet<PrescricaoEntity> Prescricoes { get; set; }
         public DbSet<RegraPrescricaoEntity> RegrasPrescricao { get; set; }
         public DbSet<CondicaoClinicaEntity> CondicoesClinicas { get; set; }
+
+        // Back-office da clínica
+        public DbSet<ProtocoloEntity> Protocolos { get; set; }
+        public DbSet<RegraProtocoloEntity> RegrasProtocolo { get; set; }
+        public DbSet<OfertaEntity> Ofertas { get; set; }
+        public DbSet<RegraPontuacaoEntity> RegrasPontuacao { get; set; }
     }
 }
