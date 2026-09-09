@@ -39,6 +39,9 @@ ScaffoldingReadMe.txt
 # dotenv environment variables file
 .env
 
+# Logs da aplicacao (Serilog) — log de aplicacao versionado e vazamento esperando acontecer
+logs/
+
 .vs/
 
 # Others
