@@ -9,7 +9,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace PetBuddies_API.Presentation.Controllers
 {
     [ApiController]
-    [Route("api/regras-pontuacao")]
+    [Route("api/regra-pontuacao")]
     [Authorize(Roles = "VET")]
     public class RegraPontuacaoController : ControllerBase
     {
