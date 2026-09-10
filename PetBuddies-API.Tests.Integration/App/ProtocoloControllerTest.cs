@@ -40,7 +40,7 @@ namespace PetBuddies_API.Tests.Integration.App
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act
-            var resposta = await cliente.GetAsync("/api/protocolos");
+            var resposta = await cliente.GetAsync("/api/protocolo");
 
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, resposta.StatusCode);
@@ -67,7 +67,7 @@ namespace PetBuddies_API.Tests.Integration.App
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act
-            var resposta = await cliente.GetAsync("/api/protocolos/7");
+            var resposta = await cliente.GetAsync("/api/protocolo/7");
             var encontrado = await resposta.Content.ReadFromJsonAsync<ProtocoloDto>(JsonPadrao.Opcoes);
 
             // Assert
@@ -87,7 +87,7 @@ namespace PetBuddies_API.Tests.Integration.App
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act
-            var resposta = await cliente.GetAsync("/api/protocolos/999");
+            var resposta = await cliente.GetAsync("/api/protocolo/999");
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, resposta.StatusCode);
@@ -117,7 +117,7 @@ namespace PetBuddies_API.Tests.Integration.App
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act
-            var resposta = await cliente.PostAsJsonAsync("/api/protocolos", ProtocoloValido(), JsonPadrao.Opcoes);
+            var resposta = await cliente.PostAsJsonAsync("/api/protocolo", ProtocoloValido(), JsonPadrao.Opcoes);
 
             // Assert
             Assert.Equal(HttpStatusCode.Created, resposta.StatusCode);
@@ -135,7 +135,7 @@ namespace PetBuddies_API.Tests.Integration.App
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act
-            var resposta = await cliente.PostAsJsonAsync("/api/protocolos", ProtocoloValido(), JsonPadrao.Opcoes);
+            var resposta = await cliente.PostAsJsonAsync("/api/protocolo", ProtocoloValido(), JsonPadrao.Opcoes);
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, resposta.StatusCode);

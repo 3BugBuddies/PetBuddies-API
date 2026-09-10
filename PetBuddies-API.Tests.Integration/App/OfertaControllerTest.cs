@@ -39,7 +39,7 @@ namespace PetBuddies_API.Tests.Integration.App
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act
-            var resposta = await cliente.GetAsync("/api/ofertas/999");
+            var resposta = await cliente.GetAsync("/api/oferta/999");
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, resposta.StatusCode);
@@ -57,7 +57,7 @@ namespace PetBuddies_API.Tests.Integration.App
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act
-            var resposta = await cliente.PostAsJsonAsync("/api/ofertas", OfertaValida(), JsonPadrao.Opcoes);
+            var resposta = await cliente.PostAsJsonAsync("/api/oferta", OfertaValida(), JsonPadrao.Opcoes);
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, resposta.StatusCode);
@@ -80,7 +80,7 @@ namespace PetBuddies_API.Tests.Integration.App
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act
-            var resposta = await cliente.PostAsJsonAsync("/api/ofertas", request, JsonPadrao.Opcoes);
+            var resposta = await cliente.PostAsJsonAsync("/api/oferta", request, JsonPadrao.Opcoes);
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, resposta.StatusCode);
@@ -101,7 +101,7 @@ namespace PetBuddies_API.Tests.Integration.App
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act
-            var resposta = await cliente.PostAsJsonAsync("/api/ofertas", OfertaValida(), JsonPadrao.Opcoes);
+            var resposta = await cliente.PostAsJsonAsync("/api/oferta", OfertaValida(), JsonPadrao.Opcoes);
 
             // Assert
             Assert.Equal(HttpStatusCode.Conflict, resposta.StatusCode);
@@ -127,7 +127,7 @@ namespace PetBuddies_API.Tests.Integration.App
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act
-            var resposta = await cliente.PostAsJsonAsync("/api/ofertas", OfertaValida(), JsonPadrao.Opcoes);
+            var resposta = await cliente.PostAsJsonAsync("/api/oferta", OfertaValida(), JsonPadrao.Opcoes);
 
             // Assert
             Assert.Equal(HttpStatusCode.Created, resposta.StatusCode);

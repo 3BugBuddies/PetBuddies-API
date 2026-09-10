@@ -35,7 +35,7 @@ namespace PetBuddies_API.Tests.Integration.App
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act
-            var resposta = await cliente.GetAsync("/api/regras-protocolo");
+            var resposta = await cliente.GetAsync("/api/regra-protocolo");
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, resposta.StatusCode);
@@ -53,7 +53,7 @@ namespace PetBuddies_API.Tests.Integration.App
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act
-            var resposta = await cliente.GetAsync("/api/regras-protocolo?protocoloId=1");
+            var resposta = await cliente.GetAsync("/api/regra-protocolo?protocoloId=1");
 
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, resposta.StatusCode);
@@ -74,7 +74,7 @@ namespace PetBuddies_API.Tests.Integration.App
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act
-            var resposta = await cliente.PostAsJsonAsync("/api/regras-protocolo", RegraValida(), JsonPadrao.Opcoes);
+            var resposta = await cliente.PostAsJsonAsync("/api/regra-protocolo", RegraValida(), JsonPadrao.Opcoes);
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, resposta.StatusCode);
@@ -100,7 +100,7 @@ namespace PetBuddies_API.Tests.Integration.App
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act
-            var resposta = await cliente.PostAsJsonAsync("/api/regras-protocolo", RegraValida(), JsonPadrao.Opcoes);
+            var resposta = await cliente.PostAsJsonAsync("/api/regra-protocolo", RegraValida(), JsonPadrao.Opcoes);
 
             // Assert
             Assert.Equal(HttpStatusCode.Created, resposta.StatusCode);
@@ -118,7 +118,7 @@ namespace PetBuddies_API.Tests.Integration.App
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act
-            var resposta = await cliente.PostAsJsonAsync("/api/regras-protocolo", RegraValida(), JsonPadrao.Opcoes);
+            var resposta = await cliente.PostAsJsonAsync("/api/regra-protocolo", RegraValida(), JsonPadrao.Opcoes);
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, resposta.StatusCode);

@@ -7,7 +7,7 @@ O serviço é o **back-office administrativo da clínica veterinária**: é onde
 ```mermaid
 flowchart LR
     Painel["Painel da clínica<br/><i>Sprint 4</i>"] -.-> Net
-    Java["petbuddies-ai (Java)<br/>API do produto"] -->|"GET /api/protocolos"| Net
+    Java["petbuddies-ai (Java)<br/>API do produto"] -->|"GET /api/protocolo"| Net
     Net["PetBuddies-API (.NET)<br/>catálogo, oferta e pontuação"]
     Net --> Oracle[("Oracle<br/>4 tabelas")]
 ```
@@ -226,10 +226,10 @@ erDiagram
 
 | Recurso | Rotas | Filtros de listagem | Status codes |
 |---|---|---|---|
-| Protocolo | `GET` `POST` `/api/protocolos`<br>`GET` `PUT` `DELETE` `/api/protocolos/{id}` | `especie`, `categoria`, `ativo` | `200` `201` `204` `400` `404` `409` |
-| RegraProtocolo | `GET` `POST` `/api/regras-protocolo`<br>`GET` `PUT` `DELETE` `/api/regras-protocolo/{id}` | `protocoloId` (obrigatório na listagem) | `200` `201` `204` `400` `404` `409` |
-| Oferta | `GET` `POST` `/api/ofertas`<br>`GET` `PUT` `DELETE` `/api/ofertas/{id}` | `clinicaId`, `ato` | `200` `201` `204` `400` `404` `409` |
-| RegraPontuacao | `GET` `POST` `/api/regras-pontuacao`<br>`GET` `PUT` `DELETE` `/api/regras-pontuacao/{id}` | `clinicaId`, `gesto` | `200` `201` `204` `400` `404` `409` |
+| Protocolo | `GET` `POST` `/api/protocolo`<br>`GET` `PUT` `DELETE` `/api/protocolo/{id}` | `especie`, `categoria`, `ativo` | `200` `201` `204` `400` `404` `409` |
+| RegraProtocolo | `GET` `POST` `/api/regra-protocolo`<br>`GET` `PUT` `DELETE` `/api/regra-protocolo/{id}` | `protocoloId` (obrigatório na listagem) | `200` `201` `204` `400` `404` `409` |
+| Oferta | `GET` `POST` `/api/oferta`<br>`GET` `PUT` `DELETE` `/api/oferta/{id}` | `clinicaId`, `ato` | `200` `201` `204` `400` `404` `409` |
+| RegraPontuacao | `GET` `POST` `/api/regra-pontuacao`<br>`GET` `PUT` `DELETE` `/api/regra-pontuacao/{id}` | `clinicaId`, `gesto` | `200` `201` `204` `400` `404` `409` |
 
 Listagem vazia devolve `204 No Content`; remoção de recurso com vínculo (FK) devolve `409 Conflict`. Erros são simples, sem envelope: `400 Bad Request`/`404 Not Found`/`409 Conflict` com uma mensagem de texto — shape ausente ou tipo errado no JSON é pego automaticamente pelo `[ApiController]` (DataAnnotations do request), e regra cruzada (ex.: alvo da oferta incoerente com o ato) é pega pelo `Validar()` de cada service, que devolve a mensagem de erro como `string?`.
 
@@ -321,7 +321,7 @@ A coleção em `docs/postman/petbuddies-api-net.postman_collection.json` ainda c
 
 > Todas as rotas exigem `Authorization: Bearer <token com role VET>`.
 
-#### `POST /api/protocolos`
+#### `POST /api/protocolo`
 ```json
 {
   "nome": "Preventivo cão adulto",
@@ -332,7 +332,7 @@ A coleção em `docs/postman/petbuddies-api-net.postman_collection.json` ainda c
 }
 ```
 
-#### `POST /api/regras-protocolo`
+#### `POST /api/regra-protocolo`
 ```json
 {
   "protocoloId": 1,
@@ -348,7 +348,7 @@ A coleção em `docs/postman/petbuddies-api-net.postman_collection.json` ainda c
 }
 ```
 
-#### `POST /api/ofertas`
+#### `POST /api/oferta`
 > `subtipo` + `protocoloId` são mutuamente exclusivos: `ato: PROTOCOLO` exige `protocoloId` e proíbe `subtipo`; `PROCEDIMENTO`/`CONSULTA` exigem `subtipo` e proíbem `protocoloId`.
 ```json
 {
@@ -361,7 +361,7 @@ A coleção em `docs/postman/petbuddies-api-net.postman_collection.json` ainda c
 }
 ```
 
-#### `POST /api/regras-pontuacao`
+#### `POST /api/regra-pontuacao`
 ```json
 {
   "clinicaId": 1,
