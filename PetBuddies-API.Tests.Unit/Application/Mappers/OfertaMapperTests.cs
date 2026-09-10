@@ -8,6 +8,7 @@ namespace PetBuddies_API.Tests.Unit.Application.Mappers
     public class OfertaMapperTests
     {
         [Fact]
+        [Trait("Mapper", "Oferta")]
         public void Aplicar_AtoProtocolo_ZeraSubtipoEMantemProtocoloId()
         {
             // Arrange
@@ -33,6 +34,7 @@ namespace PetBuddies_API.Tests.Unit.Application.Mappers
         }
 
         [Fact]
+        [Trait("Mapper", "Oferta")]
         public void Aplicar_AtoConsulta_TrimaSubtipoEZeraProtocoloId()
         {
             // Arrange

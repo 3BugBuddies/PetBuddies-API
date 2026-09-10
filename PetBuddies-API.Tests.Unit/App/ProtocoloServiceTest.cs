@@ -36,9 +36,9 @@ namespace PetBuddies_API.Tests.Unit.App
         }
 
         [Theory]
-        [Trait("Service", "Protocolo")]
         [InlineData(null)]
         [InlineData((CategoriaProtocoloEnum)999)]
+        [Trait("Service", "Protocolo")]
         public void Validar_CategoriaInvalida_RetornaMensagemDeErro(CategoriaProtocoloEnum? categoria)
         {
             // Arrange — CK_PROTOCOLO_CATEGORIA só aceita PREVENTIVO/POS_CIRURGICO, e nula também é inválida.

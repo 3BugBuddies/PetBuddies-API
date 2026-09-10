@@ -53,9 +53,9 @@ namespace PetBuddies_API.Tests.Unit.App
         }
 
         [Theory]
-        [Trait("Service", "RegraProtocolo")]
         [InlineData(0)]
         [InlineData(-1)]
+        [Trait("Service", "RegraProtocolo")]
         public void Validar_RepeticoesMenorQueUm_RetornaMensagemDeErro(int repeticoes)
         {
             // Arrange — CK_REGPROT_REPETICOES exige >= 1.

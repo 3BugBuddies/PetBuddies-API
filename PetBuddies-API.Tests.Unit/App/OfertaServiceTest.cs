@@ -108,9 +108,9 @@ namespace PetBuddies_API.Tests.Unit.App
         }
 
         [Theory]
-        [Trait("Service", "Oferta")]
         [InlineData(-0.01)]
         [InlineData(-100)]
+        [Trait("Service", "Oferta")]
         public void Validar_ValorNegativo_RetornaMensagemDeErro(decimal valor)
         {
             // Arrange — CK_OFERTA_VALOR: NR_VALOR >= 0.

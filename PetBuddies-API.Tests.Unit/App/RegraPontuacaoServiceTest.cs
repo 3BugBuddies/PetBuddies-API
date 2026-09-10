@@ -49,9 +49,9 @@ namespace PetBuddies_API.Tests.Unit.App
         }
 
         [Theory]
-        [Trait("Service", "RegraPontuacao")]
         [InlineData(0)]
         [InlineData(-5)]
+        [Trait("Service", "RegraPontuacao")]
         public void Validar_PontosMenorOuIgualAZero_RetornaMensagemDeErro(int pontos)
         {
             // Arrange — CK_PONTUACAO_PONTOS: NR_PONTOS > 0.
