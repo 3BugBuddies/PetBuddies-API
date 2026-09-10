@@ -4,17 +4,19 @@ using PetBuddies_API.Application.Dtos.Protocolo;
 using PetBuddies_API.Domain.Enums;
 using PetBuddies_API.Tests.Integration.Fixtures;
 
-namespace PetBuddies_API.Tests.Integration.Autenticacao
+namespace PetBuddies_API.Tests.Integration.App
 {
     // O trio que a rubrica 2.2 pede: sem token, com token do perfil errado, com token do
     // perfil certo. Contra POST /api/protocolos porque o cadastro de protocolo não tem
     // nenhuma regra de unicidade — o 201 do terceiro caso não depende de estado de outro teste.
+    // Fica sobre o PetBuddiesApiFixture (app real, sem mock): o 201 do terceiro caso precisa
+    // do ProtocoloService e do repositório de verdade, não do CustomWebApplicationFactory.
     [Collection(PetBuddiesApiCollection.NomeDaColecao)]
-    public class AutenticacaoTests
+    public class AutenticacaoTest
     {
         private readonly PetBuddiesApiFixture _fixture;
 
-        public AutenticacaoTests(PetBuddiesApiFixture fixture)
+        public AutenticacaoTest(PetBuddiesApiFixture fixture)
         {
             _fixture = fixture;
         }
@@ -28,6 +30,7 @@ namespace PetBuddies_API.Tests.Integration.Autenticacao
         };
 
         [Fact]
+        [Trait("Autenticacao", "Protocolo")]
         public async Task Cadastrar_SemToken_Retorna401()
         {
             // Arrange
@@ -41,6 +44,7 @@ namespace PetBuddies_API.Tests.Integration.Autenticacao
         }
 
         [Fact]
+        [Trait("Autenticacao", "Protocolo")]
         public async Task Cadastrar_TokenDeTutor_Retorna403()
         {
             // Arrange — token válido, mas o endpoint é [Authorize(Roles = "VET")].
@@ -54,6 +58,7 @@ namespace PetBuddies_API.Tests.Integration.Autenticacao
         }
 
         [Fact]
+        [Trait("Autenticacao", "Protocolo")]
         public async Task Cadastrar_TokenDeVet_Retorna201()
         {
             // Arrange
