@@ -1,3 +1,5 @@
 <Solution>
   <Project Path="PetBuddies-API/PetBuddies-API.csproj" />
+  <Project Path="PetBuddies-API.Tests.Unit/PetBuddies-API.Tests.Unit.csproj" />
+  <Project Path="PetBuddies-API.Tests.Integration/PetBuddies-API.Tests.Integration.csproj" />
 </Solution>
