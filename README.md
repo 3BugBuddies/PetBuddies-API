@@ -1,12 +1,18 @@
 # PetBuddies API — Challenge FIAP 2026 | .NET
 
-API REST desenvolvida com ASP.NET Core e EF Core, como parte do Challenge da disciplina de **Advanced Business Development with .NET (2TDS)** — FIAP 2026.
+API REST desenvolvida com ASP.NET Core e EF Core — Challenge de **Advanced Business Development with .NET (2TDS)**, FIAP 2026.
 
-O serviço é o **back-office administrativo da clínica** (ADR `s3-25`, 09/09/2026): é onde a clínica configura **o que oferece, por quanto, e quanto cada gesto do tutor vale**. Guarda **4 tabelas** — o catálogo de protocolos de cuidado (`Protocolo`, `RegraProtocolo`, que nascem no Java) e a política comercial da clínica (`Oferta`, `RegraPontuacao`, que nascem aqui).
+O serviço é o **back-office administrativo da clínica veterinária**: é onde se configura o catálogo de protocolos de cuidado, o que a clínica oferece e por quanto, e quanto cada gesto do tutor vale em pontos. O `petbuddies-ai` (Java) consome o catálogo daqui por HTTP ao montar o plano de cuidado de um animal.
 
-**O que este serviço não é mais, desde o `s3-25`:** não guarda mais clínica, endereço, veterinário, tutor, animal, consulta, prontuário ou procedimento — as onze tabelas do registro clínico migraram para o `petbuddies-ai` (Java). Não existe bot de WhatsApp desde o ADR `s3-01` — o produto é um app mobile com dois perfis (vet e tutor). E este serviço não chama o Java em nada: o `MotorApiClient` foi removido. A única integração entre os dois é o **Java chamando o .NET** para ler este catálogo no momento em que um plano de cuidado nasce — uma via só, na direção oposta à de sprints anteriores.
+```mermaid
+flowchart LR
+    Painel["Painel da clínica<br/><i>Sprint 4</i>"] -.-> Net
+    Java["petbuddies-ai (Java)<br/>API do produto"] -->|"GET /api/protocolos"| Net
+    Net["PetBuddies-API (.NET)<br/>catálogo, oferta e pontuação"]
+    Net --> Oracle[("Oracle<br/>4 tabelas")]
+```
 
-**Preço e pontuação não são consumidos por nenhuma aplicação nesta sprint.** São política configurada por quem administra a clínica, através do painel web — que ainda não existe (mockup previsto para a Sprint 4). O congelamento do valor de uma oferta ou de uma regra no fato gerado (a "nota fiscal" do gesto do tutor) também é Sprint 4. Hoje o CRUD existe e é validado; nada ainda lê essas tabelas para efetivamente cobrar ou pontuar.
+Preço e pontuação são política configurada: nesta sprint o CRUD existe e é validado, e nenhuma aplicação ainda lê essas tabelas para cobrar ou pontuar.
 
 ---
 
@@ -101,7 +107,7 @@ PetBuddies-API/
 
 ### 1. Banco de dados
 
-O `docker-compose.yml` sobe **só o Oracle** — a aplicação roda no terminal, onde o log fica visível e o restart é imediato. A porta é `1522` (o serviço de cuidado, Java, usa `1521`): os dois bancos são separados desde o ADR `s3-25`, nenhum objeto de um existe no schema do outro.
+O `docker-compose.yml` sobe **só o Oracle** — a aplicação roda no terminal, onde o log fica visível e o restart é imediato. A porta é `1522`; o serviço Java usa `1521`. Cada serviço tem o próprio schema — nenhum objeto de um existe no banco do outro.
 
 ```bash
 docker compose up -d          # sobe o banco
@@ -123,7 +129,7 @@ export $(grep -v '^#' .env | xargs)   # ou exporte manualmente, ou use user-secr
 |---|---|
 | `ConnectionStrings__Oracle` | connection string Oracle |
 | `MotorApi__BaseUrl` | endereço do `petbuddies-ai` (Java) — usado **só** pelo health check `/health/externo` |
-| `PETBUDDIES_JWT_SECRET` | segredo HS256 compartilhado com o Java (ADR `s3-20`), mínimo 32 caracteres. Sem ele a subida falha (`ValidateOnStart`) |
+| `PETBUDDIES_JWT_SECRET` | segredo HS256 compartilhado com o Java, mínimo 32 caracteres. Sem ele a subida falha (`ValidateOnStart`) |
 
 Em desenvolvimento local, a connection string já vem preenchida em `appsettings.Development.json` (Oracle do `docker-compose.yml`) — só `PETBUDDIES_JWT_SECRET` precisa ser exportado para a aplicação subir.
 
@@ -143,16 +149,54 @@ A aplicação sobe em:
 
 ## Modelo de Dados
 
+```mermaid
+erDiagram
+    PROTOCOLO ||--o{ REGRA_PROTOCOLO : compoe
+    PROTOCOLO ||--o{ OFERTA : precifica
+
+    PROTOCOLO {
+        long id PK
+        string nome
+        string categoria
+        string especie
+        bool ativo
+    }
+    REGRA_PROTOCOLO {
+        long id PK
+        string tipoCuidado
+        int deslocamento
+        int intervalo
+        string unidadeIntervalo
+    }
+    OFERTA {
+        long id PK
+        long clinicaId
+        string ato
+        string subtipo
+        decimal valor
+        date vigenciaInicio
+    }
+    REGRA_PONTUACAO {
+        long id PK
+        long clinicaId
+        string gesto
+        int pontos
+        date vigenciaInicio
+    }
+```
+
+`RegraPontuacao` não se relaciona com as demais: pontua o gesto do tutor, não o catálogo.
+
 ### Entidades e Tabelas — 4 tabelas
 
 | Entidade | Tabela | Relacionamentos | Papel |
 |----------|--------|-----------------|-------|
-| `ProtocoloEntity` | `T_PB_PROTOCOLO` | 1:N → `RegraProtocolo` | catálogo de protocolos de cuidado (nasce no Java, replicado aqui) |
+| `ProtocoloEntity` | `T_PB_PROTOCOLO` | 1:N → `RegraProtocolo` | catálogo de protocolos de cuidado |
 | `RegraProtocoloEntity` | `T_PB_REGRA_PROTOCOLO` | N:1 → `Protocolo` | a regra de cada item do protocolo (tipo de cuidado, deslocamento, recorrência) |
 | `OfertaEntity` | `T_PB_OFERTA` | N:1 → `Protocolo` (opcional) | o que a clínica oferece — procedimento, consulta ou protocolo inteiro — e por quanto, com vigência |
 | `RegraPontuacaoEntity` | `T_PB_REGRA_PONTUACAO` | — | quanto cada gesto do tutor vale, por clínica e vigência |
 
-`ClinicaEntity` saiu do .NET (migrou para o Java): `Oferta` e `RegraPontuacao` guardam só `ClinicaId`, sem FK — é single-tenant nesta sprint (`ClinicaId = 1`).
+`Oferta` e `RegraPontuacao` guardam `ClinicaId` sem FK — a clínica vive no banco do Java, e o serviço é single-tenant nesta sprint (`ClinicaId = 1`).
 
 `BaseEntity` dá `CreatedAt`/`UpdatedAt` a `Protocolo`, `Oferta` e `RegraPontuacao`. `RegraProtocolo` não herda `BaseEntity` — é sempre reescrita junto do protocolo, nunca em si mesma.
 
@@ -189,15 +233,15 @@ A aplicação sobe em:
 
 Listagem vazia devolve `204 No Content`; remoção de recurso com vínculo (FK) devolve `409 Conflict`. Erros são simples, sem envelope: `400 Bad Request`/`404 Not Found`/`409 Conflict` com uma mensagem de texto — shape ausente ou tipo errado no JSON é pego automaticamente pelo `[ApiController]` (DataAnnotations do request), e regra cruzada (ex.: alvo da oferta incoerente com o ato) é pega pelo `Validar()` de cada service, que devolve a mensagem de erro como `string?`.
 
-**A integração com o Java é essa mesma API, do outro lado:** ao instanciar um plano de cuidado, o `petbuddies-ai` faz `GET` nesses endpoints para ler o catálogo vigente. O .NET não inicia nenhuma chamada para o Java — só o health check abaixo consulta o endereço dele, e só para reportar saúde.
+Ao instanciar um plano de cuidado, o `petbuddies-ai` faz `GET` nesses endpoints para ler o catálogo vigente. O .NET não inicia chamadas para o Java — só o health check consulta o endereço dele, para reportar saúde.
 
 ---
 
 ## Autenticação
 
-JWT **emitido pelo Java** (`POST /api/auth/login`, `issuer: petbuddies-ai`) e validado aqui com `AddAuthentication().AddJwtBearer()` (`Program.cs`) — cerca de dez linhas de configuração, sem Identity: o professor não o ensinou e o PDF só o pede na Sprint 4.
+JWT **emitido pelo Java** (`POST /api/auth/login`, `issuer: petbuddies-ai`) e validado aqui com `AddAuthentication().AddJwtBearer()` (`Program.cs`). Sem Identity nesta sprint.
 
-- Chave simétrica HS256, `PETBUDDIES_JWT_SECRET` (mínimo 32 caracteres) — mesmo segredo dos dois serviços (ADR `s3-20`).
+- Chave simétrica HS256, `PETBUDDIES_JWT_SECRET` (mínimo 32 caracteres) — mesmo segredo nos dois serviços.
 - Role vem da claim `perfil` (`RoleClaimType = "perfil"`), valores `VET` e `TUTOR`.
 - Toda rota de negócio é `[Authorize(Roles = "VET")]`; sem token → `401`, com token de `TUTOR` → `403`.
 - As quatro rotas de health check são `AllowAnonymous`, propositalmente.
@@ -269,7 +313,7 @@ dotnet test --filter "Autenticacao=Protocolo"
 
 ### Via Postman
 
-A coleção em `docs/postman/petbuddies-api-net.postman_collection.json` ainda cobre `Endereco`, `Clinica`, `Veterinario` e `JanelaAtendimento` — os recursos do registro clínico que migraram para o Java no `s3-25`. Ela está **desatualizada** para o serviço atual e não foi atualizada neste PR (fora de escopo do N9); use o Swagger enquanto uma coleção nova para `Protocolo`/`RegraProtocolo`/`Oferta`/`RegraPontuacao` não é publicada.
+A coleção em `docs/postman/petbuddies-api-net.postman_collection.json` ainda cobre recursos do registro clínico, que hoje vivem no Java. Está **desatualizada** — use o Swagger até uma coleção nova dos quatro domínios ser publicada.
 
 ---
 
