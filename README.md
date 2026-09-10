@@ -212,6 +212,67 @@ A aplicação sobe em:
 
 ---
 
+## Testes Automatizados
+
+Dois projetos xUnit, quatro domínios do back-office (`Protocolo`, `RegraProtocolo`, `Oferta`,
+`RegraPontuacao`) × três camadas, no padrão ensinado em aula: Repository, Service e Controller
+testados em separado, com o Controller isolando o Service via mock.
+
+```
+PetBuddies-API.Tests.Unit/
+├── App/
+│   ├── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}RepositoryTest.cs   # EF Core InMemory
+│   └── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}ServiceTest.cs      # Moq sobre os repositórios
+└── Fixtures/
+    └── RequestBuilderFixture.cs
+
+PetBuddies-API.Tests.Integration/
+├── App/
+│   ├── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}ControllerTest.cs  # WebApplicationFactory + Service mockado
+│   └── AutenticacaoTest.cs                                                # app real, sem mock
+└── Fixtures/
+    ├── PetBuddiesApiFixture.cs         # usado pelo AutenticacaoTest
+    ├── CustomWebApplicationFactory.cs  # usado pelos ControllerTest, um Service mockado por domínio
+    └── JsonPadrao.cs
+```
+
+Rodar tudo:
+
+```bash
+dotnet test
+```
+
+Todo teste tem `[Trait]` de camada e domínio — dá para rodar só um recorte:
+
+```bash
+dotnet test --filter "Repository=Protocolo"
+dotnet test --filter "Service=Oferta"
+dotnet test --filter "Controller=RegraPontuacao"
+dotnet test --filter "Autenticacao=Protocolo"
+```
+
+Tudo roda contra `Microsoft.EntityFrameworkCore.InMemory` — não precisa do Oracle, de VPN nem de
+container subindo.
+
+---
+
+## Health Checks
+
+Quatro rotas expostas por `Program.cs`, sem autenticação (`AllowAnonymous`):
+
+| Rota | O que verifica | Quando falha |
+|---|---|---|
+| `/health/live` | o processo está de pé | nunca — não toca banco nem dependência externa |
+| `/health/db` | conexão com o Oracle | Oracle fora do ar ou connection string vazia |
+| `/health/externo` | `petbuddies-ai` (Java), via `GET /actuator/health` | motor Java fora do ar ou endereço não configurado |
+| `/health` | as três verificações acima, juntas | qualquer uma delas |
+
+```bash
+curl http://localhost:5297/health
+```
+
+---
+
 ## Tecnologias Utilizadas
 
 - **.NET 8.0** / ASP.NET Core
