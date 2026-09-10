@@ -3,10 +3,10 @@ using PetBuddies_API.Application.UseCases;
 using PetBuddies_API.Domain.Interfaces;
 using PetBuddies_API.Tests.Unit.Fixtures;
 
-namespace PetBuddies_API.Tests.Unit.Application.UseCases
+namespace PetBuddies_API.Tests.Unit.App
 {
     [Collection(ServicosDoBackOfficeCollection.NomeDaColecao)]
-    public class OfertaServiceTests
+    public class OfertaServiceTest
     {
         private readonly RequestBuilderFixture _fixture;
         private readonly Mock<IOfertaRepository> _repositorioMock = new();
@@ -14,7 +14,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
         private readonly OfertaService _service;
 
-        public OfertaServiceTests(RequestBuilderFixture fixture)
+        public OfertaServiceTest(RequestBuilderFixture fixture)
         {
             _fixture = fixture;
             _service = new OfertaService(
@@ -24,6 +24,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "Oferta")]
         public void Validar_OfertaDeProtocoloValida_RetornaNull()
         {
             // Arrange
@@ -37,6 +38,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "Oferta")]
         public void Validar_OfertaDeConsultaValida_RetornaNull()
         {
             // Arrange
@@ -50,6 +52,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "Oferta")]
         public void Validar_AtoProtocoloSemProtocoloId_RetornaMensagemDeErro()
         {
             // Arrange — CK_OFERTA_ALVO: PROTOCOLO exige ID_PROTOCOLO.
@@ -63,6 +66,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "Oferta")]
         public void Validar_AtoProtocoloComSubtipo_RetornaMensagemDeErro()
         {
             // Arrange — o alvo de uma oferta de PROTOCOLO é a linha do catálogo, não um subtipo.
@@ -76,6 +80,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "Oferta")]
         public void Validar_AtoConsultaSemSubtipo_RetornaMensagemDeErro()
         {
             // Arrange — CK_OFERTA_ALVO: CONSULTA/PROCEDIMENTO exigem TP_SUBTIPO.
@@ -89,6 +94,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "Oferta")]
         public void Validar_AtoConsultaComProtocoloId_RetornaMensagemDeErro()
         {
             // Arrange
@@ -102,6 +108,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Theory]
+        [Trait("Service", "Oferta")]
         [InlineData(-0.01)]
         [InlineData(-100)]
         public void Validar_ValorNegativo_RetornaMensagemDeErro(decimal valor)
@@ -117,6 +124,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "Oferta")]
         public void Validar_ValorZero_RetornaNull()
         {
             // Arrange — zero é a fronteira aceita pelo CHECK (>= 0, não > 0).
@@ -130,6 +138,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "Oferta")]
         public void Validar_DescricaoEmBranco_RetornaMensagemDeErro()
         {
             // Arrange
@@ -143,6 +152,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "Oferta")]
         public async Task CadastrarAsync_RequestValido_ConfirmaExatamenteUmaVezNoUnitOfWork()
         {
             // Arrange

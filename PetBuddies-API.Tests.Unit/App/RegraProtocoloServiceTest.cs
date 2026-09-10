@@ -4,10 +4,10 @@ using PetBuddies_API.Domain.Enums;
 using PetBuddies_API.Domain.Interfaces;
 using PetBuddies_API.Tests.Unit.Fixtures;
 
-namespace PetBuddies_API.Tests.Unit.Application.UseCases
+namespace PetBuddies_API.Tests.Unit.App
 {
     [Collection(ServicosDoBackOfficeCollection.NomeDaColecao)]
-    public class RegraProtocoloServiceTests
+    public class RegraProtocoloServiceTest
     {
         private readonly RequestBuilderFixture _fixture;
         private readonly Mock<IRegraProtocoloRepository> _repositorioMock = new();
@@ -15,7 +15,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
         private readonly RegraProtocoloService _service;
 
-        public RegraProtocoloServiceTests(RequestBuilderFixture fixture)
+        public RegraProtocoloServiceTest(RequestBuilderFixture fixture)
         {
             _fixture = fixture;
             _service = new RegraProtocoloService(
@@ -25,6 +25,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "RegraProtocolo")]
         public void Validar_RequestValido_RetornaNull()
         {
             // Arrange
@@ -38,6 +39,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "RegraProtocolo")]
         public void Validar_RepeticoesNulo_RetornaMensagemDeErro()
         {
             // Arrange — NR_REPETICOES é NOT NULL: nulo geraria laço infinito no motor.
@@ -51,6 +53,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Theory]
+        [Trait("Service", "RegraProtocolo")]
         [InlineData(0)]
         [InlineData(-1)]
         public void Validar_RepeticoesMenorQueUm_RetornaMensagemDeErro(int repeticoes)
@@ -66,6 +69,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "RegraProtocolo")]
         public void Validar_IntervaloPreenchidoSemUnidade_RetornaMensagemDeErro()
         {
             // Arrange — CK_REGPROT_RECORRENCIA: os dois vêm juntos, ou nenhum.
@@ -79,6 +83,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "RegraProtocolo")]
         public void Validar_UnidadeIntervaloPreenchidaSemIntervalo_RetornaMensagemDeErro()
         {
             // Arrange
@@ -96,6 +101,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "RegraProtocolo")]
         public void Validar_IntervaloEUnidadeAmbosNulos_RetornaNull()
         {
             // Arrange — ocorrência única: os dois nulos é o caso válido.
@@ -109,6 +115,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "RegraProtocolo")]
         public void Validar_IntervaloEUnidadeAmbosPreenchidos_RetornaNull()
         {
             // Arrange — regra recorrente: os dois preenchidos é o outro caso válido.
@@ -126,6 +133,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "RegraProtocolo")]
         public void Validar_TipoDeCuidadoForaDoEnum_RetornaMensagemDeErro()
         {
             // Arrange
@@ -139,6 +147,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "RegraProtocolo")]
         public async Task CadastrarAsync_RequestValido_ConfirmaExatamenteUmaVezNoUnitOfWork()
         {
             // Arrange
@@ -152,6 +161,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "RegraProtocolo")]
         public async Task ProtocoloExisteAsync_DelegaParaRepositorioDeProtocolo()
         {
             // Arrange

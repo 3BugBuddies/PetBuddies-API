@@ -5,23 +5,24 @@ using PetBuddies_API.Domain.Enums;
 using PetBuddies_API.Domain.Interfaces;
 using PetBuddies_API.Tests.Unit.Fixtures;
 
-namespace PetBuddies_API.Tests.Unit.Application.UseCases
+namespace PetBuddies_API.Tests.Unit.App
 {
     [Collection(ServicosDoBackOfficeCollection.NomeDaColecao)]
-    public class ProtocoloServiceTests
+    public class ProtocoloServiceTest
     {
         private readonly RequestBuilderFixture _fixture;
         private readonly Mock<IProtocoloRepository> _repositorioMock = new();
         private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
         private readonly ProtocoloService _service;
 
-        public ProtocoloServiceTests(RequestBuilderFixture fixture)
+        public ProtocoloServiceTest(RequestBuilderFixture fixture)
         {
             _fixture = fixture;
             _service = new ProtocoloService(_repositorioMock.Object, _unitOfWorkMock.Object);
         }
 
         [Fact]
+        [Trait("Service", "Protocolo")]
         public void Validar_RequestValido_RetornaNull()
         {
             // Arrange
@@ -34,11 +35,14 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
             Assert.Null(resultado);
         }
 
-        [Fact]
-        public void Validar_CategoriaForaDoEnum_RetornaMensagemDeErro()
+        [Theory]
+        [Trait("Service", "Protocolo")]
+        [InlineData(null)]
+        [InlineData((CategoriaProtocoloEnum)999)]
+        public void Validar_CategoriaInvalida_RetornaMensagemDeErro(CategoriaProtocoloEnum? categoria)
         {
-            // Arrange — CK_PROTOCOLO_CATEGORIA só aceita PREVENTIVO/POS_CIRURGICO.
-            var request = _fixture.ProtocoloValido() with { Categoria = (CategoriaProtocoloEnum)999 };
+            // Arrange — CK_PROTOCOLO_CATEGORIA só aceita PREVENTIVO/POS_CIRURGICO, e nula também é inválida.
+            var request = _fixture.ProtocoloValido() with { Categoria = categoria };
 
             // Act
             var resultado = _service.Validar(request);
@@ -48,19 +52,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
-        public void Validar_CategoriaNula_RetornaMensagemDeErro()
-        {
-            // Arrange
-            var request = _fixture.ProtocoloValido() with { Categoria = null };
-
-            // Act
-            var resultado = _service.Validar(request);
-
-            // Assert
-            Assert.NotNull(resultado);
-        }
-
-        [Fact]
+        [Trait("Service", "Protocolo")]
         public void Validar_EspecieForaDoEnum_RetornaMensagemDeErro()
         {
             // Arrange
@@ -74,6 +66,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "Protocolo")]
         public void Validar_NomeEmBranco_RetornaMensagemDeErro()
         {
             // Arrange
@@ -87,6 +80,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "Protocolo")]
         public async Task CadastrarAsync_RequestValido_ConfirmaExatamenteUmaVezNoUnitOfWork()
         {
             // Arrange
@@ -103,6 +97,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "Protocolo")]
         public async Task RemoverAsync_ProtocoloInexistente_RetornaFalseSemConfirmarNoUnitOfWork()
         {
             // Arrange

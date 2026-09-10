@@ -4,23 +4,24 @@ using PetBuddies_API.Domain.Enums;
 using PetBuddies_API.Domain.Interfaces;
 using PetBuddies_API.Tests.Unit.Fixtures;
 
-namespace PetBuddies_API.Tests.Unit.Application.UseCases
+namespace PetBuddies_API.Tests.Unit.App
 {
     [Collection(ServicosDoBackOfficeCollection.NomeDaColecao)]
-    public class RegraPontuacaoServiceTests
+    public class RegraPontuacaoServiceTest
     {
         private readonly RequestBuilderFixture _fixture;
         private readonly Mock<IRegraPontuacaoRepository> _repositorioMock = new();
         private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
         private readonly RegraPontuacaoService _service;
 
-        public RegraPontuacaoServiceTests(RequestBuilderFixture fixture)
+        public RegraPontuacaoServiceTest(RequestBuilderFixture fixture)
         {
             _fixture = fixture;
             _service = new RegraPontuacaoService(_repositorioMock.Object, _unitOfWorkMock.Object);
         }
 
         [Fact]
+        [Trait("Service", "RegraPontuacao")]
         public void Validar_RequestValido_RetornaNull()
         {
             // Arrange
@@ -34,6 +35,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "RegraPontuacao")]
         public void Validar_PontosNulo_RetornaMensagemDeErro()
         {
             // Arrange
@@ -47,6 +49,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Theory]
+        [Trait("Service", "RegraPontuacao")]
         [InlineData(0)]
         [InlineData(-5)]
         public void Validar_PontosMenorOuIgualAZero_RetornaMensagemDeErro(int pontos)
@@ -62,6 +65,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "RegraPontuacao")]
         public void Validar_GestoForaDoEnum_RetornaMensagemDeErro()
         {
             // Arrange
@@ -75,6 +79,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "RegraPontuacao")]
         public void Validar_InicioVigenciaNulo_RetornaMensagemDeErro()
         {
             // Arrange
@@ -88,6 +93,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "RegraPontuacao")]
         public async Task CadastrarAsync_RequestValido_ConfirmaExatamenteUmaVezNoUnitOfWork()
         {
             // Arrange
@@ -101,6 +107,7 @@ namespace PetBuddies_API.Tests.Unit.Application.UseCases
         }
 
         [Fact]
+        [Trait("Service", "RegraPontuacao")]
         public async Task VigenciaExisteAsync_DelegaParaRepositorioComOsMesmosParametros()
         {
             // Arrange — UK_PONTUACAO_VIGENCIA: um valor por clínica, gesto e vigência.
