@@ -1,9 +1,25 @@
 # PetBuddies API — Challenge FIAP 2026 | .NET
 
-API REST de domínio clínico veterinário desenvolvida com ASP.NET Core e EF Core, como parte do Challenge da disciplina de **Advanced Business Development with .NET (2TDS)** — FIAP 2026.
+API REST desenvolvida com ASP.NET Core e EF Core, como parte do Challenge da disciplina de **Advanced Business Development with .NET (2TDS)** — FIAP 2026.
 
-O serviço gerencia clínica, endereços, veterinários, tutores, animais, tipos de animal, janelas de atendimento, consultas, prontuários, registros de atendimento e procedimentos. É consumido pelo bot WhatsApp `petbuddies-ai` (Java) e dispara automaticamente o motor de cuidado preventivo Java ao cadastrar um novo animal.
+O serviço é o **back-office administrativo da clínica** (ADR `s3-25`, 09/09/2026): é onde a clínica configura **o que oferece, por quanto, e quanto cada gesto do tutor vale**. Guarda **4 tabelas** — o catálogo de protocolos de cuidado (`Protocolo`, `RegraProtocolo`, que nascem no Java) e a política comercial da clínica (`Oferta`, `RegraPontuacao`, que nascem aqui).
 
+**O que este serviço não é mais, desde o `s3-25`:** não guarda mais clínica, endereço, veterinário, tutor, animal, consulta, prontuário ou procedimento — as onze tabelas do registro clínico migraram para o `petbuddies-ai` (Java). Não existe bot de WhatsApp desde o ADR `s3-01` — o produto é um app mobile com dois perfis (vet e tutor). E este serviço não chama o Java em nada: o `MotorApiClient` foi removido. A única integração entre os dois é o **Java chamando o .NET** para ler este catálogo no momento em que um plano de cuidado nasce — uma via só, na direção oposta à de sprints anteriores.
+
+**Preço e pontuação não são consumidos por nenhuma aplicação nesta sprint.** São política configurada por quem administra a clínica, através do painel web — que ainda não existe (mockup previsto para a Sprint 4). O congelamento do valor de uma oferta ou de uma regra no fato gerado (a "nota fiscal" do gesto do tutor) também é Sprint 4. Hoje o CRUD existe e é validado; nada ainda lê essas tabelas para efetivamente cobrar ou pontuar.
+
+---
+
+## Links
+
+| | |
+|---|---|
+| Deploy | *pendente* |
+| Swagger UI (local) | `http://localhost:5297/swagger` |
+| Postman collection | [`docs/postman/petbuddies-api-net.postman_collection.json`](docs/postman/petbuddies-api-net.postman_collection.json) — **desatualizada** (ver [Como Testar](#como-testar)) |
+| Vídeo de apresentação | *pendente* |
+
+---
 
 ## Integrantes do Grupo
 
@@ -14,6 +30,7 @@ O serviço gerencia clínica, endereços, veterinários, tutores, animais, tipos
 | Giovanna Neri dos Santos | 566154 |
 | Mariana Inoue | 565834 |
 
+---
 
 ## Stack e Dependências
 
@@ -21,86 +38,16 @@ O serviço gerencia clínica, endereços, veterinários, tutores, animais, tipos
 |--------|--------|-----------|
 | Microsoft.EntityFrameworkCore | 8.0.26 | ORM principal |
 | Oracle.EntityFrameworkCore | 8.23.26200 | Driver Oracle para EF Core |
-| Swashbuckle.AspNetCore | 6.6.2 | Swagger / OpenAPI UI |
-| Swashbuckle.AspNetCore.Annotations | 6.6.2 | Anotações do Swagger |
+| Microsoft.AspNetCore.Authentication.JwtBearer | 8.0.26 | Validação do JWT emitido pelo Java |
+| Serilog.AspNetCore | 8.0.3 | Log estruturado (console + arquivo JSON compacto) |
+| OpenTelemetry.Extensions.Hosting + instrumentações (AspNetCore, Http, EntityFrameworkCore) | 1.18.0 / 1.18.0-beta.1 | Tracing e métricas |
+| AspNetCore.HealthChecks.Oracle | 8.0.1 | Health check de conexão com o Oracle |
+| AspNetCore.HealthChecks.Uris | 8.0.1 | Health check do serviço Java (`/actuator/health`) |
+| Swashbuckle.AspNetCore + Annotations | 6.6.2 | Swagger / OpenAPI UI |
+
+**Testes** (só nos projetos `.Tests.*`): xUnit 2.9.3, Moq 4.20.72, Microsoft.EntityFrameworkCore.InMemory 8.0.26, Microsoft.AspNetCore.Mvc.Testing 8.0.26.
 
 ---
-
-## Avaliação isolada — endpoints clínicos
-
-> Devido à relação de algumas classes com o Java, o teste de ponta a ponta completo exige o outro serviço rodando. Para a avaliação isolada da API .NET, a coleção Postman cobre os recursos clínicos independentes listados abaixo.
-
-### Setup rápido para o avaliador
-
-**1. Preencher a connection string Oracle** em `PetBuddies-API/appsettings.Development.json`:
-
-```json
-{
-  "ConnectionStrings": {
-    "Oracle": "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=oracle.fiap.com.br)(PORT=1521)))(CONNECT_DATA=(SERVER=DEDICATED)(SID=ORCL)));User Id=;Password=;Max Pool Size=3;Min Pool Size=1"
-  }
-}
-```
-
-> Preencha `User Id` com seu RM (ex: `rm123456`) e `Password` com a senha do Oracle FIAP.
-
-**2. Executar** (as migrations rodam automaticamente no startup via `Database.Migrate()`):
-
-```bash
-cd PetBuddies-API
-dotnet run --project PetBuddies-API
-```
-
-> Alternativa manual: `dotnet ef database update --project PetBuddies-API`
-
-**3. Swagger:** `http://localhost:5297/swagger`
-
-**4. Postman:** importar `docs/postman/petbuddies-api-net.postman_collection.json` (dentro deste repo)
-
-Execute as pastas na ordem em que aparecem na coleção: **Endereco → Clinica → Veterinario → JanelaAtendimento**.
-
-### Contexto dos recursos testados
-
-O domínio clínico é a base operacional do PetBuddies. Ele guarda os dados que permitem cadastrar unidades de atendimento, vincular profissionais e disponibilizar horários reais para consultas.
-
-- **Endereco** representa a localização física usada pela clínica. Ele é criado primeiro porque a clínica depende desse vínculo.
-
-- **Clinica** é a unidade de atendimento do sistema. Nesta sprint, ela funciona como base single-tenant para os fluxos clínicos e conversacionais.
-
-- **Veterinario** é o profissional vinculado à clínica. O cadastro valida a referência da clínica e impede CRMV duplicado dentro da mesma unidade.
-
-- **JanelaAtendimento** é a agenda disponível do veterinário. Cada janela informa início, fim, duração do slot e o veterinário responsável pelo horário.
-
-- Quando o bot WhatsApp agenda uma consulta, ele consome justamente as janelas disponíveis expostas por esta API. Por isso esta cadeia é a base clínica do fluxo de agendamento.
-
-- Esta seção pode ser testada isoladamente: ela valida CRUD, FKs, conflitos, respostas e ordenação correta de dependências sem precisar do WhatsApp, da Evolution API ou do serviço Java.
-
-- A coleção Postman captura `enderecoId`, `clinicaId`, `veterinarioId` e `janelaId` automaticamente nas variáveis de coleção.
-
-### Rotas testadas na coleção Postman
-
-Execute os recursos na ordem em que aparecem na coleção, pois cada recurso depende do ID gerado pelo anterior.
-
-| Recurso | Rotas cobertas | Principais cenários | Status codes |
-|---|---|---|---|
-| `Endereco` | `POST /api/endereco`<br>`GET /api/endereco`<br>`GET /api/endereco/{id}`<br>`PUT /api/endereco/{id}`<br>`DELETE /api/endereco/{id}` | Criação<br>Listagem<br>Busca por ID<br>Atualização<br>Remoção<br>Payload inválido<br>ID inexistente | `201 Created`<br>`200 OK`<br>`204 No Content`<br>`400 Bad Request`<br>`404 Not Found` |
-| `Clinica` | `POST /api/clinica`<br>`GET /api/clinica`<br>`GET /api/clinica/{id}`<br>`GET /api/clinica/buscar?nome=`<br>`PUT /api/clinica/{id}`<br>`DELETE /api/clinica/{id}` | Vínculo com endereço<br>Busca por nome<br>CNPJ inválido<br>CNPJ duplicado<br>FK inexistente<br>Operações CRUD | `201 Created`<br>`200 OK`<br>`204 No Content`<br>`400 Bad Request`<br>`404 Not Found`<br>`409 Conflict` |
-| `Veterinario` | `POST /api/veterinario`<br>`GET /api/veterinario`<br>`GET /api/veterinario/{id}`<br>`GET /api/veterinario/por-clinica/{clinicaId}`<br>`PUT /api/veterinario/{id}`<br>`DELETE /api/veterinario/{id}` | Vínculo com clínica<br>Filtro por clínica<br>CRMV duplicado na clínica<br>FK inexistente<br>Operações CRUD | `201 Created`<br>`200 OK`<br>`204 No Content`<br>`400 Bad Request`<br>`404 Not Found`<br>`409 Conflict` |
-| `JanelaAtendimento` | `POST /api/janela-atendimento`<br>`GET /api/janela-atendimento`<br>`GET /api/janela-atendimento/todas`<br>`GET /api/janela-atendimento/{id}`<br>`PUT /api/janela-atendimento/{id}`<br>`DELETE /api/janela-atendimento/{id}` | Vínculo com veterinário<br>Horários disponíveis<br>Listagem completa<br>Conflito de horário<br>Intervalo inválido<br>Operações CRUD | `201 Created`<br>`200 OK`<br>`204 No Content`<br>`400 Bad Request`<br>`404 Not Found`<br>`409 Conflict` |
-
-
-### Validações e respostas esperadas
-
-| Situação | Exemplo na coleção | Retorno esperado |
-|---|---|---|
-| Lista sem registros | `GET /api/endereco` antes de haver dados | `204 No Content` |
-| Busca por ID inexistente | `GET /api/clinica/999999` | `404 Not Found` |
-| Payload inválido | `POST /api/endereco` sem `logradouro` | `400 Bad Request` |
-| FK inexistente | `POST /api/clinica` com `enderecoId` inexistente | `404 Not Found` |
-| Duplicidade de negócio | CNPJ, CRMV ou horário já cadastrado | `409 Conflict` |
-| Atualização com sucesso | `PUT /api/veterinario/{id}` | `204 No Content` |
-| Remoção com sucesso | `DELETE /api/janela-atendimento/{id}` | `204 No Content` |
-
 
 ## Estrutura do Projeto
 
@@ -110,77 +57,37 @@ PetBuddies-API/
 │   └── postman/
 │       └── petbuddies-api-net.postman_collection.json
 ├── PetBuddies-API/
-│   ├── Controllers/     # 11 controllers REST por domínio
-│   ├── Data/
-│   │   ├── ApplicationContext.cs
-│   │   └── Migrations/  # Migrations EF Core
-│   ├── Dtos/            # DTOs e requests organizados por domínio
-│   ├── Enums/           # 10 enums de domínio
-│   ├── Models/          # BaseEntity + 11 entidades EF Core
-│   ├── Services/        # Services de domínio + MotorApiClient
+│   ├── Domain/
+│   │   ├── Entities/        # BaseEntity + 4 entidades (Protocolo, RegraProtocolo, Oferta, RegraPontuacao)
+│   │   ├── Enums/           # 7 enums de domínio
+│   │   └── Interfaces/      # Contratos de repositório (IUnitOfWork, IXxxRepository)
+│   ├── Application/
+│   │   ├── Dtos/            # Um subpacote por domínio: XxxDto + SalvarXxxRequest
+│   │   ├── Interfaces/      # Contratos de service (IXxxService)
+│   │   └── UseCases/        # Services — validação de shape + regra de negócio
+│   ├── Infrastructure/
+│   │   ├── Data/
+│   │   │   ├── ApplicationContext.cs
+│   │   │   ├── Configurations/  # IEntityTypeConfiguration<T>, um por entidade
+│   │   │   ├── Converters/
+│   │   │   ├── Migrations/      # Migrations EF Core
+│   │   │   └── UnitOfWork.cs
+│   │   ├── Repositories/    # Um repositório por domínio
+│   │   └── Security/
+│   │       └── JwtOptions.cs
+│   ├── Presentation/
+│   │   ├── Controllers/     # 4 controllers REST, um por domínio
+│   │   ├── Middlewares/
+│   │   │   └── CorrelacaoMiddleware.cs
+│   │   └── HealthCheckResponseWriter.cs
 │   ├── appsettings.json
 │   ├── appsettings.Development.json
 │   └── Program.cs
+├── PetBuddies-API.Tests.Unit/          # Repository + Service, EF Core InMemory + Moq
+├── PetBuddies-API.Tests.Integration/   # Controller (Service mockado) + Autenticação (app real)
+├── docker-compose.yml       # Sobe só o Oracle de desenvolvimento
 ├── Dockerfile
 └── README.md
-```
-
-
-## Modelo de Dados
-
-### Entidades e Tabelas
-
-#### Tabelas independentes — Sem ligação com Java
-
-| Entidade | Tabela | Relacionamentos |
-|----------|--------|-----------------|
-| `VeterinarioEntity` | `T_PB_VETERINARIO` | → Clinica |
-| `ClinicaEntity` | `T_PB_CLINICA` | → Endereco |
-| `EnderecoEntity` | `T_PB_ENDERECO` | — |
-| `TipoAnimalEntity` | `T_PB_TIPO_ANIMAL` | Especie + Porte |
-| `JanelaAtendimentoEntity` | `T_PB_JANELA_ATENDIMENTO` | → Veterinario |
-
-#### Tabelas dependentes — Com ligação ao Java
-
-| Entidade | Tabela | Relacionamentos |
-|----------|--------|-----------------|
-| `AnimalEntity` | `T_PB_ANIMAL` | → Responsavel, TipoAnimal |
-| `ResponsavelEntity` | `T_PB_RESPONSAVEL` | → Clinica, Endereco (nullable) |
-| `ConsultaEntity` | `T_PB_CONSULTA` | → Animal, Veterinario, Clinica |
-
-#### Tabelas dependentes de tabelas relacionadas ao Java
-
-| Entidade | Tabela | Relacionamentos |
-|----------|--------|-----------------|
-| `ProntuarioEntity` | `T_PB_PRONTUARIO` | → Animal |
-| `ProcedimentoEntity` | `T_PB_PROCEDIMENTO` | → RegistroAtendimento, Animal, Veterinario |
-| `RegistroAtendimentoEntity` | `T_PB_REGISTRO_ATENDIMENTO` | → Animal, Prontuario, Consulta |
-
-### Enums
-
-| Enum | Valores |
-|------|---------|
-| `SexoEnum` | `MACHO`, `FEMEA` |
-| `EspecieEnum` | `CACHORRO`, `GATO`, `PASSARO`, `COELHO`, `HAMSTER`, `OUTRO` |
-| `PorteEnum` | `MINI`, `PEQUENO`, `MEDIO`, `GRANDE`, `GIGANTE` |
-| `StatusTutorEnum` | `ATIVO`, `PRE_CADASTRO` |
-| `StatusConsultaEnum` | `AGENDADA`, `CONFIRMADA`, `REALIZADA`, `CANCELADA`, `NAO_COMPARECEU` |
-| `CategoriaProtocoloEnum` | `PREVENTIVO`, `POS_CIRURGICO` |
-| `StatusPlanoEnum` | `ATIVO`, `CONCLUIDO`, `CANCELADO` |
-| `TipoConsultaEnum` | `TRIAGEM`, `ROTINA`, `VACINACAO`, `EXAME`, `RETORNO`, `EMERGENCIA` |
-| `TipoProcedimentoEnum` | `VACINACAO`, `VERMIFUGACAO`, `EXAME_LABORATORIAL`, `EXAME_IMAGEM`, `CIRURGIA`, `INTERNACAO`, `OUTRO` |
-| `StatusProcedimentoEnum` | `PENDENTE`, `REALIZADO`, `CANCELADO` |
-
----
-
-## Configuração do Banco de Dados
-
-Oracle disponibilizado pela FIAP. O arquivo `PetBuddies-API/appsettings.Development.json` fica versionado com `User Id` e `Password` vazios; preencha esses campos localmente antes de executar.
-
-No startup, o `Program.cs` executa `Database.Migrate()` e aplica as migrations EF Core pendentes. Para rodar manualmente:
-
-```bash
-dotnet ef database update --project PetBuddies-API
 ```
 
 ---
@@ -190,21 +97,43 @@ dotnet ef database update --project PetBuddies-API
 ### Pré-requisitos
 
 - .NET 8 SDK
-- Acesso ao Oracle FIAP (VPN ou rede local)
+- Docker (para o Oracle de desenvolvimento) **ou** acesso ao Oracle FIAP
 
-### Rodando localmente
+### 1. Banco de dados
+
+O `docker-compose.yml` sobe **só o Oracle** — a aplicação roda no terminal, onde o log fica visível e o restart é imediato. A porta é `1522` (o serviço de cuidado, Java, usa `1521`): os dois bancos são separados desde o ADR `s3-25`, nenhum objeto de um existe no schema do outro.
 
 ```bash
-# Clonar o repositório
-git clone https://github.com/3BugBuddies/PetBuddies-API
-cd PetBuddies-API
+docker compose up -d          # sobe o banco
+docker compose down -v        # derruba e apaga o volume
+```
 
-# Preencher User Id e Password em PetBuddies-API/appsettings.Development.json
-# (ver seção "Configuração do Banco de Dados")
+Alternativa: preencher `ConnectionStrings:Oracle` em `PetBuddies-API/appsettings.Development.json` com o Oracle FIAP (`User Id` = seu RM, `Password` = a senha do Oracle FIAP).
 
-# Executar
+### 2. Variáveis de ambiente
+
+`.env.example` é o molde das variáveis que a configuração do ASP.NET Core lê do ambiente (`__` separa seção de chave). **Nada no projeto carrega `.env` automaticamente** — exporte no shell antes de rodar, ou preencha os mesmos valores em `appsettings.Development.json` / user-secrets:
+
+```bash
+cp .env.example .env
+export $(grep -v '^#' .env | xargs)   # ou exporte manualmente, ou use user-secrets
+```
+
+| Variável | Para quê |
+|---|---|
+| `ConnectionStrings__Oracle` | connection string Oracle |
+| `MotorApi__BaseUrl` | endereço do `petbuddies-ai` (Java) — usado **só** pelo health check `/health/externo` |
+| `PETBUDDIES_JWT_SECRET` | segredo HS256 compartilhado com o Java (ADR `s3-20`), mínimo 32 caracteres. Sem ele a subida falha (`ValidateOnStart`) |
+
+Em desenvolvimento local, a connection string já vem preenchida em `appsettings.Development.json` (Oracle do `docker-compose.yml`) — só `PETBUDDIES_JWT_SECRET` precisa ser exportado para a aplicação subir.
+
+### 3. Rodando
+
+```bash
 dotnet run --project PetBuddies-API
 ```
+
+No startup, `Program.cs` executa `Database.Migrate()` e aplica as migrations pendentes.
 
 A aplicação sobe em:
 - **HTTP:** `http://localhost:5297`
@@ -212,51 +141,77 @@ A aplicação sobe em:
 
 ---
 
-## Testes Automatizados
+## Modelo de Dados
 
-Dois projetos xUnit, quatro domínios do back-office (`Protocolo`, `RegraProtocolo`, `Oferta`,
-`RegraPontuacao`) × três camadas, no padrão ensinado em aula: Repository, Service e Controller
-testados em separado, com o Controller isolando o Service via mock.
+### Entidades e Tabelas — 4 tabelas
 
-```
-PetBuddies-API.Tests.Unit/
-├── App/
-│   ├── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}RepositoryTest.cs   # EF Core InMemory
-│   └── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}ServiceTest.cs      # Moq sobre os repositórios
-└── Fixtures/
-    └── RequestBuilderFixture.cs
+| Entidade | Tabela | Relacionamentos | Papel |
+|----------|--------|-----------------|-------|
+| `ProtocoloEntity` | `T_PB_PROTOCOLO` | 1:N → `RegraProtocolo` | catálogo de protocolos de cuidado (nasce no Java, replicado aqui) |
+| `RegraProtocoloEntity` | `T_PB_REGRA_PROTOCOLO` | N:1 → `Protocolo` | a regra de cada item do protocolo (tipo de cuidado, deslocamento, recorrência) |
+| `OfertaEntity` | `T_PB_OFERTA` | N:1 → `Protocolo` (opcional) | o que a clínica oferece — procedimento, consulta ou protocolo inteiro — e por quanto, com vigência |
+| `RegraPontuacaoEntity` | `T_PB_REGRA_PONTUACAO` | — | quanto cada gesto do tutor vale, por clínica e vigência |
 
-PetBuddies-API.Tests.Integration/
-├── App/
-│   ├── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}ControllerTest.cs  # WebApplicationFactory + Service mockado
-│   └── AutenticacaoTest.cs                                                # app real, sem mock
-└── Fixtures/
-    ├── PetBuddiesApiFixture.cs         # usado pelo AutenticacaoTest
-    ├── CustomWebApplicationFactory.cs  # usado pelos ControllerTest, um Service mockado por domínio
-    └── JsonPadrao.cs
-```
+`ClinicaEntity` saiu do .NET (migrou para o Java): `Oferta` e `RegraPontuacao` guardam só `ClinicaId`, sem FK — é single-tenant nesta sprint (`ClinicaId = 1`).
 
-Rodar tudo:
+`BaseEntity` dá `CreatedAt`/`UpdatedAt` a `Protocolo`, `Oferta` e `RegraPontuacao`. `RegraProtocolo` não herda `BaseEntity` — é sempre reescrita junto do protocolo, nunca em si mesma.
 
-```bash
-dotnet test
-```
+### Regras de negócio que o schema espelha
 
-Todo teste tem `[Trait]` de camada e domínio — dá para rodar só um recorte:
+- `Oferta`: `UX_OFERTA_VIGENCIA` (único por clínica + ato + subtipo/protocolo + início de vigência) e o `CHECK` `CK_OFERTA_ALVO` — ato `PROCEDIMENTO`/`CONSULTA` exige `Subtipo` e proíbe `ProtocoloId`; ato `PROTOCOLO` exige `ProtocoloId` e proíbe `Subtipo`.
+- `RegraPontuacao`: `UK_PONTUACAO_VIGENCIA` (único por clínica + gesto + início de vigência).
+- `RegraProtocolo`: `CK_REGPROT_RECORRENCIA` — `Intervalo` e `UnidadeIntervalo` são ambos nulos ou ambos preenchidos.
 
-```bash
-dotnet test --filter "Repository=Protocolo"
-dotnet test --filter "Service=Oferta"
-dotnet test --filter "Controller=RegraPontuacao"
-dotnet test --filter "Autenticacao=Protocolo"
-```
+### Enums
 
-Tudo roda contra `Microsoft.EntityFrameworkCore.InMemory` — não precisa do Oracle, de VPN nem de
-container subindo.
+| Enum | Valores |
+|------|---------|
+| `CategoriaProtocoloEnum` | `PREVENTIVO`, `POS_CIRURGICO` |
+| `EspecieEnum` | `CACHORRO`, `GATO`, `PASSARO`, `COELHO`, `HAMSTER`, `OUTRO` |
+| `TipoCuidadoEnum` | `VACINACAO`, `VERMIFUGACAO`, `EXAME`, `RETORNO`, `CIRURGIA`, `MEDICACAO`, `HIGIENE` |
+| `UnidadeTempoEnum` | `DIAS`, `SEMANAS`, `MESES` |
+| `TipoDataBaseEnum` | `NASCIMENTO`, `DATA_CIRURGIA`, `ULTIMA_REALIZACAO` |
+| `TipoAtoOfertaEnum` | `PROCEDIMENTO`, `CONSULTA`, `PROTOCOLO` |
+| `TipoGestoEnum` | `PLANO_CRIADO`, `CONSULTA_AGENDADA`, `CONSULTA_REALIZADA`, `PROCEDIMENTO_EXECUTADO` |
 
 ---
 
-## Health Checks
+## Recursos e Rotas
+
+> Todas as rotas exigem token JWT com role `VET` (`[Authorize(Roles = "VET")]`) — ver [Autenticação](#autenticação).
+
+| Recurso | Rotas | Filtros de listagem | Status codes |
+|---|---|---|---|
+| Protocolo | `GET` `POST` `/api/protocolos`<br>`GET` `PUT` `DELETE` `/api/protocolos/{id}` | `especie`, `categoria`, `ativo` | `200` `201` `204` `400` `404` `409` |
+| RegraProtocolo | `GET` `POST` `/api/regras-protocolo`<br>`GET` `PUT` `DELETE` `/api/regras-protocolo/{id}` | `protocoloId` (obrigatório na listagem) | `200` `201` `204` `400` `404` `409` |
+| Oferta | `GET` `POST` `/api/ofertas`<br>`GET` `PUT` `DELETE` `/api/ofertas/{id}` | `clinicaId`, `ato` | `200` `201` `204` `400` `404` `409` |
+| RegraPontuacao | `GET` `POST` `/api/regras-pontuacao`<br>`GET` `PUT` `DELETE` `/api/regras-pontuacao/{id}` | `clinicaId`, `gesto` | `200` `201` `204` `400` `404` `409` |
+
+Listagem vazia devolve `204 No Content`; remoção de recurso com vínculo (FK) devolve `409 Conflict`. Erros são simples, sem envelope: `400 Bad Request`/`404 Not Found`/`409 Conflict` com uma mensagem de texto — shape ausente ou tipo errado no JSON é pego automaticamente pelo `[ApiController]` (DataAnnotations do request), e regra cruzada (ex.: alvo da oferta incoerente com o ato) é pega pelo `Validar()` de cada service, que devolve a mensagem de erro como `string?`.
+
+**A integração com o Java é essa mesma API, do outro lado:** ao instanciar um plano de cuidado, o `petbuddies-ai` faz `GET` nesses endpoints para ler o catálogo vigente. O .NET não inicia nenhuma chamada para o Java — só o health check abaixo consulta o endereço dele, e só para reportar saúde.
+
+---
+
+## Autenticação
+
+JWT **emitido pelo Java** (`POST /api/auth/login`, `issuer: petbuddies-ai`) e validado aqui com `AddAuthentication().AddJwtBearer()` (`Program.cs`) — cerca de dez linhas de configuração, sem Identity: o professor não o ensinou e o PDF só o pede na Sprint 4.
+
+- Chave simétrica HS256, `PETBUDDIES_JWT_SECRET` (mínimo 32 caracteres) — mesmo segredo dos dois serviços (ADR `s3-20`).
+- Role vem da claim `perfil` (`RoleClaimType = "perfil"`), valores `VET` e `TUTOR`.
+- Toda rota de negócio é `[Authorize(Roles = "VET")]`; sem token → `401`, com token de `TUTOR` → `403`.
+- As quatro rotas de health check são `AllowAnonymous`, propositalmente.
+
+---
+
+## Observabilidade
+
+- **Serilog:** console (`[{Timestamp} {Level}] [{CorrelationId}] {Message}`) + arquivo JSON compacto em `logs/api-.log`, rotação diária, 7 dias de retenção.
+- **Correlação de requisição** (`CorrelacaoMiddleware`, primeiro middleware do pipeline): usa o `TraceId` do rastreamento já ativo como identificador — nunca inventa um novo — e devolve `X-Correlation-Id` no header de resposta. Se o cliente mandou seu próprio `X-Correlation-Id`, ele entra como propriedade adicional do log, nunca substitui o identificador do rastreamento.
+- **OpenTelemetry:** tracing (instrumentação de ASP.NET Core, `HttpClient` e Entity Framework Core) e métricas de ASP.NET Core (duração de requisição, contagem por status code). Sem `OTEL_EXPORTER_OTLP_ENDPOINT` configurado, exporta no console — é a única forma de ver um span localmente, sem coletor.
+- **Application Insights:** a connection string é lida da configuração e logada como presente/ausente no startup, mas **não é usada** nesta sprint — gancho para a Sprint 4.
+
+### Health Checks
 
 Quatro rotas expostas por `Program.cs`, sem autenticação (`AllowAnonymous`):
 
@@ -273,11 +228,101 @@ curl http://localhost:5297/health
 
 ---
 
-## Tecnologias Utilizadas
+## Como Testar
 
-- **.NET 8.0** / ASP.NET Core
-- **Entity Framework Core 8.0.26** + **Oracle.EntityFrameworkCore 8.23.26200**
-- **Oracle Database** (FIAP)
-- **Swashbuckle 6.6.2** (Swagger UI + Annotations)
-- **Data Annotations** para validação de requests
-- **System.Text.Json** com `CamelCase` + `JsonStringEnumConverter`
+### Via Swagger UI
+
+Com o token JWT (emitido pelo Java) preenchido em **Authorize**, os 20 endpoints (5 por domínio × 4 domínios) estão disponíveis com "Try it out": `http://localhost:5297/swagger`.
+
+### Via testes automatizados
+
+Dois projetos xUnit, quatro domínios (`Protocolo`, `RegraProtocolo`, `Oferta`, `RegraPontuacao`) × camada, no padrão ensinado em aula — Repository, Service e Controller testados em separado, com o Controller isolando o Service via mock:
+
+```
+PetBuddies-API.Tests.Unit/
+└── App/
+    ├── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}RepositoryTest.cs   # EF Core InMemory
+    └── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}ServiceTest.cs      # Moq sobre os repositórios
+
+PetBuddies-API.Tests.Integration/
+└── App/
+    ├── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}ControllerTest.cs  # WebApplicationFactory + Service mockado (CustomWebApplicationFactory)
+    └── AutenticacaoTest.cs                                                # app real, sem mock — sem token (401), token TUTOR (403), token VET (201)
+```
+
+Rodar tudo:
+
+```bash
+dotnet test
+```
+
+**86 testes, todos passando** (63 no `.Tests.Unit`, 23 no `.Tests.Integration` — conferido em 10/09/2026). Tudo roda contra `Microsoft.EntityFrameworkCore.InMemory`: não precisa de Oracle, VPN nem container.
+
+Todo teste tem `[Trait]` de camada e domínio — dá para rodar só um recorte:
+
+```bash
+dotnet test --filter "Repository=Protocolo"
+dotnet test --filter "Service=Oferta"
+dotnet test --filter "Controller=RegraPontuacao"
+dotnet test --filter "Autenticacao=Protocolo"
+```
+
+### Via Postman
+
+A coleção em `docs/postman/petbuddies-api-net.postman_collection.json` ainda cobre `Endereco`, `Clinica`, `Veterinario` e `JanelaAtendimento` — os recursos do registro clínico que migraram para o Java no `s3-25`. Ela está **desatualizada** para o serviço atual e não foi atualizada neste PR (fora de escopo do N9); use o Swagger enquanto uma coleção nova para `Protocolo`/`RegraProtocolo`/`Oferta`/`RegraPontuacao` não é publicada.
+
+---
+
+## Exemplos de Payload (POST)
+
+> Todas as rotas exigem `Authorization: Bearer <token com role VET>`.
+
+#### `POST /api/protocolos`
+```json
+{
+  "nome": "Preventivo cão adulto",
+  "categoria": "PREVENTIVO",
+  "especie": "CACHORRO",
+  "ativo": true,
+  "descricao": "Vacinação e vermifugação anuais"
+}
+```
+
+#### `POST /api/regras-protocolo`
+```json
+{
+  "protocoloId": 1,
+  "tipo": "VACINACAO",
+  "nome": "V10 anual",
+  "offset": 0,
+  "unidadeOffset": "DIAS",
+  "dataBase": "ULTIMA_REALIZACAO",
+  "intervalo": 12,
+  "unidadeIntervalo": "MESES",
+  "repeticoes": 1,
+  "descricao": "Reforço anual da V10"
+}
+```
+
+#### `POST /api/ofertas`
+> `subtipo` + `protocoloId` são mutuamente exclusivos: `ato: PROTOCOLO` exige `protocoloId` e proíbe `subtipo`; `PROCEDIMENTO`/`CONSULTA` exigem `subtipo` e proíbem `protocoloId`.
+```json
+{
+  "clinicaId": 1,
+  "ato": "PROTOCOLO",
+  "protocoloId": 1,
+  "descricao": "Plano preventivo cão adulto",
+  "valor": 180.00,
+  "inicioVigencia": "2026-10-01"
+}
+```
+
+#### `POST /api/regras-pontuacao`
+```json
+{
+  "clinicaId": 1,
+  "gesto": "CONSULTA_REALIZADA",
+  "pontos": 10,
+  "inicioVigencia": "2026-10-01"
+}
+```
