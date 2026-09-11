@@ -1,24 +1,19 @@
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PetBuddies_API.Infrastructure.Data;
-using PetBuddies_API.Application.Interfaces;
-using PetBuddies_API.Application.UseCases;
-using PetBuddies_API.Domain.Interfaces;
-using PetBuddies_API.Infrastructure.Repositories;
+using PetBuddies_API.Infrastructure.IoC;
 using PetBuddies_API.Infrastructure.Security;
 using PetBuddies_API.Presentation;
 using PetBuddies_API.Presentation.Middlewares;
 using Serilog;
-using Serilog.Events;
-using Serilog.Formatting.Compact;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -34,22 +29,7 @@ var configuracaoDoLog = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-// Os niveis vem do codigo e podem ser sobrescritos pela secao Serilog do appsettings.
-// O arquivo sai em JSON compacto: e nele que as propriedades enriquecidas — entre
-// elas o CorrelationId — ficam legiveis por maquina.
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-    .Enrich.FromLogContext()
-    .ReadFrom.Configuration(configuracaoDoLog)
-    .WriteTo.Console(outputTemplate:
-        "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
-    .WriteTo.File(
-        new CompactJsonFormatter(),
-        "logs/api-.log",
-        rollingInterval: RollingInterval.Day,
-        retainedFileCountLimit: 7)
-    .CreateLogger();
+Bootstrap.AddLogApi(configuracaoDoLog);
 
 Log.Information("PetBuddies-API subindo no ambiente {Ambiente}", ambiente);
 
@@ -58,27 +38,7 @@ builder.Host.UseSerilog();
 
 const string PoliticaCorsDoPainel = "painel-clinica";
 
-builder.Services.AddDbContext<ApplicationContext>(options =>
-{
-    options.UseOracle(
-        builder.Configuration.GetConnectionString("Oracle"),
-        o => o.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)
-    );
-});
-// Confirmacao da unidade de trabalho: quem chama SalvarAsync e o caso de uso,
-// nunca o repositorio.
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-// Back-office da clinica
-builder.Services.AddScoped<IProtocoloRepository, ProtocoloRepository>();
-builder.Services.AddScoped<IRegraProtocoloRepository, RegraProtocoloRepository>();
-builder.Services.AddScoped<IOfertaRepository, OfertaRepository>();
-builder.Services.AddScoped<IRegraPontuacaoRepository, RegraPontuacaoRepository>();
-
-builder.Services.AddScoped<IProtocoloService, ProtocoloService>();
-builder.Services.AddScoped<IRegraProtocoloService, RegraProtocoloService>();
-builder.Services.AddScoped<IOfertaService, OfertaService>();
-builder.Services.AddScoped<IRegraPontuacaoService, RegraPontuacaoService>();
+Bootstrap.AddIoC(builder.Services, builder.Configuration);
 
 // ValidateOnStart derruba a subida quando PETBUDDIES_JWT_SECRET falta; o
 // design-time do EF nao chega la, porque para no Build().
@@ -219,21 +179,14 @@ builder.Services.AddHealthChecks()
         timeout: TimeSpan.FromSeconds(3));
 
 // Tracing e metricas — Application Insights
-var connAppInsights = builder.Configuration["ApplicationInsights:ConnectionString"];
-
-if (!string.IsNullOrWhiteSpace(connAppInsights))
-{
-    builder.Services.AddOpenTelemetry()
-        .UseAzureMonitor(options =>
-        {
-            options.ConnectionString = connAppInsights;
-        });
-}
+builder.Services.AddTelemetria(builder.Configuration);
 
 // O valor nunca entra em linha de log — so o fato de existir ou nao.
 Log.Information(
     "Application Insights {Estado}",
-    string.IsNullOrWhiteSpace(connAppInsights) ? "nao configurado" : "configurado");
+    string.IsNullOrWhiteSpace(builder.Configuration["ApplicationInsights:ConnectionString"])
+        ? "nao configurado"
+        : "configurado");
 
 var app = builder.Build();
 
