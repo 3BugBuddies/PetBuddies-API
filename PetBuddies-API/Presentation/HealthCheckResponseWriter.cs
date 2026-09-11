@@ -4,9 +4,7 @@ using System.Text.Json;
 namespace PetBuddies_API.Presentation
 {
     /// <summary>
-    /// Escreve o corpo das quatro rotas de saude: o status agregado e uma linha
-    /// por verificacao, com nome, status e descricao. E o mesmo formato nas quatro
-    /// — quem monitora nao precisa saber qual rota chamou para ler a resposta.
+    /// Escreve o corpo JSON das rotas de saude: status agregado e uma linha por verificacao.
     /// </summary>
     public static class HealthCheckResponseWriter
     {

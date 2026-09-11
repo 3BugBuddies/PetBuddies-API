@@ -28,7 +28,7 @@ namespace PetBuddies_API.Infrastructure.Data.Configurations
                 .HasColumnType("NUMBER(10)")
                 .ValueGeneratedOnAdd();
 
-            // Sem FK: T_PB_CLINICA sai do .NET quando o Java absorver o registro.
+            // Sem FK: T_PB_CLINICA nao existe neste schema.
             builder.Property(oferta => oferta.ClinicaId)
                 .HasColumnName("ID_CLINICA")
                 .HasColumnType("NUMBER(10)")
