@@ -10,16 +10,13 @@ namespace PetBuddies_API.Application.UseCases
     {
         private readonly IRegraProtocoloRepository _repositorio;
         private readonly IProtocoloRepository _protocoloRepositorio;
-        private readonly IUnitOfWork _unitOfWork;
 
         public RegraProtocoloService(
             IRegraProtocoloRepository repositorio,
-            IProtocoloRepository protocoloRepositorio,
-            IUnitOfWork unitOfWork)
+            IProtocoloRepository protocoloRepositorio)
         {
             _repositorio = repositorio;
             _protocoloRepositorio = protocoloRepositorio;
-            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<RegraProtocoloDto>> ListarPorProtocoloAsync(
@@ -105,7 +102,6 @@ namespace PetBuddies_API.Application.UseCases
             regra.Aplicar(request);
 
             await _repositorio.AdicionarAsync(regra, cancellationToken);
-            await _unitOfWork.SalvarAsync(cancellationToken);
 
             return regra.ToDto();
         }
@@ -123,7 +119,7 @@ namespace PetBuddies_API.Application.UseCases
             }
 
             regra.Aplicar(request);
-            await _unitOfWork.SalvarAsync(cancellationToken);
+            await _repositorio.AtualizarAsync(regra, cancellationToken);
 
             return regra.ToDto();
         }
@@ -137,8 +133,7 @@ namespace PetBuddies_API.Application.UseCases
                 return false;
             }
 
-            _repositorio.Remover(regra);
-            await _unitOfWork.SalvarAsync(cancellationToken);
+            await _repositorio.RemoverAsync(regra, cancellationToken);
 
             return true;
         }

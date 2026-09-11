@@ -1,5 +1,6 @@
 using Moq;
 using PetBuddies_API.Application.UseCases;
+using PetBuddies_API.Domain.Entities;
 using PetBuddies_API.Domain.Enums;
 using PetBuddies_API.Domain.Interfaces;
 using PetBuddies_API.Tests.Unit.Fixtures;
@@ -12,7 +13,6 @@ namespace PetBuddies_API.Tests.Unit.App
         private readonly RequestBuilderFixture _fixture;
         private readonly Mock<IRegraProtocoloRepository> _repositorioMock = new();
         private readonly Mock<IProtocoloRepository> _protocoloRepositorioMock = new();
-        private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
         private readonly RegraProtocoloService _service;
 
         public RegraProtocoloServiceTest(RequestBuilderFixture fixture)
@@ -20,8 +20,7 @@ namespace PetBuddies_API.Tests.Unit.App
             _fixture = fixture;
             _service = new RegraProtocoloService(
                 _repositorioMock.Object,
-                _protocoloRepositorioMock.Object,
-                _unitOfWorkMock.Object);
+                _protocoloRepositorioMock.Object);
         }
 
         [Fact]
@@ -148,7 +147,7 @@ namespace PetBuddies_API.Tests.Unit.App
 
         [Fact]
         [Trait("Service", "RegraProtocolo")]
-        public async Task CadastrarAsync_RequestValido_ConfirmaExatamenteUmaVezNoUnitOfWork()
+        public async Task CadastrarAsync_RequestValido_ChamaAdicionarAsyncExatamenteUmaVez()
         {
             // Arrange
             var request = _fixture.RegraProtocoloValida();
@@ -157,7 +156,9 @@ namespace PetBuddies_API.Tests.Unit.App
             await _service.CadastrarAsync(request);
 
             // Assert
-            _unitOfWorkMock.Verify(uow => uow.SalvarAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _repositorioMock.Verify(
+                repositorio => repositorio.AdicionarAsync(It.IsAny<RegraProtocoloEntity>(), It.IsAny<CancellationToken>()),
+                Times.Once);
         }
 
         [Fact]

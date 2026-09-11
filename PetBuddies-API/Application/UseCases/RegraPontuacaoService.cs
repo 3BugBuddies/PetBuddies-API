@@ -10,12 +10,10 @@ namespace PetBuddies_API.Application.UseCases
     public class RegraPontuacaoService : IRegraPontuacaoService
     {
         private readonly IRegraPontuacaoRepository _repositorio;
-        private readonly IUnitOfWork _unitOfWork;
 
-        public RegraPontuacaoService(IRegraPontuacaoRepository repositorio, IUnitOfWork unitOfWork)
+        public RegraPontuacaoService(IRegraPontuacaoRepository repositorio)
         {
             _repositorio = repositorio;
-            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<RegraPontuacaoDto>> ListarAsync(
@@ -81,7 +79,6 @@ namespace PetBuddies_API.Application.UseCases
             regra.Aplicar(request);
 
             await _repositorio.AdicionarAsync(regra, cancellationToken);
-            await _unitOfWork.SalvarAsync(cancellationToken);
 
             return regra.ToDto();
         }
@@ -99,7 +96,7 @@ namespace PetBuddies_API.Application.UseCases
             }
 
             regra.Aplicar(request);
-            await _unitOfWork.SalvarAsync(cancellationToken);
+            await _repositorio.AtualizarAsync(regra, cancellationToken);
 
             return regra.ToDto();
         }
@@ -113,8 +110,7 @@ namespace PetBuddies_API.Application.UseCases
                 return false;
             }
 
-            _repositorio.Remover(regra);
-            await _unitOfWork.SalvarAsync(cancellationToken);
+            await _repositorio.RemoverAsync(regra, cancellationToken);
 
             return true;
         }

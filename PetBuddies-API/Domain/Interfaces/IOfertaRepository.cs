@@ -24,6 +24,7 @@ namespace PetBuddies_API.Domain.Interfaces
             CancellationToken cancellationToken = default);
 
         Task AdicionarAsync(OfertaEntity oferta, CancellationToken cancellationToken = default);
-        void Remover(OfertaEntity oferta);
+        Task RemoverAsync(OfertaEntity oferta, CancellationToken cancellationToken = default);
+        Task AtualizarAsync(OfertaEntity oferta, CancellationToken cancellationToken = default);
     }
 }

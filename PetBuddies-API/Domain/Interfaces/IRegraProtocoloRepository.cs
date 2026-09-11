@@ -13,6 +13,7 @@ namespace PetBuddies_API.Domain.Interfaces
         Task<RegraProtocoloEntity?> ObterParaAlterarAsync(long regraId, CancellationToken cancellationToken = default);
 
         Task AdicionarAsync(RegraProtocoloEntity regra, CancellationToken cancellationToken = default);
-        void Remover(RegraProtocoloEntity regra);
+        Task RemoverAsync(RegraProtocoloEntity regra, CancellationToken cancellationToken = default);
+        Task AtualizarAsync(RegraProtocoloEntity regra, CancellationToken cancellationToken = default);
     }
 }

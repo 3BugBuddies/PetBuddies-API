@@ -12,13 +12,12 @@ namespace PetBuddies_API.Tests.Unit.App
     {
         private readonly RequestBuilderFixture _fixture;
         private readonly Mock<IProtocoloRepository> _repositorioMock = new();
-        private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
         private readonly ProtocoloService _service;
 
         public ProtocoloServiceTest(RequestBuilderFixture fixture)
         {
             _fixture = fixture;
-            _service = new ProtocoloService(_repositorioMock.Object, _unitOfWorkMock.Object);
+            _service = new ProtocoloService(_repositorioMock.Object);
         }
 
         [Fact]
@@ -81,7 +80,7 @@ namespace PetBuddies_API.Tests.Unit.App
 
         [Fact]
         [Trait("Service", "Protocolo")]
-        public async Task CadastrarAsync_RequestValido_ConfirmaExatamenteUmaVezNoUnitOfWork()
+        public async Task CadastrarAsync_RequestValido_ChamaAdicionarAsyncExatamenteUmaVez()
         {
             // Arrange
             var request = _fixture.ProtocoloValido();
@@ -93,12 +92,11 @@ namespace PetBuddies_API.Tests.Unit.App
             _repositorioMock.Verify(
                 repositorio => repositorio.AdicionarAsync(It.IsAny<ProtocoloEntity>(), It.IsAny<CancellationToken>()),
                 Times.Once);
-            _unitOfWorkMock.Verify(uow => uow.SalvarAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
         [Trait("Service", "Protocolo")]
-        public async Task RemoverAsync_ProtocoloInexistente_RetornaFalseSemConfirmarNoUnitOfWork()
+        public async Task RemoverAsync_ProtocoloInexistente_RetornaFalseSemChamarRemoverAsync()
         {
             // Arrange
             _repositorioMock
@@ -110,7 +108,9 @@ namespace PetBuddies_API.Tests.Unit.App
 
             // Assert
             Assert.False(removido);
-            _unitOfWorkMock.Verify(uow => uow.SalvarAsync(It.IsAny<CancellationToken>()), Times.Never);
+            _repositorioMock.Verify(
+                repositorio => repositorio.RemoverAsync(It.IsAny<ProtocoloEntity>(), It.IsAny<CancellationToken>()),
+                Times.Never);
         }
     }
 }
