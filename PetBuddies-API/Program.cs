@@ -167,12 +167,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Saude — tres verificacoes, quatro rotas. "self" nao toca em nada: e ele que
-// distingue "processo caiu" de "banco caiu". A cadeia do Oracle pode nem existir
-// (Testing nao carrega appsettings.Development.json); nesse caso a verificacao
-// falha e reporta indisponivel, que e a resposta correta.
-// O timeout de tres segundos evita que um monitor batendo de segundo em segundo
-// segure o pool, que a cadeia ja limita a tres conexoes.
+// Saude — self, oracle, motor-java
 var cadeiaOracle = builder.Configuration.GetConnectionString("Oracle");
 var urlDoMotor = (builder.Configuration["MotorApi:BaseUrl"] ?? "http://localhost:8080").TrimEnd('/');
 
@@ -189,15 +184,7 @@ builder.Services.AddHealthChecks()
         tags: ["externo"],
         timeout: TimeSpan.FromSeconds(3));
 
-// Rastreamento e metricas (decisao N3 = A). As tres instrumentacoes sao o que
-// produz os spans: ASP.NET Core da o span do controlador, HttpClient o da chamada
-// ao Java, e Entity Framework Core o do banco. As metricas de ASP.NET Core dao
-// duracao da requisicao e contagem por codigo de status — o tempo de resposta e a
-// taxa de erro que a rubrica pede.
-//
-// Sem coletor OTLP configurado o exportador e o console: e a unica forma de ver
-// span rodando local, onde nao ha coletor nenhum. Com OTEL_EXPORTER_OTLP_ENDPOINT
-// definido, a saida vai para o coletor.
+// Rastreamento e metricas — console sem coletor, OTLP quando OTEL_EXPORTER_OTLP_ENDPOINT existir.
 var endpointOtlp = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
 var exportarNoConsole = string.IsNullOrWhiteSpace(endpointOtlp);
 
@@ -235,18 +222,15 @@ builder.Services.AddOpenTelemetry()
         }
     });
 
-// Gancho da Sprint 4: a chave e lida da configuracao e nao usada. O valor nunca
-// entra em linha de log — so o fato de existir ou nao.
+// O valor nunca entra em linha de log — so o fato de existir ou nao.
 var chaveApplicationInsights = builder.Configuration["ApplicationInsights:ConnectionString"];
 Log.Information(
-    "Application Insights {Estado} — gancho da Sprint 4, lido e nao usado nesta sprint",
+    "Application Insights {Estado}",
     string.IsNullOrWhiteSpace(chaveApplicationInsights) ? "nao configurado" : "configurado");
 
 var app = builder.Build();
 
-// Em Testing a WebApplicationFactory sobe este mesmo Program: migrar aqui faria
-// todo teste de integracao abrir o Oracle. Fora de Testing a migracao continua,
-// porque com bancos separados (S1 = B) ela e a dona daquele schema.
+// Em Testing a WebApplicationFactory sobe este mesmo Program: migrar aqui abriria o Oracle em todo teste.
 if (!app.Environment.IsEnvironment("Testing"))
 {
     using var scope = app.Services.CreateScope();
@@ -254,8 +238,7 @@ if (!app.Environment.IsEnvironment("Testing"))
     db.Database.Migrate();
 }
 
-// Primeiro middleware do pipeline: toda linha de log da requisicao — inclusive as
-// do Swagger e das rotas de saude — nasce dentro do escopo da correlacao.
+// Primeiro middleware do pipeline: log da requisicao dentro do escopo da correlacao.
 app.UseMiddleware<CorrelacaoMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -276,10 +259,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// As quatro rotas de saude nao exigem token e precisam continuar assim quando a
-// validacao do token (N4) entrar — por isso o AllowAnonymous explicito agora.
-// motor-java responde indisponivel ate o endereco de saude do Java (J5) existir:
-// uma verificacao que reporta dependencia ausente como ausente esta funcionando.
+// Rotas de saude nao exigem token.
 app.MapHealthChecks("/health/live", new HealthCheckOptions
 {
     Predicate = verificacao => verificacao.Tags.Contains("live"),
@@ -305,5 +285,5 @@ app.MapHealthChecks("/health", new HealthCheckOptions
 
 app.Run();
 
-// Necessario para WebApplicationFactory<Program> enxergar o tipo (PR N6).
+// Necessario para WebApplicationFactory<Program> enxergar o tipo.
 public partial class Program { }

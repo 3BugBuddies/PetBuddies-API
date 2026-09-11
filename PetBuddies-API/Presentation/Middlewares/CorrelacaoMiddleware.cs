@@ -4,10 +4,7 @@ using System.Diagnostics;
 namespace PetBuddies_API.Presentation.Middlewares
 {
     /// <summary>
-    /// Correlaciona as linhas de log de uma requisicao pelo identificador que o
-    /// rastreamento ja criou (decisao AN3 = A): nao se inventa identificador.
-    /// E o unico middleware do servico nesta sprint — o padrao de erros simples
-    /// no controller continua, e nao existe handler global de excecao.
+    /// Correlaciona as linhas de log de uma requisicao pelo identificador do rastreamento.
     /// </summary>
     public class CorrelacaoMiddleware
     {
@@ -30,9 +27,7 @@ namespace PetBuddies_API.Presentation.Middlewares
 
             if (string.IsNullOrEmpty(identificador))
             {
-                // Caminho barulhento de proposito: sem o rastreamento registrado
-                // antes deste middleware a correlacao ficaria sem identificador
-                // em silencio, que e a armadilha que o PR precisa evitar.
+                // Fallback barulhento: sem identificador de rastreamento, avisa em vez de seguir em silencio.
                 identificador = contexto.TraceIdentifier;
                 _logger.LogWarning(
                     "Rastreamento indisponivel em {Caminho}: a correlacao caiu para o identificador do servidor",
@@ -60,8 +55,7 @@ namespace PetBuddies_API.Presentation.Middlewares
                 }
                 catch
                 {
-                    // Marca e relanca — nao trata. O padrao de erros simples do
-                    // controller continua e nao existe handler global de excecao.
+                    // Marca e relanca — nao trata.
                     falhou = true;
                     throw;
                 }
@@ -69,9 +63,7 @@ namespace PetBuddies_API.Presentation.Middlewares
                 {
                     cronometro.Stop();
 
-                    // Numa excecao nao tratada o Kestrel so escreve o 500 depois
-                    // deste bloco: sem a marca, a linha diria "respondeu 200"
-                    // para uma requisicao que o cliente recebeu como 500.
+                    // Sem a marca, excecao nao tratada logaria "respondeu 200" para um 500 real.
                     var status = falhou && !contexto.Response.HasStarted
                         ? StatusCodes.Status500InternalServerError
                         : contexto.Response.StatusCode;

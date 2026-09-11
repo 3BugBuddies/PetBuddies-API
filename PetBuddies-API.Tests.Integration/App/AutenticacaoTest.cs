@@ -6,11 +6,7 @@ using PetBuddies_API.Tests.Integration.Fixtures;
 
 namespace PetBuddies_API.Tests.Integration.App
 {
-    // O trio que a rubrica 2.2 pede: sem token, com token do perfil errado, com token do
-    // perfil certo. Contra POST /api/protocolo porque o cadastro de protocolo não tem
-    // nenhuma regra de unicidade — o 201 do terceiro caso não depende de estado de outro teste.
-    // Fica sobre o PetBuddiesApiFixture (app real, sem mock): o 201 do terceiro caso precisa
-    // do ProtocoloService e do repositório de verdade, não do CustomWebApplicationFactory.
+    // Sem token, com token de perfil errado, com token de perfil certo — contra POST /api/protocolo.
     [Collection(PetBuddiesApiCollection.NomeDaColecao)]
     public class AutenticacaoTest
     {
