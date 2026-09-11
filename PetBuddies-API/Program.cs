@@ -1,13 +1,13 @@
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 using PetBuddies_API.Infrastructure.Data;
 using PetBuddies_API.Application.Interfaces;
 using PetBuddies_API.Application.UseCases;
@@ -19,8 +19,10 @@ using PetBuddies_API.Presentation.Middlewares;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
+using System.IO.Compression;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 
 // Serilog e a primeira coisa que sobe. Configurado depois do host, as linhas da
 // subida sairiam no logger padrao e nunca chegariam ao arquivo.
@@ -171,6 +173,38 @@ builder.Services.AddSwaggerGen(c =>
 var cadeiaOracle = builder.Configuration.GetConnectionString("Oracle");
 var urlDoMotor = (builder.Configuration["MotorApi:BaseUrl"] ?? "http://localhost:8080").TrimEnd('/');
 
+//Adicionar compressao de dados
+builder.Services.AddResponseCompression(options =>
+{
+    //br - Brotli
+    options.Providers.Add<BrotliCompressionProvider>();
+    //gzip
+    options.Providers.Add<GzipCompressionProvider>();
+});
+
+builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.SmallestSize;
+});
+
+builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.SmallestSize;
+});
+
+// Add Rate Limiter
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter(policyName: "politica_5_tentativas", opt =>
+    {
+        opt.PermitLimit = 5;
+        opt.Window = TimeSpan.FromSeconds(20);
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 2;
+    });
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
+
 builder.Services.AddHealthChecks()
     .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
     .AddOracle(
@@ -184,49 +218,22 @@ builder.Services.AddHealthChecks()
         tags: ["externo"],
         timeout: TimeSpan.FromSeconds(3));
 
-// Rastreamento e metricas — console sem coletor, OTLP quando OTEL_EXPORTER_OTLP_ENDPOINT existir.
-var endpointOtlp = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
-var exportarNoConsole = string.IsNullOrWhiteSpace(endpointOtlp);
+// Tracing e metricas — Application Insights
+var connAppInsights = builder.Configuration["ApplicationInsights:ConnectionString"];
 
-builder.Services.AddOpenTelemetry()
-    .ConfigureResource(recurso => recurso.AddService(
-        serviceName: "petbuddies-api",
-        serviceVersion: "1.0.0"))
-    .WithTracing(rastreamento =>
-    {
-        rastreamento
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation()
-            .AddEntityFrameworkCoreInstrumentation();
-
-        if (exportarNoConsole)
+if (!string.IsNullOrWhiteSpace(connAppInsights))
+{
+    builder.Services.AddOpenTelemetry()
+        .UseAzureMonitor(options =>
         {
-            rastreamento.AddConsoleExporter();
-        }
-        else
-        {
-            rastreamento.AddOtlpExporter();
-        }
-    })
-    .WithMetrics(metricas =>
-    {
-        metricas.AddAspNetCoreInstrumentation();
-
-        if (exportarNoConsole)
-        {
-            metricas.AddConsoleExporter();
-        }
-        else
-        {
-            metricas.AddOtlpExporter();
-        }
-    });
+            options.ConnectionString = connAppInsights;
+        });
+}
 
 // O valor nunca entra em linha de log — so o fato de existir ou nao.
-var chaveApplicationInsights = builder.Configuration["ApplicationInsights:ConnectionString"];
 Log.Information(
     "Application Insights {Estado}",
-    string.IsNullOrWhiteSpace(chaveApplicationInsights) ? "nao configurado" : "configurado");
+    string.IsNullOrWhiteSpace(connAppInsights) ? "nao configurado" : "configurado");
 
 var app = builder.Build();
 
@@ -256,6 +263,9 @@ app.UseCors(PoliticaCorsDoPainel);
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseRateLimiter();
+app.UseResponseCompression();
 
 app.MapControllers();
 
