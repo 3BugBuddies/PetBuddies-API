@@ -74,11 +74,20 @@ namespace PetBuddies_API.Infrastructure.Repositories
         public async Task AdicionarAsync(OfertaEntity oferta, CancellationToken cancellationToken = default)
         {
             await _context.Ofertas.AddAsync(oferta, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public void Remover(OfertaEntity oferta)
+        public async Task RemoverAsync(OfertaEntity oferta, CancellationToken cancellationToken = default)
         {
             _context.Ofertas.Remove(oferta);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        // Entidade vem rastreada de ObterParaAlterarAsync (sem AsNoTracking): o EF já detecta
+        // as mudanças, e chamar Update() marcaria todas as colunas como modificadas.
+        public async Task AtualizarAsync(OfertaEntity oferta, CancellationToken cancellationToken = default)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

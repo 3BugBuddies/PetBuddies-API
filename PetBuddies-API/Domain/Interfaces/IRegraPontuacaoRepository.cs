@@ -22,6 +22,7 @@ namespace PetBuddies_API.Domain.Interfaces
             CancellationToken cancellationToken = default);
 
         Task AdicionarAsync(RegraPontuacaoEntity regra, CancellationToken cancellationToken = default);
-        void Remover(RegraPontuacaoEntity regra);
+        Task RemoverAsync(RegraPontuacaoEntity regra, CancellationToken cancellationToken = default);
+        Task AtualizarAsync(RegraPontuacaoEntity regra, CancellationToken cancellationToken = default);
     }
 }

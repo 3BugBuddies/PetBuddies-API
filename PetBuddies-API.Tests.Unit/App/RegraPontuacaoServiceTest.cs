@@ -1,5 +1,6 @@
 using Moq;
 using PetBuddies_API.Application.UseCases;
+using PetBuddies_API.Domain.Entities;
 using PetBuddies_API.Domain.Enums;
 using PetBuddies_API.Domain.Interfaces;
 using PetBuddies_API.Tests.Unit.Fixtures;
@@ -11,13 +12,12 @@ namespace PetBuddies_API.Tests.Unit.App
     {
         private readonly RequestBuilderFixture _fixture;
         private readonly Mock<IRegraPontuacaoRepository> _repositorioMock = new();
-        private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
         private readonly RegraPontuacaoService _service;
 
         public RegraPontuacaoServiceTest(RequestBuilderFixture fixture)
         {
             _fixture = fixture;
-            _service = new RegraPontuacaoService(_repositorioMock.Object, _unitOfWorkMock.Object);
+            _service = new RegraPontuacaoService(_repositorioMock.Object);
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace PetBuddies_API.Tests.Unit.App
 
         [Fact]
         [Trait("Service", "RegraPontuacao")]
-        public async Task CadastrarAsync_RequestValido_ConfirmaExatamenteUmaVezNoUnitOfWork()
+        public async Task CadastrarAsync_RequestValido_ChamaAdicionarAsyncExatamenteUmaVez()
         {
             // Arrange
             var request = _fixture.RegraPontuacaoValida();
@@ -103,7 +103,9 @@ namespace PetBuddies_API.Tests.Unit.App
             await _service.CadastrarAsync(request);
 
             // Assert
-            _unitOfWorkMock.Verify(uow => uow.SalvarAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _repositorioMock.Verify(
+                repositorio => repositorio.AdicionarAsync(It.IsAny<RegraPontuacaoEntity>(), It.IsAny<CancellationToken>()),
+                Times.Once);
         }
 
         [Fact]

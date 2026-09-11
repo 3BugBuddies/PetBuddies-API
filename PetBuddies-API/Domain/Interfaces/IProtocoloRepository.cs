@@ -18,6 +18,7 @@ namespace PetBuddies_API.Domain.Interfaces
         Task<bool> ExisteAsync(long protocoloId, CancellationToken cancellationToken = default);
 
         Task AdicionarAsync(ProtocoloEntity protocolo, CancellationToken cancellationToken = default);
-        void Remover(ProtocoloEntity protocolo);
+        Task RemoverAsync(ProtocoloEntity protocolo, CancellationToken cancellationToken = default);
+        Task AtualizarAsync(ProtocoloEntity protocolo, CancellationToken cancellationToken = default);
     }
 }

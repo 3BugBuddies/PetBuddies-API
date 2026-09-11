@@ -11,16 +11,13 @@ namespace PetBuddies_API.Application.UseCases
     {
         private readonly IOfertaRepository _repositorio;
         private readonly IProtocoloRepository _protocoloRepositorio;
-        private readonly IUnitOfWork _unitOfWork;
 
         public OfertaService(
             IOfertaRepository repositorio,
-            IProtocoloRepository protocoloRepositorio,
-            IUnitOfWork unitOfWork)
+            IProtocoloRepository protocoloRepositorio)
         {
             _repositorio = repositorio;
             _protocoloRepositorio = protocoloRepositorio;
-            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<OfertaDto>> ListarAsync(
@@ -128,7 +125,6 @@ namespace PetBuddies_API.Application.UseCases
             oferta.Aplicar(request);
 
             await _repositorio.AdicionarAsync(oferta, cancellationToken);
-            await _unitOfWork.SalvarAsync(cancellationToken);
 
             return oferta.ToDto();
         }
@@ -146,7 +142,7 @@ namespace PetBuddies_API.Application.UseCases
             }
 
             oferta.Aplicar(request);
-            await _unitOfWork.SalvarAsync(cancellationToken);
+            await _repositorio.AtualizarAsync(oferta, cancellationToken);
 
             return oferta.ToDto();
         }
@@ -160,8 +156,7 @@ namespace PetBuddies_API.Application.UseCases
                 return false;
             }
 
-            _repositorio.Remover(oferta);
-            await _unitOfWork.SalvarAsync(cancellationToken);
+            await _repositorio.RemoverAsync(oferta, cancellationToken);
 
             return true;
         }

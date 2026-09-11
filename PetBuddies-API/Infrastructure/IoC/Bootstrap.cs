@@ -58,17 +58,15 @@ namespace PetBuddies_API.Infrastructure.IoC
                 );
             });
 
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IProtocoloRepository, ProtocoloRepository>();
+            services.AddTransient<IRegraProtocoloRepository, RegraProtocoloRepository>();
+            services.AddTransient<IOfertaRepository, OfertaRepository>();
+            services.AddTransient<IRegraPontuacaoRepository, RegraPontuacaoRepository>();
 
-            services.AddScoped<IProtocoloRepository, ProtocoloRepository>();
-            services.AddScoped<IRegraProtocoloRepository, RegraProtocoloRepository>();
-            services.AddScoped<IOfertaRepository, OfertaRepository>();
-            services.AddScoped<IRegraPontuacaoRepository, RegraPontuacaoRepository>();
-
-            services.AddScoped<IProtocoloService, ProtocoloService>();
-            services.AddScoped<IRegraProtocoloService, RegraProtocoloService>();
-            services.AddScoped<IOfertaService, OfertaService>();
-            services.AddScoped<IRegraPontuacaoService, RegraPontuacaoService>();
+            services.AddTransient<IProtocoloService, ProtocoloService>();
+            services.AddTransient<IRegraProtocoloService, RegraProtocoloService>();
+            services.AddTransient<IOfertaService, OfertaService>();
+            services.AddTransient<IRegraPontuacaoService, RegraPontuacaoService>();
         }
     }
 }

@@ -144,7 +144,7 @@ namespace PetBuddies_API.Tests.Unit.App
             await _contexto.SaveChangesAsync();
 
             // Act
-            _repositorio.Remover(regra);
+            await _repositorio.RemoverAsync(regra);
             await _contexto.SaveChangesAsync();
 
             // Assert
