@@ -110,7 +110,7 @@ namespace PetBuddies_API.Tests.Unit.App
 
         [Fact]
         [Trait("Service", "RegraPontuacao")]
-        public async Task VigenciaExisteAsync_DelegaParaRepositorioComOsMesmosParametros()
+        public async Task VigenciaExisteAsync_ParametrosInformados_DelegaAoRepositorio()
         {
             // Arrange — UK_PONTUACAO_VIGENCIA: um valor por clínica, gesto e vigência.
             var request = _fixture.RegraPontuacaoValida();

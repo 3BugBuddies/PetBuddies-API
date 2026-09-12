@@ -3,9 +3,9 @@ using PetBuddies_API.Application.Mappers;
 using PetBuddies_API.Domain.Entities;
 using PetBuddies_API.Domain.Enums;
 
-namespace PetBuddies_API.Tests.Unit.Application.Mappers
+namespace PetBuddies_API.Tests.Unit.App
 {
-    public class OfertaMapperTests
+    public class OfertaMapperTest
     {
         [Fact]
         [Trait("Mapper", "Oferta")]

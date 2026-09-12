@@ -163,7 +163,7 @@ namespace PetBuddies_API.Tests.Unit.App
 
         [Fact]
         [Trait("Service", "RegraProtocolo")]
-        public async Task ProtocoloExisteAsync_DelegaParaRepositorioDeProtocolo()
+        public async Task ProtocoloExisteAsync_ProtocoloIdInformado_DelegaAoRepositorioDeProtocolo()
         {
             // Arrange
             _protocoloRepositorioMock

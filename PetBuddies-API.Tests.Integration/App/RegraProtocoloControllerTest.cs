@@ -32,6 +32,7 @@ namespace PetBuddies_API.Tests.Integration.App
         [Trait("Controller", "RegraProtocolo")]
         public async Task Listar_SemProtocoloId_Retorna400()
         {
+            // Arrange
             using var cliente = _factory.CriarClienteComPerfil("VET");
 
             // Act

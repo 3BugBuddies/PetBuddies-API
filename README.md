@@ -89,7 +89,7 @@ PetBuddies-API/
 │   ├── appsettings.json
 │   ├── appsettings.Development.json
 │   └── Program.cs
-├── PetBuddies-API.Tests.Unit/          # Repository + Service, EF Core InMemory + Moq
+├── PetBuddies-API.Tests.Unit/          # Repository, Service e Mapper — EF Core InMemory + Moq
 ├── PetBuddies-API.Tests.Integration/   # Controller (Service mockado) + Autenticação (app real)
 ├── docker-compose.yml       # Sobe só o Oracle de desenvolvimento
 ├── Dockerfile
@@ -244,7 +244,7 @@ JWT **emitido pelo Java** (`POST /api/auth/login`, `issuer: petbuddies-ai`) e va
 - Chave simétrica HS256, `PETBUDDIES_JWT_SECRET` (mínimo 32 caracteres) — mesmo segredo nos dois serviços.
 - Role vem da claim `perfil` (`RoleClaimType = "perfil"`), valores `VET` e `TUTOR`.
 - Toda rota de negócio é `[Authorize(Roles = "VET")]`; sem token → `401`, com token de `TUTOR` → `403`.
-- As quatro rotas de health check são `AllowAnonymous`, propositalmente.
+- As rotas de health check (`/health/*` e `/api/health/*`) são `AllowAnonymous`, propositalmente.
 
 ---
 
@@ -252,7 +252,22 @@ JWT **emitido pelo Java** (`POST /api/auth/login`, `issuer: petbuddies-ai`) e va
 
 - **Serilog:** console (`[{Timestamp} {Level}] [{CorrelationId}] {Message}`) + arquivo JSON compacto em `logs/api-.log`, rotação diária, 7 dias de retenção.
 - **Correlação de requisição** (`CorrelacaoMiddleware`, primeiro middleware do pipeline): usa o `TraceId` do rastreamento já ativo como identificador — nunca inventa um novo — e devolve `X-Correlation-Id` no header de resposta. Se o cliente mandou seu próprio `X-Correlation-Id`, ele entra como propriedade adicional do log, nunca substitui o identificador do rastreamento.
+- **Nível de log pela resposta:** a linha de conclusão de cada requisição escolhe o nível pelo status já calculado:
+
+  | Status | Nível |
+  |---|---|
+  | 500 ou mais (inclui exceção não tratada) | `Error` |
+  | 400 a 499 | `Warning` |
+  | demais | `Information` |
+
 - **OpenTelemetry:** tracing (instrumentação de ASP.NET Core, `HttpClient` e Entity Framework Core) e métricas de ASP.NET Core (duração de requisição, contagem por status code). Sem `OTEL_EXPORTER_OTLP_ENDPOINT` configurado, exporta no console — é a única forma de ver um span localmente, sem coletor.
+
+### Como monitorar
+
+- A cada requisição, o console mostra o span (`Activity.TraceId`, rota, status).
+- `http.server.request.duration` é o tempo de resposta; separado por `http.response.status_code`, dá a taxa de erro.
+- O `TraceId` do span é o mesmo valor do cabeçalho `X-Correlation-Id` e do `CorrelationId` em `logs/api-*.log` — com ele se acha a requisição nos três lugares.
+- Para mandar a um coletor, basta definir `OTEL_EXPORTER_OTLP_ENDPOINT`.
 
 ### Health Checks
 
@@ -268,6 +283,11 @@ Quatro rotas expostas por `Program.cs`, sem autenticação (`AllowAnonymous`):
 ```bash
 curl http://localhost:5297/health
 ```
+
+O `HealthController` expõe as mesmas três verificações em `/api/health/live`, `/api/health/db` e
+`/api/health/externo` — também sem autenticação, `200` quando saudável e `503` quando não. O corpo
+usa um contrato diferente do de `/health/*`: `name`, `status` e `description` (mais `error` quando há
+exceção), enquanto `/health/*` usa `nome`, `status` e `descricao`.
 
 ---
 
@@ -285,7 +305,8 @@ Dois projetos xUnit, quatro domínios (`Protocolo`, `RegraProtocolo`, `Oferta`, 
 PetBuddies-API.Tests.Unit/
 └── App/
     ├── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}RepositoryTest.cs   # EF Core InMemory
-    └── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}ServiceTest.cs      # Moq sobre os repositórios
+    ├── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}ServiceTest.cs      # Moq sobre os repositórios
+    └── OfertaMapperTest.cs                                                 # OfertaMapper.Aplicar, sem repositório
 
 PetBuddies-API.Tests.Integration/
 └── App/
@@ -293,19 +314,24 @@ PetBuddies-API.Tests.Integration/
     └── AutenticacaoTest.cs                                                # app real, sem mock — sem token (401), token TUTOR (403), token VET (201)
 ```
 
+O Domínio (`Domain/Entities/*`) não tem teste próprio: as entidades são estrutura de dados, sem
+comportamento próprio. A regra de negócio vive nos casos de uso da camada de Aplicação, e é lá que
+os `*ServiceTest` com Moq cobrem.
+
 Rodar tudo:
 
 ```bash
 dotnet test
 ```
 
-**86 testes, todos passando** (63 no `.Tests.Unit`, 23 no `.Tests.Integration` — conferido em 10/09/2026). Tudo roda contra `Microsoft.EntityFrameworkCore.InMemory`: não precisa de Oracle, VPN nem container.
+**86 testes, todos passando** (63 no `.Tests.Unit`, 23 no `.Tests.Integration` — conferido em 12/09/2026). Tudo roda contra `Microsoft.EntityFrameworkCore.InMemory`: não precisa de Oracle, VPN nem container.
 
 Todo teste tem `[Trait]` de camada e domínio — dá para rodar só um recorte:
 
 ```bash
 dotnet test --filter "Repository=Protocolo"
 dotnet test --filter "Service=Oferta"
+dotnet test --filter "Mapper=Oferta"
 dotnet test --filter "Controller=RegraPontuacao"
 dotnet test --filter "Autenticacao=Protocolo"
 ```
