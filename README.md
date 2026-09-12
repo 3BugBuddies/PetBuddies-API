@@ -253,7 +253,6 @@ JWT **emitido pelo Java** (`POST /api/auth/login`, `issuer: petbuddies-ai`) e va
 - **Serilog:** console (`[{Timestamp} {Level}] [{CorrelationId}] {Message}`) + arquivo JSON compacto em `logs/api-.log`, rotação diária, 7 dias de retenção.
 - **Correlação de requisição** (`CorrelacaoMiddleware`, primeiro middleware do pipeline): usa o `TraceId` do rastreamento já ativo como identificador — nunca inventa um novo — e devolve `X-Correlation-Id` no header de resposta. Se o cliente mandou seu próprio `X-Correlation-Id`, ele entra como propriedade adicional do log, nunca substitui o identificador do rastreamento.
 - **OpenTelemetry:** tracing (instrumentação de ASP.NET Core, `HttpClient` e Entity Framework Core) e métricas de ASP.NET Core (duração de requisição, contagem por status code). Sem `OTEL_EXPORTER_OTLP_ENDPOINT` configurado, exporta no console — é a única forma de ver um span localmente, sem coletor.
-- **Application Insights:** a connection string é lida da configuração e logada como presente/ausente no startup, mas **não é usada** nesta sprint — gancho para a Sprint 4.
 
 ### Health Checks
 

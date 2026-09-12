@@ -1,4 +1,3 @@
-using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
@@ -178,15 +177,14 @@ builder.Services.AddHealthChecks()
         tags: ["externo"],
         timeout: TimeSpan.FromSeconds(3));
 
-// Tracing e metricas — Application Insights
+// Tracing e metricas — OpenTelemetry
 builder.Services.AddTelemetria(builder.Configuration);
 
-// O valor nunca entra em linha de log — so o fato de existir ou nao.
 Log.Information(
-    "Application Insights {Estado}",
-    string.IsNullOrWhiteSpace(builder.Configuration["ApplicationInsights:ConnectionString"])
-        ? "nao configurado"
-        : "configurado");
+    "Telemetria exportando para {Destino}",
+    string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"])
+        ? "console"
+        : "OTLP");
 
 var app = builder.Build();
 
