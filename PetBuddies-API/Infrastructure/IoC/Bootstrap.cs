@@ -1,5 +1,7 @@
-using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Oracle.EntityFrameworkCore.Infrastructure;
 using PetBuddies_API.Application.Interfaces;
 using PetBuddies_API.Application.UseCases;
@@ -16,18 +18,41 @@ namespace PetBuddies_API.Infrastructure.IoC
     {
         public static void AddTelemetria(this IServiceCollection services, IConfiguration configuration)
         {
-            var connectionString = configuration["ApplicationInsights:ConnectionString"];
-
-            // Sem connection string o UseAzureMonitor lanca na subida.
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                return;
-            }
+            // Console sem coletor, OTLP quando OTEL_EXPORTER_OTLP_ENDPOINT existir.
+            var exportarNoConsole = string.IsNullOrWhiteSpace(configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
 
             services.AddOpenTelemetry()
-                .UseAzureMonitor(options =>
+                .ConfigureResource(recurso => recurso.AddService(
+                    serviceName: "petbuddies-api",
+                    serviceVersion: "1.0.0"))
+                .WithTracing(rastreamento =>
                 {
-                    options.ConnectionString = connectionString;
+                    rastreamento
+                        .AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddEntityFrameworkCoreInstrumentation();
+
+                    if (exportarNoConsole)
+                    {
+                        rastreamento.AddConsoleExporter();
+                    }
+                    else
+                    {
+                        rastreamento.AddOtlpExporter();
+                    }
+                })
+                .WithMetrics(metricas =>
+                {
+                    metricas.AddAspNetCoreInstrumentation();
+
+                    if (exportarNoConsole)
+                    {
+                        metricas.AddConsoleExporter();
+                    }
+                    else
+                    {
+                        metricas.AddOtlpExporter();
+                    }
                 });
         }
 
