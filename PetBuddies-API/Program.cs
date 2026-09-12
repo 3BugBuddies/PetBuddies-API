@@ -171,11 +171,9 @@ builder.Services.AddHealthChecks()
         name: "oracle",
         tags: ["db"],
         timeout: TimeSpan.FromSeconds(3))
-    // Degraded: com o Java fora a API segue atendendo, e o /health nao pode ir a 503 por isso.
     .AddUrlGroup(
         new Uri($"{urlDoMotor}/actuator/health"),
         name: "motor-java",
-        failureStatus: HealthStatus.Degraded,
         tags: ["externo"],
         timeout: TimeSpan.FromSeconds(3));
 
