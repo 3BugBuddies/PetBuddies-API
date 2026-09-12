@@ -20,10 +20,8 @@ Preço e pontuação são política configurada: nesta sprint o CRUD existe e é
 
 | | |
 |---|---|
-| Deploy | *pendente* |
 | Swagger UI (local) | `http://localhost:5297/swagger` |
 | Postman collection | [`docs/postman/petbuddies-api-net.postman_collection.json`](docs/postman/petbuddies-api-net.postman_collection.json) — **desatualizada** (ver [Como Testar](#como-testar)) |
-| Vídeo de apresentação | *pendente* |
 
 ---
 
