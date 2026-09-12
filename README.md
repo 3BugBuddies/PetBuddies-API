@@ -244,7 +244,7 @@ JWT **emitido pelo Java** (`POST /api/auth/login`, `issuer: petbuddies-ai`) e va
 - Chave simétrica HS256, `PETBUDDIES_JWT_SECRET` (mínimo 32 caracteres) — mesmo segredo nos dois serviços.
 - Role vem da claim `perfil` (`RoleClaimType = "perfil"`), valores `VET` e `TUTOR`.
 - Toda rota de negócio é `[Authorize(Roles = "VET")]`; sem token → `401`, com token de `TUTOR` → `403`.
-- As quatro rotas de health check são `AllowAnonymous`, propositalmente.
+- As rotas de health check (`/health/*` e `/api/health/*`) são `AllowAnonymous`, propositalmente.
 
 ---
 
@@ -306,7 +306,7 @@ PetBuddies-API.Tests.Unit/
 └── App/
     ├── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}RepositoryTest.cs   # EF Core InMemory
     ├── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}ServiceTest.cs      # Moq sobre os repositórios
-    └── OfertaMapperTest.cs                                                 # Aplicar() da entidade, sem repositório
+    └── OfertaMapperTest.cs                                                 # OfertaMapper.Aplicar, sem repositório
 
 PetBuddies-API.Tests.Integration/
 └── App/
