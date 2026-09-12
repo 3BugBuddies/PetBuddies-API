@@ -1,465 +1,1631 @@
 {
   "info": {
-    "name": "PetBuddies API — .NET (Clínico)",
+    "name": "PetBuddies API — .NET (back-office)",
+    "description": "Protocolo, regra de protocolo, oferta e regra de pontuacao — os quatro dominios do back-office administrativo da clinica (ADR s3-25). Onda 19.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
   "variable": [
-    { "key": "baseUrl",          "value": "http://localhost:5297" },
-    { "key": "enderecoId",       "value": "" },
-    { "key": "enderecoDeleteId", "value": "" },
-    { "key": "clinicaId",        "value": "" },
-    { "key": "clinicaDeleteId",  "value": "" },
-    { "key": "veterinarioId",    "value": "" },
-    { "key": "vetDeleteId",      "value": "" },
-    { "key": "janelaId",         "value": "" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5297",
+      "type": "string"
+    },
+    {
+      "key": "javaBaseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "login",
+      "value": "ana@clinica.com",
+      "type": "string"
+    },
+    {
+      "key": "senha",
+      "value": "petbuddies123",
+      "type": "string"
+    },
+    {
+      "key": "jwtSecret",
+      "value": "troque-por-um-segredo-de-no-minimo-32-caracteres",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "protocoloId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "protocoloDeleteId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "regraProtocoloId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "regraProtocoloDeleteId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ofertaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ofertaDeleteId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "regraPontuacaoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "regraPontuacaoDeleteId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vigenciaOferta",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vigenciaOfertaDelete",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vigenciaPontuacao",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vigenciaPontuacaoDelete",
+      "value": "",
+      "type": "string"
+    }
   ],
   "item": [
-
     {
-      "name": "Endereco",
+      "name": "0a · Login (Java)",
+      "auth": {
+        "type": "noauth"
+      },
       "item": [
         {
-          "name": "Cria endereço — 201",
+          "name": "Login no Java — 200",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/endereco",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{javaBaseUrl}}/api/auth/login",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"logradouro\": \"Rua das Flores\",\n  \"numero\": \"123\",\n  \"complemento\": \"Sala 1\",\n  \"bairro\": \"Bela Vista\",\n  \"cidade\": \"Sao Paulo\",\n  \"estado\": \"SP\",\n  \"cep\": \"01001000\"\n}"
+              "raw": "{\n  \"login\": \"{{login}}\",\n  \"senha\": \"{{senha}}\"\n}"
             }
           },
-          "event": [{ "listen": "test", "script": { "exec": [
-            "pm.test('Status 201', () => pm.response.to.have.status(201));",
-            "pm.collectionVariables.set('enderecoId', pm.response.json().id);"
-          ]}}]
-        },
-        {
-          "name": "Lista endereços — 200",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/endereco" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
-        },
-        {
-          "name": "Busca endereço por id — 200",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/endereco/{{enderecoId}}" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
-        },
-        {
-          "name": "Busca endereço inexistente — 404",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/endereco/999999" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
-        },
-        {
-          "name": "Atualiza endereço — 204",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/endereco/{{enderecoId}}",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"logradouro\": \"Av. Paulista\",\n  \"numero\": \"1000\",\n  \"bairro\": \"Bela Vista\",\n  \"cidade\": \"Sao Paulo\",\n  \"estado\": \"SP\",\n  \"cep\": \"01310100\"\n}"
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login no Java — 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('token', pm.response.json().token);",
+                  "}"
+                ]
+              }
             }
-          },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
-        },
-        {
-          "name": "Atualiza endereço inexistente — 404",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/endereco/999999",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"logradouro\": \"Rua X\",\n  \"numero\": \"1\",\n  \"cidade\": \"Sao Paulo\",\n  \"estado\": \"SP\",\n  \"cep\": \"01001000\"\n}"
-            }
-          },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
-        },
-        {
-          "name": "Cria endereço sem logradouro — 400",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/endereco",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"numero\": \"1\",\n  \"cidade\": \"Sao Paulo\",\n  \"estado\": \"SP\",\n  \"cep\": \"01001000\"\n}"
-            }
-          },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] }}]
-        },
-        {
-          "name": "Cria segundo endereço (para deletar) — 201",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/endereco",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"logradouro\": \"Rua para Deletar\",\n  \"numero\": \"999\",\n  \"cidade\": \"Sao Paulo\",\n  \"estado\": \"SP\",\n  \"cep\": \"04001000\"\n}"
-            }
-          },
-          "event": [{ "listen": "test", "script": { "exec": [
-            "pm.test('Status 201', () => pm.response.to.have.status(201));",
-            "pm.collectionVariables.set('enderecoDeleteId', pm.response.json().id);"
-          ]}}]
-        },
-        {
-          "name": "Remove endereço — 204",
-          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/endereco/{{enderecoDeleteId}}" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
-        },
-        {
-          "name": "Remove endereço inexistente — 404",
-          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/endereco/999999" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+          ]
         }
       ]
     },
-
     {
-      "name": "Clinica",
+      "name": "0b · Token local (sem o Java)",
+      "auth": {
+        "type": "noauth"
+      },
       "item": [
         {
-          "name": "Cria clínica — 201",
+          "name": "Gera token local — 200",
           "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/clinica",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"PetVida Clinica Veterinaria\",\n  \"cnpj\": \"11222333000144\",\n  \"telefone\": \"11999990001\",\n  \"email\": \"contato@petvida.com\",\n  \"enderecoId\": {{enderecoId}}\n}"
-            }
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health/live"
           },
-          "event": [{ "listen": "test", "script": { "exec": [
-            "pm.test('Status 201', () => pm.response.to.have.status(201));",
-            "pm.collectionVariables.set('clinicaId', pm.response.json().id);"
-          ]}}]
-        },
-        {
-          "name": "Lista clínicas — 200",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/clinica" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
-        },
-        {
-          "name": "Busca clínica por id — 200",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/clinica/{{clinicaId}}" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
-        },
-        {
-          "name": "Busca clínica inexistente — 404",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/clinica/999999" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
-        },
-        {
-          "name": "Busca clínicas por nome — 200",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/clinica/buscar?nome=PetVida" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
-        },
-        {
-          "name": "Atualiza clínica — 204",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/clinica/{{clinicaId}}",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"PetVida Clinica Veterinaria (atualizada)\",\n  \"cnpj\": \"11222333000144\",\n  \"telefone\": \"11999990002\",\n  \"enderecoId\": {{enderecoId}}\n}"
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// CryptoJS ja existe como global no sandbox do Postman/newman: 'require(\"crypto-js\")' colide",
+                  "// com essa declaracao (SyntaxError: Identifier 'CryptoJS' has already been declared).",
+                  "const b64url = src => CryptoJS.enc.Base64.stringify(src).replace(/=+$/, '').replace(/\\+/g, '-').replace(/\\//g, '_');",
+                  "const agora = Math.floor(Date.now() / 1000);",
+                  "const h = b64url(CryptoJS.enc.Utf8.parse(JSON.stringify({ alg: 'HS256', typ: 'JWT' })));",
+                  "const p = b64url(CryptoJS.enc.Utf8.parse(JSON.stringify({ iss: 'petbuddies-ai', perfil: 'VET', veterinarioId: 1, nbf: agora - 60, exp: agora + 8 * 3600 })));",
+                  "const s = b64url(CryptoJS.HmacSHA256(`${h}.${p}`, pm.variables.get('jwtSecret')));",
+                  "pm.collectionVariables.set('token', `${h}.${p}.${s}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Gera token local — 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Token gerado nao esta vazio', () => {",
+                  "    pm.expect(pm.collectionVariables.get('token')).to.be.a('string').with.length.above(0);",
+                  "});"
+                ]
+              }
             }
-          },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
-        },
-        {
-          "name": "Cria clínica com CNPJ inválido — 400",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/clinica",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Clinica Invalida\",\n  \"cnpj\": \"123\",\n  \"telefone\": \"11999990001\",\n  \"enderecoId\": {{enderecoId}}\n}"
-            }
-          },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] }}]
-        },
-        {
-          "name": "Cria clínica com endereço inexistente — 404",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/clinica",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Clinica Orfao\",\n  \"cnpj\": \"99888777000155\",\n  \"telefone\": \"11900000000\",\n  \"enderecoId\": 999999\n}"
-            }
-          },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
-        },
-        {
-          "name": "Cria clínica com CNPJ duplicado — 409",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/clinica",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Outra Clinica\",\n  \"cnpj\": \"11222333000144\",\n  \"telefone\": \"11900000000\",\n  \"enderecoId\": {{enderecoId}}\n}"
-            }
-          },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 409', () => pm.response.to.have.status(409));"] }}]
-        },
-        {
-          "name": "Cria segunda clínica (para deletar) — 201",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/clinica",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Clinica para Deletar\",\n  \"cnpj\": \"22333444000155\",\n  \"telefone\": \"11900000000\",\n  \"enderecoId\": {{enderecoId}}\n}"
-            }
-          },
-          "event": [{ "listen": "test", "script": { "exec": [
-            "pm.test('Status 201', () => pm.response.to.have.status(201));",
-            "pm.collectionVariables.set('clinicaDeleteId', pm.response.json().id);"
-          ]}}]
-        },
-        {
-          "name": "Remove clínica — 204",
-          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/clinica/{{clinicaDeleteId}}" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
-        },
-        {
-          "name": "Remove clínica inexistente — 404",
-          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/clinica/999999" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+          ]
         }
       ]
     },
-
     {
-      "name": "Veterinario",
+      "name": "1 · Saúde",
+      "auth": {
+        "type": "noauth"
+      },
       "item": [
         {
-          "name": "Cria veterinário — 201",
+          "name": "Consulta health live — 200",
           "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/veterinario",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Dra. Ana Lima\",\n  \"crmv\": \"12345SP\",\n  \"especialidade\": \"Clinico Geral\",\n  \"telefone\": \"11912345678\",\n  \"email\": \"ana.lima@petvida.com\",\n  \"atendeEmergencia\": true,\n  \"ativo\": true,\n  \"clinicaId\": {{clinicaId}}\n}"
-            }
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health/live"
           },
-          "event": [{ "listen": "test", "script": { "exec": [
-            "pm.test('Status 201', () => pm.response.to.have.status(201));",
-            "pm.collectionVariables.set('veterinarioId', pm.response.json().id);"
-          ]}}]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Consulta health live — 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Lista veterinários — 200",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/veterinario" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
-        },
-        {
-          "name": "Busca veterinário por id — 200",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/veterinario/{{veterinarioId}}" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
-        },
-        {
-          "name": "Busca veterinário inexistente — 404",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/veterinario/999999" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
-        },
-        {
-          "name": "Lista veterinários por clínica — 200",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/veterinario/por-clinica/{{clinicaId}}" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
-        },
-        {
-          "name": "Atualiza veterinário — 204",
+          "name": "Consulta health db — 200 ou 503",
           "request": {
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/veterinario/{{veterinarioId}}",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Dra. Ana Lima (atualizada)\",\n  \"crmv\": \"12345SP\",\n  \"especialidade\": \"Dermatologia\",\n  \"atendeEmergencia\": false,\n  \"ativo\": true,\n  \"clinicaId\": {{clinicaId}}\n}"
-            }
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health/db"
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Consulta health db — 200 ou 503', () => pm.expect(pm.response.code).to.be.oneOf([200, 503]));",
+                  "const json = pm.response.json();",
+                  "pm.test('Corpo tem status e checks', () => {",
+                  "    pm.expect(json).to.have.property('status');",
+                  "    pm.expect(json).to.have.property('checks');",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Cria veterinário com clinicaId zero — 400",
+          "name": "Consulta health externo — 200 ou 503",
           "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/veterinario",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Vet Invalido\",\n  \"crmv\": \"99999SP\",\n  \"atendeEmergencia\": false,\n  \"ativo\": true,\n  \"clinicaId\": 0\n}"
-            }
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health/externo"
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] }}]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Consulta health externo — 200 ou 503', () => pm.expect(pm.response.code).to.be.oneOf([200, 503]));",
+                  "const json = pm.response.json();",
+                  "pm.test('Corpo tem status e checks', () => {",
+                  "    pm.expect(json).to.have.property('status');",
+                  "    pm.expect(json).to.have.property('checks');",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Cria veterinário com clínica inexistente — 404",
+          "name": "Consulta health agregada — 200 ou 503",
           "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/veterinario",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Vet Orfao\",\n  \"crmv\": \"88888SP\",\n  \"atendeEmergencia\": false,\n  \"ativo\": true,\n  \"clinicaId\": 999999\n}"
-            }
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Consulta health agregada — 200 ou 503', () => pm.expect(pm.response.code).to.be.oneOf([200, 503]));",
+                  "const json = pm.response.json();",
+                  "pm.test('Corpo tem status e checks', () => {",
+                  "    pm.expect(json).to.have.property('status');",
+                  "    pm.expect(json).to.have.property('checks');",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Cria veterinário com CRMV duplicado na clínica — 409",
+          "name": "Consulta api/health live — 200",
           "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/veterinario",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Dr. Outro\",\n  \"crmv\": \"12345SP\",\n  \"atendeEmergencia\": false,\n  \"ativo\": true,\n  \"clinicaId\": {{clinicaId}}\n}"
-            }
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health/live"
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 409', () => pm.response.to.have.status(409));"] }}]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Consulta api/health live — 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Cria segundo veterinário (para deletar) — 201",
+          "name": "Consulta api/health db — 200 ou 503",
           "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/veterinario",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Dr. para Deletar\",\n  \"crmv\": \"77777SP\",\n  \"atendeEmergencia\": false,\n  \"ativo\": true,\n  \"clinicaId\": {{clinicaId}}\n}"
-            }
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health/db"
           },
-          "event": [{ "listen": "test", "script": { "exec": [
-            "pm.test('Status 201', () => pm.response.to.have.status(201));",
-            "pm.collectionVariables.set('vetDeleteId', pm.response.json().id);"
-          ]}}]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Consulta api/health db — 200 ou 503', () => pm.expect(pm.response.code).to.be.oneOf([200, 503]));",
+                  "const json = pm.response.json();",
+                  "pm.test('Corpo tem status e checks', () => {",
+                  "    pm.expect(json).to.have.property('status');",
+                  "    pm.expect(json).to.have.property('checks');",
+                  "});"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Remove veterinário — 204",
-          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/veterinario/{{vetDeleteId}}" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
-        },
-        {
-          "name": "Remove veterinário inexistente — 404",
-          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/veterinario/999999" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+          "name": "Consulta api/health externo — 200 ou 503",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health/externo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Consulta api/health externo — 200 ou 503', () => pm.expect(pm.response.code).to.be.oneOf([200, 503]));",
+                  "const json = pm.response.json();",
+                  "pm.test('Corpo tem status e checks', () => {",
+                  "    pm.expect(json).to.have.property('status');",
+                  "    pm.expect(json).to.have.property('checks');",
+                  "});"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
-
     {
-      "name": "JanelaAtendimento",
+      "name": "2 · Protocolo",
       "item": [
         {
-          "name": "Cria janela de atendimento — 201",
+          "name": "Cadastra protocolo — 201",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/janela-atendimento",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/protocolo",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"dataHoraInicio\": \"2026-06-20T09:00:00\",\n  \"dataHoraFim\": \"2026-06-20T09:30:00\",\n  \"duracaoSlot\": 30,\n  \"veterinarioId\": {{veterinarioId}}\n}"
+              "raw": "{\n  \"nome\": \"Preventivo cao adulto - postman\",\n  \"categoria\": \"PREVENTIVO\",\n  \"especie\": \"CACHORRO\",\n  \"ativo\": true,\n  \"descricao\": \"Vacinacao e vermifugacao anuais\"\n}"
             }
           },
-          "event": [{ "listen": "test", "script": { "exec": [
-            "pm.test('Status 201', () => pm.response.to.have.status(201));",
-            "pm.collectionVariables.set('janelaId', pm.response.json().id);"
-          ]}}]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra protocolo — 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('protocoloId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Lista janelas disponíveis — 200",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/janela-atendimento" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
+          "name": "Cadastra segundo protocolo para deletar — 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/protocolo",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Protocolo descartavel - postman\",\n  \"categoria\": \"POS_CIRURGICO\",\n  \"especie\": \"GATO\",\n  \"ativo\": true,\n  \"descricao\": \"Usado so para testar remocao\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra segundo protocolo para deletar — 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('protocoloDeleteId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Lista todas as janelas — 200",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/janela-atendimento/todas" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
+          "name": "Lista protocolos — 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/protocolo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Lista protocolos — 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Busca janela por id — 200",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/janela-atendimento/{{janelaId}}" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }}]
+          "name": "Busca protocolo por id — 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/protocolo/{{protocoloId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Busca protocolo por id — 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Busca janela inexistente — 404",
-          "request": { "method": "GET", "url": "{{baseUrl}}/api/janela-atendimento/999999" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+          "name": "Busca protocolo inexistente — 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/protocolo/999999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Busca protocolo inexistente — 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Atualiza janela — 204",
+          "name": "Atualiza protocolo — 204",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/janela-atendimento/{{janelaId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/protocolo/{{protocoloId}}",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"dataHoraInicio\": \"2026-06-20T10:00:00\",\n  \"dataHoraFim\": \"2026-06-20T10:30:00\",\n  \"duracaoSlot\": 30,\n  \"veterinarioId\": {{veterinarioId}}\n}"
+              "raw": "{\n  \"nome\": \"Preventivo cao adulto - postman (atualizado)\",\n  \"categoria\": \"PREVENTIVO\",\n  \"especie\": \"CACHORRO\",\n  \"ativo\": true,\n  \"descricao\": \"Descricao atualizada\"\n}"
             }
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Atualiza protocolo — 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Cria janela com dataHoraFim anterior — 400",
+          "name": "Atualiza protocolo inexistente — 404",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/protocolo/999999999",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Nao existe\",\n  \"categoria\": \"PREVENTIVO\",\n  \"especie\": \"CACHORRO\",\n  \"ativo\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Atualiza protocolo inexistente — 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastra protocolo sem categoria — 400",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/janela-atendimento",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/protocolo",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"dataHoraInicio\": \"2026-06-20T10:00:00\",\n  \"dataHoraFim\": \"2026-06-20T09:00:00\",\n  \"duracaoSlot\": 30,\n  \"veterinarioId\": {{veterinarioId}}\n}"
+              "raw": "{\n  \"nome\": \"Protocolo invalido\",\n  \"especie\": \"CACHORRO\"\n}"
             }
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 400', () => pm.response.to.have.status(400));"] }}]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra protocolo sem categoria — 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Cria janela com veterinário inexistente — 404",
+          "name": "Busca protocolo sem token — 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/protocolo",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Busca protocolo sem token — 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove protocolo para deletar — 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/protocolo/{{protocoloDeleteId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove protocolo para deletar — 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove protocolo inexistente — 404",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/protocolo/999999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove protocolo inexistente — 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3 · Regra de protocolo",
+      "item": [
+        {
+          "name": "Lista regras sem protocoloId — 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-protocolo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Lista regras sem protocoloId — 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastra regra de protocolo — 201",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/janela-atendimento",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/regra-protocolo",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"dataHoraInicio\": \"2026-07-01T08:00:00\",\n  \"dataHoraFim\": \"2026-07-01T08:30:00\",\n  \"duracaoSlot\": 30,\n  \"veterinarioId\": 999999\n}"
+              "raw": "{\n  \"protocoloId\": {{protocoloId}},\n  \"tipo\": \"VACINACAO\",\n  \"nome\": \"V10 anual - postman\",\n  \"offset\": 0,\n  \"unidadeOffset\": \"DIAS\",\n  \"dataBase\": \"ULTIMA_REALIZACAO\",\n  \"intervalo\": 12,\n  \"unidadeIntervalo\": \"MESES\",\n  \"repeticoes\": 1,\n  \"descricao\": \"Reforco anual da V10\"\n}"
             }
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra regra de protocolo — 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('regraProtocoloId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Cria janela com horário duplicado — 409",
+          "name": "Cadastra segunda regra de protocolo para deletar — 201",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": "{{baseUrl}}/api/janela-atendimento",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/regra-protocolo",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"dataHoraInicio\": \"2026-06-20T10:00:00\",\n  \"dataHoraFim\": \"2026-06-20T10:30:00\",\n  \"duracaoSlot\": 30,\n  \"veterinarioId\": {{veterinarioId}}\n}"
+              "raw": "{\n  \"protocoloId\": {{protocoloId}},\n  \"tipo\": \"EXAME\",\n  \"nome\": \"Exame anual descartavel - postman\",\n  \"offset\": 30,\n  \"unidadeOffset\": \"DIAS\",\n  \"dataBase\": \"NASCIMENTO\",\n  \"repeticoes\": 1,\n  \"descricao\": \"Regra usada so para testar remocao\"\n}"
             }
           },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 409', () => pm.response.to.have.status(409));"] }}]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra segunda regra de protocolo para deletar — 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('regraProtocoloDeleteId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Remove janela — 204",
-          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/janela-atendimento/{{janelaId}}" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }}]
+          "name": "Lista regras do protocolo — 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-protocolo?protocoloId={{protocoloId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Lista regras do protocolo — 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Remove janela inexistente — 404",
-          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/janela-atendimento/999999" },
-          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] }}]
+          "name": "Busca regra de protocolo por id — 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-protocolo/{{regraProtocoloId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Busca regra de protocolo por id — 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Busca regra de protocolo inexistente — 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-protocolo/999999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Busca regra de protocolo inexistente — 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualiza regra de protocolo — 204",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/regra-protocolo/{{regraProtocoloId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"protocoloId\": {{protocoloId}},\n  \"tipo\": \"VACINACAO\",\n  \"nome\": \"V10 anual - postman (atualizada)\",\n  \"offset\": 0,\n  \"unidadeOffset\": \"DIAS\",\n  \"dataBase\": \"ULTIMA_REALIZACAO\",\n  \"intervalo\": 12,\n  \"unidadeIntervalo\": \"MESES\",\n  \"repeticoes\": 2,\n  \"descricao\": \"Reforco anual da V10 atualizado\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Atualiza regra de protocolo — 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualiza regra de protocolo inexistente — 404",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/regra-protocolo/999999999",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"protocoloId\": {{protocoloId}},\n  \"tipo\": \"VACINACAO\",\n  \"nome\": \"Nao existe\",\n  \"offset\": 0,\n  \"unidadeOffset\": \"DIAS\",\n  \"dataBase\": \"ULTIMA_REALIZACAO\",\n  \"repeticoes\": 1\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Atualiza regra de protocolo inexistente — 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastra regra com protocolo inexistente — 404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/regra-protocolo",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"protocoloId\": 999999999,\n  \"tipo\": \"VACINACAO\",\n  \"nome\": \"Regra orfa - postman\",\n  \"offset\": 0,\n  \"unidadeOffset\": \"DIAS\",\n  \"dataBase\": \"NASCIMENTO\",\n  \"repeticoes\": 1\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra regra com protocolo inexistente — 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastra regra com intervalo sem unidade — 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/regra-protocolo",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"protocoloId\": {{protocoloId}},\n  \"tipo\": \"VACINACAO\",\n  \"nome\": \"Regra invalida - postman\",\n  \"offset\": 10,\n  \"unidadeOffset\": \"DIAS\",\n  \"dataBase\": \"NASCIMENTO\",\n  \"intervalo\": 6,\n  \"repeticoes\": 1\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra regra com intervalo sem unidade — 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove segunda regra de protocolo — 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-protocolo/{{regraProtocoloDeleteId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove segunda regra de protocolo — 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove regra de protocolo inexistente — 404",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-protocolo/999999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove regra de protocolo inexistente — 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4 · Oferta",
+      "item": [
+        {
+          "name": "Cadastra oferta — 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/oferta",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"ato\": \"PROTOCOLO\",\n  \"protocoloId\": {{protocoloId}},\n  \"descricao\": \"Plano preventivo cao adulto - postman\",\n  \"valor\": 180.00,\n  \"inicioVigencia\": \"{{vigenciaOferta}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const base = new Date(Date.UTC(2027, 0, 1));",
+                  "const dias = Math.floor(Math.random() * 3650);",
+                  "base.setUTCDate(base.getUTCDate() + dias);",
+                  "pm.collectionVariables.set('vigenciaOferta', base.toISOString().slice(0, 10));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra oferta — 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('ofertaId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastra segunda oferta para deletar — 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/oferta",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"ato\": \"CONSULTA\",\n  \"subtipo\": \"CONSULTA_GERAL\",\n  \"descricao\": \"Consulta avulsa descartavel - postman\",\n  \"valor\": 90.00,\n  \"inicioVigencia\": \"{{vigenciaOfertaDelete}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const base = new Date(Date.UTC(2027, 0, 1));",
+                  "const dias = Math.floor(Math.random() * 3650);",
+                  "base.setUTCDate(base.getUTCDate() + dias);",
+                  "pm.collectionVariables.set('vigenciaOfertaDelete', base.toISOString().slice(0, 10));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra segunda oferta para deletar — 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('ofertaDeleteId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lista ofertas — 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/oferta"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Lista ofertas — 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Busca oferta por id — 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/oferta/{{ofertaId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Busca oferta por id — 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Busca oferta inexistente — 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/oferta/999999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Busca oferta inexistente — 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualiza oferta — 204",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/oferta/{{ofertaId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"ato\": \"PROTOCOLO\",\n  \"protocoloId\": {{protocoloId}},\n  \"descricao\": \"Plano preventivo cao adulto - postman (atualizado)\",\n  \"valor\": 190.00,\n  \"inicioVigencia\": \"{{vigenciaOferta}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Atualiza oferta — 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualiza oferta inexistente — 404",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/oferta/999999999",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"ato\": \"CONSULTA\",\n  \"subtipo\": \"CONSULTA_TESTE_404\",\n  \"descricao\": \"Nao existe\",\n  \"valor\": 10.00,\n  \"inicioVigencia\": \"2027-06-01\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Atualiza oferta inexistente — 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastra oferta de protocolo com subtipo — 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/oferta",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"ato\": \"PROTOCOLO\",\n  \"protocoloId\": {{protocoloId}},\n  \"subtipo\": \"NAO_DEVERIA_TER\",\n  \"descricao\": \"Oferta invalida - postman\",\n  \"valor\": 50.00,\n  \"inicioVigencia\": \"{{vigenciaOferta}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra oferta de protocolo com subtipo — 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastra oferta com protocolo inexistente — 404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/oferta",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"ato\": \"PROTOCOLO\",\n  \"protocoloId\": 999999999,\n  \"descricao\": \"Oferta orfa - postman\",\n  \"valor\": 50.00,\n  \"inicioVigencia\": \"2027-06-01\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra oferta com protocolo inexistente — 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastra oferta com vigencia duplicada — 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/oferta",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"ato\": \"PROTOCOLO\",\n  \"protocoloId\": {{protocoloId}},\n  \"descricao\": \"Plano preventivo cao adulto - duplicado\",\n  \"valor\": 200.00,\n  \"inicioVigencia\": \"{{vigenciaOferta}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra oferta com vigencia duplicada — 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove segunda oferta — 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/oferta/{{ofertaDeleteId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove segunda oferta — 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove oferta inexistente — 404",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/oferta/999999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove oferta inexistente — 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5 · Regra de pontuação",
+      "item": [
+        {
+          "name": "Cadastra regra de pontuacao — 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/regra-pontuacao",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"gesto\": \"CONSULTA_REALIZADA\",\n  \"pontos\": 10,\n  \"inicioVigencia\": \"{{vigenciaPontuacao}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const base = new Date(Date.UTC(2027, 0, 1));",
+                  "const dias = Math.floor(Math.random() * 3650);",
+                  "base.setUTCDate(base.getUTCDate() + dias);",
+                  "pm.collectionVariables.set('vigenciaPontuacao', base.toISOString().slice(0, 10));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra regra de pontuacao — 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('regraPontuacaoId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastra segunda regra de pontuacao para deletar — 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/regra-pontuacao",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"gesto\": \"PLANO_CRIADO\",\n  \"pontos\": 5,\n  \"inicioVigencia\": \"{{vigenciaPontuacaoDelete}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const base = new Date(Date.UTC(2027, 0, 1));",
+                  "const dias = Math.floor(Math.random() * 3650);",
+                  "base.setUTCDate(base.getUTCDate() + dias);",
+                  "pm.collectionVariables.set('vigenciaPontuacaoDelete', base.toISOString().slice(0, 10));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra segunda regra de pontuacao para deletar — 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('regraPontuacaoDeleteId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lista regras de pontuacao — 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-pontuacao"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Lista regras de pontuacao — 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Busca regra de pontuacao por id — 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-pontuacao/{{regraPontuacaoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Busca regra de pontuacao por id — 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Busca regra de pontuacao inexistente — 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-pontuacao/999999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Busca regra de pontuacao inexistente — 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualiza regra de pontuacao — 204",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/regra-pontuacao/{{regraPontuacaoId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"gesto\": \"CONSULTA_REALIZADA\",\n  \"pontos\": 15,\n  \"inicioVigencia\": \"{{vigenciaPontuacao}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Atualiza regra de pontuacao — 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualiza regra de pontuacao inexistente — 404",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/regra-pontuacao/999999999",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"gesto\": \"CONSULTA_AGENDADA\",\n  \"pontos\": 10,\n  \"inicioVigencia\": \"2027-06-01\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Atualiza regra de pontuacao inexistente — 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastra regra de pontuacao com pontos zero — 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/regra-pontuacao",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"gesto\": \"CONSULTA_AGENDADA\",\n  \"pontos\": 0,\n  \"inicioVigencia\": \"2027-06-01\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra regra de pontuacao com pontos zero — 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastra regra de pontuacao com vigencia duplicada — 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/regra-pontuacao",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"gesto\": \"CONSULTA_REALIZADA\",\n  \"pontos\": 20,\n  \"inicioVigencia\": \"{{vigenciaPontuacao}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra regra de pontuacao com vigencia duplicada — 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove segunda regra de pontuacao — 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-pontuacao/{{regraPontuacaoDeleteId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove segunda regra de pontuacao — 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove regra de pontuacao inexistente — 404",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-pontuacao/999999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove regra de pontuacao inexistente — 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6 · Limpeza",
+      "item": [
+        {
+          "name": "Remove protocolo com vinculos — 409",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/protocolo/{{protocoloId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove protocolo com vinculos — 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove oferta vinculada ao protocolo — 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/oferta/{{ofertaId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove oferta vinculada ao protocolo — 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove regra de protocolo vinculada — 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-protocolo/{{regraProtocoloId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove regra de protocolo vinculada — 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove protocolo — 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/protocolo/{{protocoloId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove protocolo — 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove regra de pontuacao — 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-pontuacao/{{regraPontuacaoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove regra de pontuacao — 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
         }
       ]
     }
-
   ]
 }

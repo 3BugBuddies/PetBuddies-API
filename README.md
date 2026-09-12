@@ -21,7 +21,7 @@ Preço e pontuação são política configurada: nesta sprint o CRUD existe e é
 | | |
 |---|---|
 | Swagger UI (local) | `http://localhost:5297/swagger` |
-| Postman collection | [`docs/postman/petbuddies-api-net.postman_collection.json`](docs/postman/petbuddies-api-net.postman_collection.json) — **desatualizada** (ver [Como Testar](#como-testar)) |
+| Postman collection | [`docs/postman/petbuddies-api-net.postman_collection.json`](docs/postman/petbuddies-api-net.postman_collection.json) |
 
 ---
 
@@ -243,6 +243,7 @@ JWT **emitido pelo Java** (`POST /api/auth/login`, `issuer: petbuddies-ai`) e va
 - Role vem da claim `perfil` (`RoleClaimType = "perfil"`), valores `VET` e `TUTOR`.
 - Toda rota de negócio é `[Authorize(Roles = "VET")]`; sem token → `401`, com token de `TUTOR` → `403`.
 - As rotas de health check (`/health/*` e `/api/health/*`) são `AllowAnonymous`, propositalmente.
+- **Sem o Java de pé:** o token sai do request "Gera token local" da coleção Postman (pasta `0b`), que assina um JWT `VET` localmente com o mesmo valor de `PETBUDDIES_JWT_SECRET` guardado na variável de coleção `jwtSecret`. Para testar pelo Swagger, gere o token nesse request e cole em **Authorize**.
 
 ---
 
@@ -336,7 +337,12 @@ dotnet test --filter "Autenticacao=Protocolo"
 
 ### Via Postman
 
-A coleção em `docs/postman/petbuddies-api-net.postman_collection.json` ainda cobre recursos do registro clínico, que hoje vivem no Java. Está **desatualizada** — use o Swagger até uma coleção nova dos quatro domínios ser publicada.
+A coleção em `docs/postman/petbuddies-api-net.postman_collection.json` cobre os quatro domínios do back-office.
+
+- Importe o arquivo.
+- Gere o token de duas formas: com o Java de pé, rode a pasta `0a · Login (Java)`; sem o Java, rode `0b · Token local (sem o Java)` — grava o token sozinho, a partir da variável de coleção `jwtSecret` (mesmo valor de `PETBUDDIES_JWT_SECRET`).
+- Rode a coleção inteira em ordem, com o Oracle de pé.
+- O que cada pasta cobre: `1 · Saúde` as sete rotas de health check; `2 · Protocolo`, `3 · Regra de protocolo`, `4 · Oferta` e `5 · Regra de pontuação` o CRUD de cada domínio, com os erros que o controller declara; `6 · Limpeza` remove o que a execução criou.
 
 ---
 
