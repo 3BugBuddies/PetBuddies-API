@@ -276,16 +276,18 @@ Quatro rotas expostas por `Program.cs`, sem autenticação (`AllowAnonymous`):
 | Rota | O que verifica | Quando falha |
 |---|---|---|
 | `/health/live` | o processo está de pé | nunca — não toca banco nem dependência externa |
-| `/health/db` | conexão com o Oracle | Oracle fora do ar ou connection string vazia |
-| `/health/externo` | `petbuddies-ai` (Java), via `GET /actuator/health` | motor Java fora do ar ou endereço não configurado |
-| `/health` | as três verificações acima, juntas | qualquer uma delas |
+| `/health/db` | conexão com o Oracle | `503` com o Oracle fora do ar ou connection string vazia |
+| `/health/externo` | `petbuddies-ai` (Java), emissor do token que esta API aceita, via `GET /actuator/health` | `200` com `Degraded` quando o Java está fora, não responde em 3 s ou não está configurado — a API continua atendendo |
+| `/health` | as três verificações acima, juntas | `503` se `self` ou `oracle` falharem; só o Java fora deixa `200` com `Degraded` |
+
+Estados: `Healthy` e `Degraded` respondem `200`; `Unhealthy` responde `503`.
 
 ```bash
 curl http://localhost:5297/health
 ```
 
 O `HealthController` expõe as mesmas três verificações em `/api/health/live`, `/api/health/db` e
-`/api/health/externo` — também sem autenticação, `200` quando saudável e `503` quando não. O corpo
+`/api/health/externo` — também sem autenticação, com os mesmos códigos (`200` para `Healthy` e `Degraded`, `503` para `Unhealthy`). O corpo
 usa um contrato diferente do de `/health/*`: `name`, `status` e `description` (mais `error` quando há
 exceção), enquanto `/health/*` usa `nome`, `status` e `descricao`.
 

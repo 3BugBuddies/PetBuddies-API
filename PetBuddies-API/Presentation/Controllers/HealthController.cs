@@ -43,9 +43,9 @@ namespace PetBuddies_API.Presentation.Controllers
                 })
             };
 
-            return report.Status == HealthStatus.Healthy
-                ? Ok(result)
-                : StatusCode(StatusCodes.Status503ServiceUnavailable, result);
+            return report.Status == HealthStatus.Unhealthy
+                ? StatusCode(StatusCodes.Status503ServiceUnavailable, result)
+                : Ok(result);
         }
     }
 }
