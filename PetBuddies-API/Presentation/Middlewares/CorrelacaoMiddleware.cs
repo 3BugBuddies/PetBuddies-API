@@ -68,7 +68,15 @@ namespace PetBuddies_API.Presentation.Middlewares
                         ? StatusCodes.Status500InternalServerError
                         : contexto.Response.StatusCode;
 
-                    _logger.LogInformation(
+                    var nivel = status switch
+                    {
+                        >= 500 => LogLevel.Error,
+                        >= 400 => LogLevel.Warning,
+                        _ => LogLevel.Information
+                    };
+
+                    _logger.Log(
+                        nivel,
                         "{Metodo} {Caminho} respondeu {StatusCode} em {DuracaoMs:F1} ms",
                         contexto.Request.Method,
                         contexto.Request.Path.Value,
