@@ -165,13 +165,16 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// CryptoJS ja existe como global no sandbox do Postman/newman: 'require(\"crypto-js\")' colide",
-                  "// com essa declaracao (SyntaxError: Identifier 'CryptoJS' has already been declared).",
-                  "const b64url = src => CryptoJS.enc.Base64.stringify(src).replace(/=+$/, '').replace(/\\+/g, '-').replace(/\\//g, '_');",
+                  "// 'const CryptoJS = require(\"crypto-js\")' quebra no sandbox (SyntaxError: Identifier 'CryptoJS'",
+                  "// has already been declared) porque CryptoJS ja existe como global la. Nome de variavel diferente",
+                  "// evita a colisao e ainda funciona quando esse global for removido (newman avisa que usar o",
+                  "// global direto e deprecated).",
+                  "const cryptoJs = require('crypto-js');",
+                  "const b64url = src => cryptoJs.enc.Base64.stringify(src).replace(/=+$/, '').replace(/\\+/g, '-').replace(/\\//g, '_');",
                   "const agora = Math.floor(Date.now() / 1000);",
-                  "const h = b64url(CryptoJS.enc.Utf8.parse(JSON.stringify({ alg: 'HS256', typ: 'JWT' })));",
-                  "const p = b64url(CryptoJS.enc.Utf8.parse(JSON.stringify({ iss: 'petbuddies-ai', perfil: 'VET', veterinarioId: 1, nbf: agora - 60, exp: agora + 8 * 3600 })));",
-                  "const s = b64url(CryptoJS.HmacSHA256(`${h}.${p}`, pm.variables.get('jwtSecret')));",
+                  "const h = b64url(cryptoJs.enc.Utf8.parse(JSON.stringify({ alg: 'HS256', typ: 'JWT' })));",
+                  "const p = b64url(cryptoJs.enc.Utf8.parse(JSON.stringify({ iss: 'petbuddies-ai', perfil: 'VET', veterinarioId: 1, nbf: agora - 60, exp: agora + 8 * 3600 })));",
+                  "const s = b64url(cryptoJs.HmacSHA256(`${h}.${p}`, pm.variables.get('jwtSecret')));",
                   "pm.collectionVariables.set('token', `${h}.${p}.${s}`);"
                 ]
               }
