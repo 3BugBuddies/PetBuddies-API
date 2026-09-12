@@ -64,23 +64,25 @@ PetBuddies-API/
 │   ├── Domain/
 │   │   ├── Entities/        # BaseEntity + 4 entidades (Protocolo, RegraProtocolo, Oferta, RegraPontuacao)
 │   │   ├── Enums/           # 7 enums de domínio
-│   │   └── Interfaces/      # Contratos de repositório (IUnitOfWork, IXxxRepository)
+│   │   └── Interfaces/      # Contratos de repositório (IXxxRepository)
 │   ├── Application/
 │   │   ├── Dtos/            # Um subpacote por domínio: XxxDto + SalvarXxxRequest
 │   │   ├── Interfaces/      # Contratos de service (IXxxService)
+│   │   ├── Mappers/         # Entidade ↔ DTO, um por domínio
 │   │   └── UseCases/        # Services — validação de shape + regra de negócio
 │   ├── Infrastructure/
 │   │   ├── Data/
 │   │   │   ├── ApplicationContext.cs
 │   │   │   ├── Configurations/  # IEntityTypeConfiguration<T>, um por entidade
 │   │   │   ├── Converters/
-│   │   │   ├── Migrations/      # Migrations EF Core
-│   │   │   └── UnitOfWork.cs
+│   │   │   └── Migrations/      # Migrations EF Core
+│   │   ├── IoC/
+│   │   │   └── Bootstrap.cs     # Injeção de dependência, Serilog e OpenTelemetry
 │   │   ├── Repositories/    # Um repositório por domínio
 │   │   └── Security/
 │   │       └── JwtOptions.cs
 │   ├── Presentation/
-│   │   ├── Controllers/     # 4 controllers REST, um por domínio
+│   │   ├── Controllers/     # 4 controllers REST, um por domínio, e o HealthController
 │   │   ├── Middlewares/
 │   │   │   └── CorrelacaoMiddleware.cs
 │   │   └── HealthCheckResponseWriter.cs
