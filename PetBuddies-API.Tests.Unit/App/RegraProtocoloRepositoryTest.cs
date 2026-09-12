@@ -38,7 +38,7 @@ namespace PetBuddies_API.Tests.Unit.App
 
         [Fact]
         [Trait("Repository", "RegraProtocolo")]
-        public async Task ListarPorProtocoloAsync_RetornaSoAsRegrasDaqueleProtocoloOrdenadasPorId()
+        public async Task ListarPorProtocoloAsync_RegrasDeVariosProtocolos_RetornaSoAsDoProtocoloOrdenadasPorId()
         {
             // Arrange
             var protocolo = await CriarProtocoloAsync();
