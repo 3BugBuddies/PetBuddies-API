@@ -244,6 +244,8 @@ app.MapHealthChecks("/health", new HealthCheckOptions
     ResponseWriter = HealthCheckResponseWriter.EscreverAsync
 }).AllowAnonymous();
 
+app.MapPrometheusScrapingEndpoint("/metrics").AllowAnonymous();
+
 app.Run();
 
 // Necessario para WebApplicationFactory<Program> enxergar o tipo.

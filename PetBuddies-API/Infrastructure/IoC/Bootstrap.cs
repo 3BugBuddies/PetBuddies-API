@@ -45,6 +45,10 @@ namespace PetBuddies_API.Infrastructure.IoC
                 {
                     metricas.AddAspNetCoreInstrumentation();
 
+                    // Fora do if de proposito: dentro dele, /metrics responderia vazio
+                    // sempre que houvesse coletor configurado.
+                    metricas.AddPrometheusExporter();
+
                     if (exportarNoConsole)
                     {
                         metricas.AddConsoleExporter();
