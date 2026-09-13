@@ -244,9 +244,6 @@ app.MapHealthChecks("/health", new HealthCheckOptions
     ResponseWriter = HealthCheckResponseWriter.EscreverAsync
 }).AllowAnonymous();
 
-// O caminho que a rubrica chama de "expor": tempo de resposta e taxa de erro
-// legiveis sem coletor externo, sem conta e sem rede. Anonimo como os health —
-// um coletor raspa antes de qualquer login.
 app.MapPrometheusScrapingEndpoint("/metrics").AllowAnonymous();
 
 app.Run();
