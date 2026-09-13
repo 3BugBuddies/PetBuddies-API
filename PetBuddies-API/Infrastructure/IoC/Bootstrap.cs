@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -28,7 +29,14 @@ namespace PetBuddies_API.Infrastructure.IoC
                 .WithTracing(rastreamento =>
                 {
                     rastreamento
-                        .AddAspNetCoreInstrumentation()
+                        // Health check e coleta de metrica sao trafego de infraestrutura:
+                        // rastreados, afogam no console as requisicoes que interessam.
+                        .AddAspNetCoreInstrumentation(opcoes => opcoes.Filter = contexto =>
+                        {
+                            var caminho = contexto.Request.Path.Value ?? string.Empty;
+                            return !caminho.StartsWith("/health", StringComparison.OrdinalIgnoreCase)
+                                && !caminho.StartsWith("/metrics", StringComparison.OrdinalIgnoreCase);
+                        })
                         .AddHttpClientInstrumentation()
                         .AddEntityFrameworkCoreInstrumentation();
 
@@ -49,11 +57,9 @@ namespace PetBuddies_API.Infrastructure.IoC
                     // sempre que houvesse coletor configurado.
                     metricas.AddPrometheusExporter();
 
-                    if (exportarNoConsole)
-                    {
-                        metricas.AddConsoleExporter();
-                    }
-                    else
+                    // Metrica nao vai para o console: o despejo periodico era metade do
+                    // log, e /metrics entrega o mesmo dado quando alguem pede.
+                    if (!exportarNoConsole)
                     {
                         metricas.AddOtlpExporter();
                     }

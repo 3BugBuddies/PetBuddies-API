@@ -147,99 +147,47 @@ A aplicação sobe em:
 
 ---
 
-## Diagrama de classes
+## Modelo de dados
 
 ![Diagrama de classes do back-office](docs/diagrama-classes.png)
 
-As quatro entidades, agrupadas pelos dois papéis do serviço. O **catálogo** é lido pelo Java por
+Quatro entidades, agrupadas pelos dois papéis do serviço. O **catálogo** é lido pelo Java por
 HTTP no instante em que um plano de cuidado nasce; a **política comercial** ainda não tem
 consumidor — preço e pontuação são configuração, e congelar o valor no ato é Sprint 4.
 
-Três coisas que o desenho torna visíveis:
+| Entidade | Tabela | Papel |
+|---|---|---|
+| `ProtocoloEntity` | `T_PB_PROTOCOLO` | o molde de cuidado: categoria e espécie a que se aplica |
+| `RegraProtocoloEntity` | `T_PB_REGRA_PROTOCOLO` | o item do molde — tipo de cuidado, deslocamento, data-base e recorrência |
+| `OfertaEntity` | `T_PB_OFERTA` | o que a clínica oferece e por quanto, com vigência |
+| `RegraPontuacaoEntity` | `T_PB_REGRA_PONTUACAO` | quanto cada gesto do tutor vale, por clínica e vigência |
 
-- **Nenhuma chave cruza os dois bancos.** O plano e o item do Java guardam `protocoloId` e
+Três coisas que o desenho mostra e a tabela não mostra:
+
+- **Nenhuma chave cruza os dois bancos.** O plano e o item do lado Java guardam `protocoloId` e
   `regraProtocoloId` como número solto, lidos uma vez por `GET /api/protocolo`. Depois de
   materializado, o plano não volta ao catálogo.
-- **`RegraProtocolo` é a única entidade sem carimbo de tempo**, porque é a única que não herda
+- **`RegraProtocolo` é a única sem carimbo de tempo**, porque é a única que não herda
   `BaseEntity` — ela não existe fora do protocolo que a contém.
-- **`Oferta` é a única ponte entre os dois pacotes**, e por um id nulável: uma oferta pode ser de
-  um protocolo, de um procedimento ou de uma consulta.
+- **`Oferta` é a única ponte entre os dois pacotes**, por um id nulável: a oferta pode ser de um
+  protocolo, de um procedimento ou de uma consulta.
+
+Os quatro enums próprios do serviço estão no desenho. `EspecieEnum`, `TipoCuidadoEnum` e
+`UnidadeTempoEnum` aparecem como tipo de campo e não estão expandidos: são **vocabulário
+compartilhado com o Java**, e os valores precisam bater nos dois lados — a lista vive em
+`Domain/Enums/`.
+
+### Invariantes que o schema garante
+
+- `Oferta` — `UX_OFERTA_VIGENCIA` (único por clínica + ato + subtipo/protocolo + início de
+  vigência) e o `CHECK` `CK_OFERTA_ALVO`: ato `PROCEDIMENTO`/`CONSULTA` exige `Subtipo` e proíbe
+  `ProtocoloId`; ato `PROTOCOLO` faz o inverso.
+- `RegraPontuacao` — `UK_PONTUACAO_VIGENCIA` (único por clínica + gesto + início de vigência).
+- `RegraProtocolo` — `CK_REGPROT_RECORRENCIA`: `Intervalo` e `UnidadeIntervalo` são ambos nulos
+  ou ambos preenchidos.
 
 A fonte do desenho é `.claude/docs/dotnet-sprint-3/diagrama-classes/diagrama-classes.html`, que
-não é versionado — o PNG é o entregável.
-
----
-
-## Modelo de Dados
-
-```mermaid
-erDiagram
-    PROTOCOLO ||--o{ REGRA_PROTOCOLO : compoe
-    PROTOCOLO ||--o{ OFERTA : precifica
-
-    PROTOCOLO {
-        long id PK
-        string nome
-        string categoria
-        string especie
-        bool ativo
-    }
-    REGRA_PROTOCOLO {
-        long id PK
-        string tipoCuidado
-        int deslocamento
-        int intervalo
-        string unidadeIntervalo
-    }
-    OFERTA {
-        long id PK
-        long clinicaId
-        string ato
-        string subtipo
-        decimal valor
-        date vigenciaInicio
-    }
-    REGRA_PONTUACAO {
-        long id PK
-        long clinicaId
-        string gesto
-        int pontos
-        date vigenciaInicio
-    }
-```
-
-`RegraPontuacao` não se relaciona com as demais: pontua o gesto do tutor, não o catálogo.
-
-### Entidades e Tabelas — 4 tabelas
-
-| Entidade | Tabela | Relacionamentos | Papel |
-|----------|--------|-----------------|-------|
-| `ProtocoloEntity` | `T_PB_PROTOCOLO` | 1:N → `RegraProtocolo` | catálogo de protocolos de cuidado |
-| `RegraProtocoloEntity` | `T_PB_REGRA_PROTOCOLO` | N:1 → `Protocolo` | a regra de cada item do protocolo (tipo de cuidado, deslocamento, recorrência) |
-| `OfertaEntity` | `T_PB_OFERTA` | N:1 → `Protocolo` (opcional) | o que a clínica oferece — procedimento, consulta ou protocolo inteiro — e por quanto, com vigência |
-| `RegraPontuacaoEntity` | `T_PB_REGRA_PONTUACAO` | — | quanto cada gesto do tutor vale, por clínica e vigência |
-
-`Oferta` e `RegraPontuacao` guardam `ClinicaId` sem FK — a clínica vive no banco do Java, e o serviço é single-tenant nesta sprint (`ClinicaId = 1`).
-
-`BaseEntity` dá `CreatedAt`/`UpdatedAt` a `Protocolo`, `Oferta` e `RegraPontuacao`. `RegraProtocolo` não herda `BaseEntity` — é sempre reescrita junto do protocolo, nunca em si mesma.
-
-### Regras de negócio que o schema espelha
-
-- `Oferta`: `UX_OFERTA_VIGENCIA` (único por clínica + ato + subtipo/protocolo + início de vigência) e o `CHECK` `CK_OFERTA_ALVO` — ato `PROCEDIMENTO`/`CONSULTA` exige `Subtipo` e proíbe `ProtocoloId`; ato `PROTOCOLO` exige `ProtocoloId` e proíbe `Subtipo`.
-- `RegraPontuacao`: `UK_PONTUACAO_VIGENCIA` (único por clínica + gesto + início de vigência).
-- `RegraProtocolo`: `CK_REGPROT_RECORRENCIA` — `Intervalo` e `UnidadeIntervalo` são ambos nulos ou ambos preenchidos.
-
-### Enums
-
-| Enum | Valores |
-|------|---------|
-| `CategoriaProtocoloEnum` | `PREVENTIVO`, `POS_CIRURGICO` |
-| `EspecieEnum` | `CACHORRO`, `GATO`, `PASSARO`, `COELHO`, `HAMSTER`, `OUTRO` |
-| `TipoCuidadoEnum` | `VACINACAO`, `VERMIFUGACAO`, `EXAME`, `RETORNO`, `CIRURGIA`, `MEDICACAO`, `HIGIENE` |
-| `UnidadeTempoEnum` | `DIAS`, `SEMANAS`, `MESES` |
-| `TipoDataBaseEnum` | `NASCIMENTO`, `DATA_CIRURGIA`, `ULTIMA_REALIZACAO` |
-| `TipoAtoOfertaEnum` | `PROCEDIMENTO`, `CONSULTA`, `PROTOCOLO` |
-| `TipoGestoEnum` | `PLANO_CRIADO`, `CONSULTA_AGENDADA`, `CONSULTA_REALIZADA`, `PROCEDIMENTO_EXECUTADO` |
+não é versionada — o PNG é o entregável.
 
 ---
 
@@ -265,13 +213,41 @@ Ao instanciar um plano de cuidado, o `petbuddies-ai` faz `GET` nesses endpoints 
 
 ## Autenticação
 
-JWT **emitido pelo Java** (`POST /api/auth/login`, `issuer: petbuddies-ai`) e validado aqui com `AddAuthentication().AddJwtBearer()` (`Program.cs`). Sem Identity nesta sprint.
+**Este serviço não emite token — ele valida o que o Java emite.** Não há `POST /api/auth/login`
+aqui: o `AddAuthentication().AddJwtBearer()` (`Program.cs`) confere assinatura, emissor e perfil
+de um JWT `HS256` assinado com `PETBUDDIES_JWT_SECRET`, **o mesmo segredo nos dois serviços**.
+Sem Identity nesta sprint.
 
-- Chave simétrica HS256, `PETBUDDIES_JWT_SECRET` (mínimo 32 caracteres) — mesmo segredo nos dois serviços.
-- Role vem da claim `perfil` (`RoleClaimType = "perfil"`), valores `VET` e `TUTOR`.
-- Toda rota de negócio é `[Authorize(Roles = "VET")]`; sem token → `401`, com token de `TUTOR` → `403`.
-- As rotas de health check (`/health/*` e `/api/health/*`) são `AllowAnonymous`, propositalmente.
-- **Sem o Java de pé:** o token sai do request "Gera token local" da coleção Postman (pasta `0b`), que assina um JWT `VET` localmente com o mesmo valor de `PETBUDDIES_JWT_SECRET` guardado na variável de coleção `jwtSecret`. Para testar pelo Swagger, gere o token nesse request e cole em **Authorize**.
+- Emissor exigido: `petbuddies-ai`. Role vem da claim `perfil` (`RoleClaimType = "perfil"`).
+- Toda rota de negócio é `[Authorize(Roles = "VET")]`: sem token → `401`, token de `TUTOR` → `403`.
+- `/health/*` e `/metrics` são `AllowAnonymous`, propositalmente.
+
+### Como obter um token
+
+**Com o Java no ar** — é o caminho normal, e o token é o mesmo que o app usa:
+
+```bash
+curl -s -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"login":"ana@clinica.com","senha":"<senha>"}' | jq -r .token
+```
+
+Depois, em qualquer rota daqui:
+
+```bash
+curl -s http://localhost:5297/api/protocolo -H "Authorization: Bearer $TOKEN"
+```
+
+**Sem o Java** — para avaliar este serviço isolado, a coleção Postman gera o token localmente:
+abra a pasta **`0b · Token local (sem o Java)`** e rode `Gera token local`. O script monta um JWT
+`HS256` com `iss: petbuddies-ai` e `perfil: VET`, assinado com a variável de coleção `jwtSecret`,
+e guarda o resultado em `{{token}}` — os demais requests já mandam esse header. **Ajuste
+`jwtSecret` para o mesmo valor de `PETBUDDIES_JWT_SECRET` da sua máquina**, senão a assinatura
+não confere e tudo volta `401`.
+
+**No Swagger** (`http://localhost:5297/swagger`): gere o token por um dos dois caminhos, clique
+em **Authorize** e cole apenas o token — o prefixo `Bearer` é adicionado pela própria página, que
+guarda a autorização entre recarregamentos.
 
 ---
 
@@ -287,7 +263,8 @@ JWT **emitido pelo Java** (`POST /api/auth/login`, `issuer: petbuddies-ai`) e va
   | 400 a 499 | `Warning` |
   | demais | `Information` |
 
-- **OpenTelemetry:** tracing (instrumentação de ASP.NET Core, `HttpClient` e Entity Framework Core) e métricas de ASP.NET Core (duração de requisição, contagem por status code). Sem `OTEL_EXPORTER_OTLP_ENDPOINT` configurado, o tracing exporta no console — é a única forma de ver um span localmente, sem coletor.
+- **OpenTelemetry:** tracing (instrumentação de ASP.NET Core, `HttpClient` e Entity Framework Core) e métricas de ASP.NET Core (duração de requisição, contagem por status code). Sem `OTEL_EXPORTER_OTLP_ENDPOINT` configurado, **o tracing** exporta no console — é a única forma de ver um span sem coletor. **A métrica não vai para o console:** o despejo periódico dela ocupava metade do log, e o `/metrics` entrega o mesmo dado quando alguém pede.
+- **O console não rastreia infraestrutura.** Requisições a `/health/*` e `/metrics` ficam fora do tracing: são chamadas de máquina, repetidas em laço, e afogariam as requisições que interessam. Elas continuam contando nas métricas — o `/metrics` mostra a linha delas por rota.
 - **Métricas em `GET /metrics`**, no formato de texto do Prometheus, sem autenticação. Esse caminho está **sempre ligado**, independente de coletor: é o que torna as métricas legíveis sem depender de nada externo.
 
 ### Como monitorar
