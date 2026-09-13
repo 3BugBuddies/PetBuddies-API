@@ -233,7 +233,10 @@ erDiagram
 
 Listagem vazia devolve `204 No Content`; remoção de recurso com vínculo (FK) devolve `409 Conflict`. Erros são simples, sem envelope: `400 Bad Request`/`404 Not Found`/`409 Conflict` com uma mensagem de texto — shape ausente ou tipo errado no JSON é pego automaticamente pelo `[ApiController]` (DataAnnotations do request), e regra cruzada (ex.: alvo da oferta incoerente com o ato) é pega pelo `Validar()` de cada service, que devolve a mensagem de erro como `string?`.
 
-Ao instanciar um plano de cuidado, o `petbuddies-ai` faz `GET` nesses endpoints para ler o catálogo vigente. O .NET não inicia chamadas para o Java — só o health check consulta o endereço dele, para reportar saúde.
+Ao instanciar um plano de cuidado, o `petbuddies-ai` faz `GET` nesses endpoints para ler o catálogo vigente.
+
+> **O catálogo nasce povoado.** A migration `semear_catalogo_inicial` insere dois protocolos preventivos — um de cão e um de gato, com três regras cada — e roda sozinha na subida, porque `Database.Migrate()` é chamado no start. Sem isso o catálogo nasceria vazio, e o motor do Java leria isso como "nenhum protocolo compatível": mesma resposta de sucesso, sem erro e sem log.
+ O .NET não inicia chamadas para o Java — só o health check consulta o endereço dele, para reportar saúde.
 
 ---
 
