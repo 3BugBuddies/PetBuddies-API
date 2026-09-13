@@ -245,11 +245,14 @@ curl -s -X POST http://localhost:5297/api/dev/token | jq -r .token
 ```
 
 Assina um JWT com o mesmo `PETBUDDIES_JWT_SECRET` que a API valida. `?perfil=TUTOR` emite um
-token do outro perfil, útil para ver o `403`. **Ele só existe em `Development`** — a rota é
-registrada dentro do `if (app.Environment.IsDevelopment())` do `Program.cs`, junto do Swagger.
-Em `Production` ela não é mapeada, e responde `404`: não é uma rota protegida, é uma rota que
-não existe. É por isso que o atalho não contradiz a arquitetura — em produção o serviço continua
-não emitindo token, apenas validando o que o Java emite.
+token do outro perfil, útil para ver o `403`.
+
+**Ele só existe em `Development`.** O `TokenDevController` é marcado com
+`[ApenasEmDesenvolvimento]`, e fora de Development um `ControllerFeatureProvider` o tira da
+descoberta do MVC: o framework não chega a saber que ele existe. A rota responde `404` e não
+aparece no Swagger — não é rota protegida, é rota inexistente. É por isso que o atalho não
+contradiz a arquitetura: em produção o serviço continua sem emitir token, apenas validando o que
+o Java emite.
 
 O request `Gera token local` da pasta **`0b`** da coleção Postman continua funcionando, para quem
 preferir: ele assina o mesmo JWT do lado do cliente, com a variável de coleção `jwtSecret`.

@@ -102,6 +102,7 @@ namespace PetBuddies_API.Infrastructure.IoC
             services.AddTransient<IRegraProtocoloService, RegraProtocoloService>();
             services.AddTransient<IOfertaService, OfertaService>();
             services.AddTransient<IRegraPontuacaoService, RegraPontuacaoService>();
+            services.AddTransient<ITokenDevService, TokenDevService>();
         }
     }
 }

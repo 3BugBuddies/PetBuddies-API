@@ -3,17 +3,16 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PetBuddies_API.Infrastructure.Data;
 using PetBuddies_API.Infrastructure.IoC;
 using PetBuddies_API.Infrastructure.Security;
 using PetBuddies_API.Presentation;
+using PetBuddies_API.Presentation.Conventions;
 using PetBuddies_API.Presentation.Middlewares;
 using Serilog;
 using System.IO.Compression;
@@ -98,6 +97,20 @@ builder.Services.AddCors(opcoes =>
 // serializa todos enums para string ao inves de number
 builder.Services
     .AddControllers()
+    .ConfigureApplicationPartManager(gerenciador =>
+    {
+        // Fora de Development o controller de token de apoio nem e descoberto.
+        if (builder.Environment.IsDevelopment())
+        {
+            return;
+        }
+
+        foreach (var padrao in gerenciador.FeatureProviders.OfType<ControllerFeatureProvider>().ToList())
+        {
+            gerenciador.FeatureProviders.Remove(padrao);
+        }
+        gerenciador.FeatureProviders.Add(new ControllersSemOsDeDesenvolvimento());
+    })
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
@@ -206,38 +219,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c => c.EnablePersistAuthorization());
-
-    // Em producao este servico nao emite token — ele valida o que o Java emite.
-    // O atalho existe para que o back-office possa ser avaliado sozinho, e por
-    // isso mora dentro deste if: fora de Development a rota nao e registrada.
-    app.MapPost("/api/dev/token", (IOptions<JwtOptions> opcoes, string perfil = "VET") =>
-    {
-        var jwt = opcoes.Value;
-        var credenciais = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Secret)),
-            SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: jwt.Issuer,
-            claims: new[] { new Claim("perfil", perfil) },
-            notBefore: DateTime.UtcNow.AddMinutes(-1),
-            expires: DateTime.UtcNow.AddHours(8),
-            signingCredentials: credenciais);
-
-        return Results.Ok(new
-        {
-            token = new JwtSecurityTokenHandler().WriteToken(token),
-            perfil,
-            emissor = jwt.Issuer,
-            expiraEm = token.ValidTo
-        });
-    })
-    .AllowAnonymous()
-    .WithTags("dev — apoio ao teste local")
-    .WithSummary("Emite um JWT para testar este serviço sem o Java no ar")
-    .WithDescription(
-        "Assina um token com o mesmo PETBUDDIES_JWT_SECRET que a API valida. "
-        + "Copie o valor de 'token' e cole em Authorize. Só existe em Development.");
 }
 
 if (!app.Environment.IsDevelopment())
