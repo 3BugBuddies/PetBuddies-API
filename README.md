@@ -132,24 +132,28 @@ docker compose up -d          # sobe o banco
 docker compose down -v        # derruba e apaga o volume
 ```
 
-Alternativa: preencher `ConnectionStrings:Oracle` em `PetBuddies-API/appsettings.Development.json` com o Oracle FIAP (`User Id` = seu RM, `Password` = a senha do Oracle FIAP).
+Alternativa: o Oracle FIAP, exportando `ConnectionStrings__Oracle` (passo 2) com `User Id` = seu RM e `Password` = a senha do Oracle FIAP.
 
 ### 2. Variáveis de ambiente
 
-`.env.example` é o molde das variáveis que a configuração do ASP.NET Core lê do ambiente (`__` separa seção de chave). **Nada no projeto carrega `.env` automaticamente** — exporte no shell antes de rodar, ou preencha os mesmos valores em `appsettings.Development.json` / user-secrets:
+**Para rodar localmente, nenhuma.** O `appsettings.Development.json` já traz a connection string do
+Oracle do `docker-compose.yml` e um `PETBUDDIES_JWT_SECRET` de desenvolvimento. Esse arquivo só é
+lido em `Development`: em qualquer outro ambiente o segredo precisa vir da variável, e sem ela a
+subida falha (`ValidateOnStart`).
+
+Exporte só para trocar um desses valores — a variável de ambiente vence o arquivo (`__` separa seção de chave):
+
+| Variável | Quando exportar |
+|---|---|
+| `ConnectionStrings__Oracle` | para usar o Oracle FIAP no lugar do container |
+| `PETBUDDIES_JWT_SECRET` | para aceitar o token do Java: o valor precisa ser o mesmo configurado lá, com no mínimo 32 caracteres |
+| `MotorApi__BaseUrl` | se o Java não estiver em `http://localhost:8080` — usado **só** pelo health check `/health/externo` |
 
 ```bash
-cp .env.example .env
-export $(grep -v '^#' .env | xargs)   # ou exporte manualmente, ou use user-secrets
+export ConnectionStrings__Oracle='Data Source=oracle.fiap.com.br:1521/ORCL;User Id=<RM>;Password=<senha>'
 ```
 
-| Variável | Para quê |
-|---|---|
-| `ConnectionStrings__Oracle` | connection string Oracle |
-| `MotorApi__BaseUrl` | endereço do `petbuddies-ai` (Java) — usado **só** pelo health check `/health/externo` |
-| `PETBUDDIES_JWT_SECRET` | segredo HS256 compartilhado com o Java, mínimo 32 caracteres. Sem ele a subida falha (`ValidateOnStart`) |
-
-Em desenvolvimento local, a connection string já vem preenchida em `appsettings.Development.json` (Oracle do `docker-compose.yml`) — só `PETBUDDIES_JWT_SECRET` precisa ser exportado para a aplicação subir.
+Use aspas simples: a connection string tem espaço, e sem elas o shell a corta em `Data`.
 
 ### 3. Rodando
 
@@ -269,18 +273,19 @@ curl -s http://localhost:5297/api/protocolo -H "Authorization: Bearer $TOKEN"
 2. Copie o valor de `token` da resposta.
 3. Clique em **Authorize** e cole só o token — o prefixo `Bearer` é colocado pela página.
 
-**Postman:** rode a pasta `0 · Token` da coleção. Ela grava o token na variável `token`, que todas
-as outras requisições usam.
+**Postman:** nada a fazer. Qualquer requisição da coleção pede o token à API sozinha quando a
+variável `token` está vazia ou vencida; a pasta `0 · Token` faz o mesmo de forma explícita.
 
-O token vale 8 horas e é assinado com o mesmo `PETBUDDIES_JWT_SECRET` que a API valida.
+O token vale 8 horas e é assinado com o mesmo `PETBUDDIES_JWT_SECRET` que a API valida — em
+`Development`, o valor que já vem no `appsettings.Development.json`, sem nada a configurar.
 `?perfil=TUTOR` emite um token do outro perfil, útil para ver o `403`.
 
 **A rota só existe em `Development`.** O `dotnet run` usa o perfil do `launchSettings.json`, que já
-define `Development` — mesmo com o `.env` exportado. Em qualquer outro ambiente a rota responde
+define `Development` mesmo que o shell tenha outro valor. Em qualquer outro ambiente a rota responde
 `404` e some do Swagger: em produção o serviço só valida o token que o Java emite.
 
-**Com o Java no ar**, o login dele também serve: o token do app é aceito aqui, porque os dois
-serviços usam o mesmo segredo e o mesmo emissor. Como subir o Java e os usuários de demonstração
+**Com o Java no ar**, o login dele também serve, desde que os dois serviços usem o mesmo
+`PETBUDDIES_JWT_SECRET` (passo 2 de [Como Executar](#como-executar)) — o emissor já é o mesmo. Como subir o Java e os usuários de demonstração
 estão no README do [PetBuddies-AI](https://github.com/3BugBuddies/PetBuddies-AI); no Postman, é a
 pasta `7 · Login no Java (opcional)`.
 
@@ -401,7 +406,7 @@ dotnet test --filter "Autenticacao=Protocolo"
 A coleção em `docs/postman/petbuddies-api-net.postman_collection.json` cobre os quatro domínios do back-office.
 
 - Importe o arquivo.
-- Com a API e o Oracle de pé, rode a coleção inteira em ordem. A pasta `0 · Token` pede o token à própria API e o grava sozinha — não há segredo para configurar no Postman.
+- Com a API e o Oracle de pé, rode a coleção inteira em ordem — ou qualquer requisição avulsa. O token é pedido à própria API e gravado sozinho, pela pasta `0 · Token` ou, se a variável estiver vazia ou vencida, pelo script da coleção. Não há segredo para configurar no Postman.
 - O que cada pasta cobre: `1 · Saúde` as sete rotas de health check; `2 · Protocolo`, `3 · Regra de protocolo`, `4 · Oferta` e `5 · Regra de pontuação` o CRUD de cada domínio, com os erros que o controller declara; `6 · Limpeza` remove o que a execução criou.
 - `7 · Login no Java (opcional)` só responde com o `petbuddies-ai` no ar; sem ele, essa requisição falha e pode ser ignorada.
 

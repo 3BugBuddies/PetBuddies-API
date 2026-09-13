@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "PetBuddies API — .NET (back-office)",
-    "description": "Protocolo, regra de protocolo, oferta e regra de pontuação — os quatro domínios do back-office administrativo da clínica.\n\nComo rodar: com a API de pé em Development (`dotnet run --project PetBuddies-API`) e o Oracle no ar, rode a coleção inteira em ordem. A pasta `0 · Token` pede um token à própria API e o grava na variável `token`; não é preciso subir o Java nem configurar segredo no Postman.\n\nA pasta `7 · Login no Java (opcional)` só funciona com o `petbuddies-ai` no ar e troca o token por um emitido pelo Java — vale o mesmo para esta API.",
+    "description": "Protocolo, regra de protocolo, oferta e regra de pontuação — os quatro domínios do back-office administrativo da clínica.\n\nComo rodar: com a API de pé em Development (`dotnet run --project PetBuddies-API`) e o Oracle no ar, rode a coleção inteira em ordem ou qualquer requisição avulsa. Não há nada a configurar: quando a variável `token` está vazia ou vencida, o script da coleção pede um token à própria API (`POST /api/dev/token`) antes de enviar a requisição.\n\nA pasta `7 · Login no Java (opcional)` só funciona com o `petbuddies-ai` no ar e com o mesmo `PETBUDDIES_JWT_SECRET` nos dois serviços.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -37,6 +37,11 @@
     },
     {
       "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tokenExpiraEm",
       "value": "",
       "type": "string"
     },
@@ -104,7 +109,7 @@
   "item": [
     {
       "name": "0 · Token",
-      "description": "Pede um token à própria API em `POST /api/dev/token`. A rota só existe em Development (o perfil padrão do `dotnet run`) e assina o JWT com o mesmo `PETBUDDIES_JWT_SECRET` que a API valida.\n\nRode esta pasta antes das outras: o teste grava o token na variável de coleção `token`, que todas as requisições seguintes usam. `?perfil=TUTOR` emite um token do outro perfil, útil para ver o `403`.",
+      "description": "Pede um token à própria API em `POST /api/dev/token`. A rota só existe em Development (o perfil padrão do `dotnet run`) e assina o JWT com o `PETBUDDIES_JWT_SECRET` de desenvolvimento, que já vem no `appsettings.Development.json`.\n\nO script da coleção faz o mesmo sozinho quando o token falta ou vence; esta pasta deixa o passo visível. `?perfil=TUTOR` emite um token do outro perfil, útil para ver o `403`.",
       "auth": {
         "type": "noauth"
       },
@@ -126,6 +131,7 @@
                   "pm.test('Emite token de desenvolvimento — 200', () => pm.response.to.have.status(200));",
                   "if (pm.response.code === 200) {",
                   "    pm.collectionVariables.set('token', pm.response.json().token);",
+                  "    pm.collectionVariables.set('tokenExpiraEm', pm.response.json().expiraEm);",
                   "}",
                   "pm.test('Token gravado na coleção', () => {",
                   "    pm.expect(pm.collectionVariables.get('token')).to.be.a('string').with.length.above(0);",
@@ -1610,7 +1616,34 @@
           ]
         }
       ],
-      "description": "Só com o `petbuddies-ai` (Java) no ar, em `javaBaseUrl`. Troca o token pelo que o app usa; esta API aceita os dois, porque valida o mesmo segredo e o mesmo emissor. Sem o Java, ignore esta pasta — a pasta `0 · Token` já basta."
+      "description": "Só com o `petbuddies-ai` (Java) no ar, em `javaBaseUrl`, e com o mesmo `PETBUDDIES_JWT_SECRET` nos dois serviços. Troca o token pelo que o app usa. Sem o Java, ignore esta pasta."
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Token vazio ou a menos de um minuto de vencer: pede outro à própria API antes da requisição.",
+          "const token = pm.collectionVariables.get('token');",
+          "const expiraEm = Date.parse(pm.collectionVariables.get('tokenExpiraEm') || '');",
+          "const vencido = !Number.isNaN(expiraEm) && expiraEm - 60000 < Date.now();",
+          "const ehRotaDoToken = pm.request.url.getPath().endsWith('/api/dev/token');",
+          "",
+          "if ((!token || vencido) && !ehRotaDoToken) {",
+          "    pm.sendRequest({",
+          "        url: pm.variables.replaceIn('{{baseUrl}}/api/dev/token?perfil=VET'),",
+          "        method: 'POST'",
+          "    }, (erro, resposta) => {",
+          "        if (!erro && resposta.code === 200) {",
+          "            pm.collectionVariables.set('token', resposta.json().token);",
+          "            pm.collectionVariables.set('tokenExpiraEm', resposta.json().expiraEm);",
+          "        }",
+          "    });",
+          "}"
+        ]
+      }
     }
   ]
 }

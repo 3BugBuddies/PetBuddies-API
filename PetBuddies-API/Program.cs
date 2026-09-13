@@ -129,7 +129,9 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Token emitido pelo servico Java (POST /api/auth/login)."
+        Description = builder.Environment.IsDevelopment()
+            ? "Gere o token em POST /api/dev/token (grupo TokenDev) e cole só o valor de 'token'."
+            : "Token emitido pelo serviço Java (POST /api/auth/login)."
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
