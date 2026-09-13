@@ -16,6 +16,21 @@ Preço e pontuação são política configurada: nesta sprint o CRUD existe e é
 
 ---
 
+## Índice
+
+1. [Integrantes do Grupo](#integrantes-do-grupo)
+2. [Stack e Dependências](#stack-e-dependências)
+3. [Estrutura do Projeto](#estrutura-do-projeto)
+4. [Como Executar](#como-executar)
+5. [Modelo de dados](#modelo-de-dados)
+6. [Recursos e Rotas](#recursos-e-rotas)
+7. [Autenticação](#autenticação)
+8. [Observabilidade](#observabilidade)
+9. [Como Testar](#como-testar)
+10. [Exemplos de Payload (POST)](#exemplos-de-payload-post)
+
+---
+
 ## Links
 
 | | |
