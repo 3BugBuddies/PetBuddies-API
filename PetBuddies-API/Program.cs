@@ -202,7 +202,7 @@ app.UseMiddleware<CorrelacaoMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => c.EnablePersistAuthorization());
 }
 
 if (!app.Environment.IsDevelopment())
