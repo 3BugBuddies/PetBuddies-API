@@ -43,7 +43,14 @@ namespace PetBuddies_API.Infrastructure.IoC
                 })
                 .WithMetrics(metricas =>
                 {
+                    // A instrumentacao do AspNetCore ja produz http.server.request.duration,
+                    // com http.response.status_code como dimensao: tempo de resposta e taxa
+                    // de erro saem dai, sem instrumento proprio.
                     metricas.AddAspNetCoreInstrumentation();
+
+                    // Sempre ligado, e nao no lugar dos outros: o /metrics e o que a rubrica
+                    // chama de expor, e precisa responder sem coletor externo nenhum.
+                    metricas.AddPrometheusExporter();
 
                     if (exportarNoConsole)
                     {

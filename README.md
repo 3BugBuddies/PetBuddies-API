@@ -264,14 +264,35 @@ JWT **emitido pelo Java** (`POST /api/auth/login`, `issuer: petbuddies-ai`) e va
   | 400 a 499 | `Warning` |
   | demais | `Information` |
 
-- **OpenTelemetry:** tracing (instrumentação de ASP.NET Core, `HttpClient` e Entity Framework Core) e métricas de ASP.NET Core (duração de requisição, contagem por status code). Sem `OTEL_EXPORTER_OTLP_ENDPOINT` configurado, exporta no console — é a única forma de ver um span localmente, sem coletor.
+- **OpenTelemetry:** tracing (instrumentação de ASP.NET Core, `HttpClient` e Entity Framework Core) e métricas de ASP.NET Core (duração de requisição, contagem por status code). Sem `OTEL_EXPORTER_OTLP_ENDPOINT` configurado, o tracing exporta no console — é a única forma de ver um span localmente, sem coletor.
+- **Métricas em `GET /metrics`**, no formato de texto do Prometheus, sem autenticação. Esse caminho está **sempre ligado**, independente de coletor: é o que torna as métricas legíveis sem depender de nada externo.
 
 ### Como monitorar
 
+```bash
+curl localhost:5297/metrics
+```
+
+**Tempo de resposta** — soma e contagem por rota e status; a média é a divisão das duas:
+
+```
+http_server_request_duration_seconds_sum{http_request_method="GET",http_response_status_code="200",...}
+http_server_request_duration_seconds_count{http_request_method="GET",http_response_status_code="200",...}
+```
+
+**Taxa de erro** — a mesma métrica, agrupada pela dimensão de status:
+
+```bash
+curl -s localhost:5297/metrics | grep -oE 'http_response_status_code="[0-9]+"' | sort | uniq -c
+```
+
+Nada disso exige instrumento próprio: `AddAspNetCoreInstrumentation()` já produz as duas.
+
+Além do endpoint:
+
 - A cada requisição, o console mostra o span (`Activity.TraceId`, rota, status).
-- `http.server.request.duration` é o tempo de resposta; separado por `http.response.status_code`, dá a taxa de erro.
 - O `TraceId` do span é o mesmo valor do cabeçalho `X-Correlation-Id` e do `CorrelationId` em `logs/api-*.log` — com ele se acha a requisição nos três lugares.
-- Para mandar a um coletor, basta definir `OTEL_EXPORTER_OTLP_ENDPOINT`.
+- Para mandar a um coletor externo, basta definir `OTEL_EXPORTER_OTLP_ENDPOINT`; o `/metrics` continua respondendo do mesmo jeito.
 
 ### Health Checks
 
