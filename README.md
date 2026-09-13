@@ -147,6 +147,29 @@ A aplicação sobe em:
 
 ---
 
+## Diagrama de classes
+
+![Diagrama de classes do back-office](docs/diagrama-classes.png)
+
+As quatro entidades, agrupadas pelos dois papéis do serviço. O **catálogo** é lido pelo Java por
+HTTP no instante em que um plano de cuidado nasce; a **política comercial** ainda não tem
+consumidor — preço e pontuação são configuração, e congelar o valor no ato é Sprint 4.
+
+Três coisas que o desenho torna visíveis:
+
+- **Nenhuma chave cruza os dois bancos.** O plano e o item do Java guardam `protocoloId` e
+  `regraProtocoloId` como número solto, lidos uma vez por `GET /api/protocolo`. Depois de
+  materializado, o plano não volta ao catálogo.
+- **`RegraProtocolo` é a única entidade sem carimbo de tempo**, porque é a única que não herda
+  `BaseEntity` — ela não existe fora do protocolo que a contém.
+- **`Oferta` é a única ponte entre os dois pacotes**, e por um id nulável: uma oferta pode ser de
+  um protocolo, de um procedimento ou de uma consulta.
+
+A fonte do desenho é `.claude/docs/dotnet-sprint-3/diagrama-classes/diagrama-classes.html`, que
+não é versionado — o PNG é o entregável.
+
+---
+
 ## Modelo de Dados
 
 ```mermaid
