@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "PetBuddies API — .NET (back-office)",
-    "description": "Protocolo, regra de protocolo, oferta e regra de pontuacao — os quatro dominios do back-office administrativo da clinica (ADR s3-25). Onda 19.",
+    "description": "Protocolo, regra de protocolo, oferta e regra de pontuação — os quatro domínios do back-office administrativo da clínica.\n\nComo rodar: com a API de pé em Development (`dotnet run --project PetBuddies-API`) e o Oracle no ar, rode a coleção inteira em ordem. A pasta `0 · Token` pede um token à própria API e o grava na variável `token`; não é preciso subir o Java nem configurar segredo no Postman.\n\nA pasta `7 · Login no Java (opcional)` só funciona com o `petbuddies-ai` no ar e troca o token por um emitido pelo Java — vale o mesmo para esta API.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -33,11 +33,6 @@
     {
       "key": "senha",
       "value": "petbuddies123",
-      "type": "string"
-    },
-    {
-      "key": "jwtSecret",
-      "value": "troque-por-um-segredo-de-no-minimo-32-caracteres",
       "type": "string"
     },
     {
@@ -108,26 +103,19 @@
   ],
   "item": [
     {
-      "name": "0a · Login (Java)",
+      "name": "0 · Token",
+      "description": "Pede um token à própria API em `POST /api/dev/token`. A rota só existe em Development (o perfil padrão do `dotnet run`) e assina o JWT com o mesmo `PETBUDDIES_JWT_SECRET` que a API valida.\n\nRode esta pasta antes das outras: o teste grava o token na variável de coleção `token`, que todas as requisições seguintes usam. `?perfil=TUTOR` emite um token do outro perfil, útil para ver o `403`.",
       "auth": {
         "type": "noauth"
       },
       "item": [
         {
-          "name": "Login no Java — 200",
+          "name": "Emite token de desenvolvimento — 200",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{javaBaseUrl}}/api/auth/login",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"login\": \"{{login}}\",\n  \"senha\": \"{{senha}}\"\n}"
-            }
+            "header": [],
+            "url": "{{baseUrl}}/api/dev/token?perfil=VET",
+            "description": "Devolve `token`, `perfil`, `emissor` e `expiraEm`. O token vale 8 horas. Fora de Development a rota responde `404`."
           },
           "event": [
             {
@@ -135,57 +123,11 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Login no Java — 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Emite token de desenvolvimento — 200', () => pm.response.to.have.status(200));",
                   "if (pm.response.code === 200) {",
                   "    pm.collectionVariables.set('token', pm.response.json().token);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "0b · Token local (sem o Java)",
-      "auth": {
-        "type": "noauth"
-      },
-      "item": [
-        {
-          "name": "Gera token local — 200",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/health/live"
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "// 'const CryptoJS = require(\"crypto-js\")' quebra no sandbox (SyntaxError: Identifier 'CryptoJS'",
-                  "// has already been declared) porque CryptoJS ja existe como global la. Nome de variavel diferente",
-                  "// evita a colisao e ainda funciona quando esse global for removido (newman avisa que usar o",
-                  "// global direto e deprecated).",
-                  "const cryptoJs = require('crypto-js');",
-                  "const b64url = src => cryptoJs.enc.Base64.stringify(src).replace(/=+$/, '').replace(/\\+/g, '-').replace(/\\//g, '_');",
-                  "const agora = Math.floor(Date.now() / 1000);",
-                  "const h = b64url(cryptoJs.enc.Utf8.parse(JSON.stringify({ alg: 'HS256', typ: 'JWT' })));",
-                  "const p = b64url(cryptoJs.enc.Utf8.parse(JSON.stringify({ iss: 'petbuddies-ai', perfil: 'VET', veterinarioId: 1, nbf: agora - 60, exp: agora + 8 * 3600 })));",
-                  "const s = b64url(cryptoJs.HmacSHA256(`${h}.${p}`, pm.variables.get('jwtSecret')));",
-                  "pm.collectionVariables.set('token', `${h}.${p}.${s}`);"
-                ]
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Gera token local — 200', () => pm.response.to.have.status(200));",
-                  "pm.test('Token gerado nao esta vazio', () => {",
+                  "}",
+                  "pm.test('Token gravado na coleção', () => {",
                   "    pm.expect(pm.collectionVariables.get('token')).to.be.a('string').with.length.above(0);",
                   "});"
                 ]
@@ -1629,6 +1571,46 @@
           ]
         }
       ]
+    },
+    {
+      "name": "7 · Login no Java (opcional)",
+      "auth": {
+        "type": "noauth"
+      },
+      "item": [
+        {
+          "name": "Login no Java — 200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{javaBaseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"{{login}}\",\n  \"senha\": \"{{senha}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login no Java — 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('token', pm.response.json().token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Só com o `petbuddies-ai` (Java) no ar, em `javaBaseUrl`. Troca o token pelo que o app usa; esta API aceita os dois, porque valida o mesmo segredo e o mesmo emissor. Sem o Java, ignore esta pasta — a pasta `0 · Token` já basta."
     }
   ]
 }

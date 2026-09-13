@@ -22,6 +22,7 @@ Preço e pontuação são política configurada: nesta sprint o CRUD existe e é
 |---|---|
 | Swagger UI (local) | `http://localhost:5297/swagger` |
 | Postman collection | [`docs/postman/petbuddies-api-net.postman_collection.json`](docs/postman/petbuddies-api-net.postman_collection.json) |
+| Serviço Java (opcional para avaliar este) | [3BugBuddies/PetBuddies-AI](https://github.com/3BugBuddies/PetBuddies-AI) |
 
 ---
 
@@ -82,7 +83,9 @@ PetBuddies-API/
 │   │   └── Security/
 │   │       └── JwtOptions.cs
 │   ├── Presentation/
-│   │   ├── Controllers/     # 4 controllers REST, um por domínio, e o HealthController
+│   │   ├── Controllers/     # 4 controllers REST, um por domínio, o HealthController e o TokenDevController
+│   │   ├── Conventions/
+│   │   │   └── ApenasEmDesenvolvimento.cs  # tira o TokenDevController das rotas fora de Development
 │   │   ├── Middlewares/
 │   │   │   └── CorrelacaoMiddleware.cs
 │   │   └── HealthCheckResponseWriter.cs
@@ -144,6 +147,17 @@ No startup, `Program.cs` executa `Database.Migrate()` e aplica as migrations pen
 A aplicação sobe em:
 - **HTTP:** `http://localhost:5297`
 - **Swagger UI:** `http://localhost:5297/swagger`
+
+### 4. Pegue um token
+
+Toda rota de negócio exige token, e **não é preciso subir o Java para isso**: a própria API emite
+um token de desenvolvimento.
+
+```bash
+curl -s -X POST http://localhost:5297/api/dev/token | jq -r .token
+```
+
+No Swagger e no Postman o caminho é o mesmo — detalhe em [Autenticação](#autenticação).
 
 ---
 
@@ -224,44 +238,36 @@ Sem Identity nesta sprint.
 
 ### Como obter um token
 
-**Com o Java no ar** — é o caminho normal, e o token é o mesmo que o app usa:
+> **Para avaliar este serviço não é preciso subir o Java.** Com a API rodando por `dotnet run`, ela
+> mesma emite o token em `POST /api/dev/token`.
+
+**Terminal:**
 
 ```bash
-curl -s -X POST http://localhost:8080/api/auth/login \
-  -H 'Content-Type: application/json' \
-  -d '{"login":"ana@clinica.com","senha":"<senha>"}' | jq -r .token
-```
-
-Depois, em qualquer rota daqui:
-
-```bash
+TOKEN=$(curl -s -X POST http://localhost:5297/api/dev/token | jq -r .token)
 curl -s http://localhost:5297/api/protocolo -H "Authorization: Bearer $TOKEN"
 ```
 
-**Sem o Java** — este serviço é entregue e avaliado sozinho, então existe um atalho:
+**Swagger** (`http://localhost:5297/swagger`):
 
-```bash
-curl -s -X POST http://localhost:5297/api/dev/token | jq -r .token
-```
+1. Abra o grupo **TokenDev** → `POST /api/dev/token` → **Try it out** → **Execute**.
+2. Copie o valor de `token` da resposta.
+3. Clique em **Authorize** e cole só o token — o prefixo `Bearer` é colocado pela página.
 
-Assina um JWT com o mesmo `PETBUDDIES_JWT_SECRET` que a API valida. `?perfil=TUTOR` emite um
-token do outro perfil, útil para ver o `403`.
+**Postman:** rode a pasta `0 · Token` da coleção. Ela grava o token na variável `token`, que todas
+as outras requisições usam.
 
-**Ele só existe em `Development`.** O `TokenDevController` é marcado com
-`[ApenasEmDesenvolvimento]`, e fora de Development um `ControllerFeatureProvider` o tira da
-descoberta do MVC: o framework não chega a saber que ele existe. A rota responde `404` e não
-aparece no Swagger — não é rota protegida, é rota inexistente. É por isso que o atalho não
-contradiz a arquitetura: em produção o serviço continua sem emitir token, apenas validando o que
-o Java emite.
+O token vale 8 horas e é assinado com o mesmo `PETBUDDIES_JWT_SECRET` que a API valida.
+`?perfil=TUTOR` emite um token do outro perfil, útil para ver o `403`.
 
-O request `Gera token local` da pasta **`0b`** da coleção Postman continua funcionando, para quem
-preferir: ele assina o mesmo JWT do lado do cliente, com a variável de coleção `jwtSecret`.
-**Ajuste `jwtSecret` para o valor de `PETBUDDIES_JWT_SECRET` da sua máquina**, senão a assinatura
-não confere e tudo volta `401`.
+**A rota só existe em `Development`.** O `dotnet run` usa o perfil do `launchSettings.json`, que já
+define `Development` — mesmo com o `.env` exportado. Em qualquer outro ambiente a rota responde
+`404` e some do Swagger: em produção o serviço só valida o token que o Java emite.
 
-**No Swagger** (`http://localhost:5297/swagger`): o endpoint aparece em **dev — apoio ao teste
-local**. Execute, copie o valor de `token`, clique em **Authorize** e cole apenas o token — o prefixo `Bearer` é adicionado pela própria página, que
-guarda a autorização entre recarregamentos.
+**Com o Java no ar**, o login dele também serve: o token do app é aceito aqui, porque os dois
+serviços usam o mesmo segredo e o mesmo emissor. Como subir o Java e os usuários de demonstração
+estão no README do [PetBuddies-AI](https://github.com/3BugBuddies/PetBuddies-AI); no Postman, é a
+pasta `7 · Login no Java (opcional)`.
 
 ---
 
@@ -334,7 +340,7 @@ exceção), enquanto `/health/*` usa `nome`, `status` e `descricao`.
 
 ### Via Swagger UI
 
-Com o token JWT (emitido pelo Java) preenchido em **Authorize**, os 20 endpoints (5 por domínio × 4 domínios) estão disponíveis com "Try it out": `http://localhost:5297/swagger`.
+Com o token de `POST /api/dev/token` preenchido em **Authorize** (passo a passo em [Como obter um token](#como-obter-um-token)), os 20 endpoints (5 por domínio × 4 domínios) estão disponíveis com "Try it out": `http://localhost:5297/swagger`.
 
 ### Via testes automatizados
 
@@ -380,9 +386,9 @@ dotnet test --filter "Autenticacao=Protocolo"
 A coleção em `docs/postman/petbuddies-api-net.postman_collection.json` cobre os quatro domínios do back-office.
 
 - Importe o arquivo.
-- Gere o token de duas formas: com o Java de pé, rode a pasta `0a · Login (Java)`; sem o Java, rode `0b · Token local (sem o Java)` — grava o token sozinho, a partir da variável de coleção `jwtSecret` (mesmo valor de `PETBUDDIES_JWT_SECRET`).
-- Rode a coleção inteira em ordem, com o Oracle de pé.
+- Com a API e o Oracle de pé, rode a coleção inteira em ordem. A pasta `0 · Token` pede o token à própria API e o grava sozinha — não há segredo para configurar no Postman.
 - O que cada pasta cobre: `1 · Saúde` as sete rotas de health check; `2 · Protocolo`, `3 · Regra de protocolo`, `4 · Oferta` e `5 · Regra de pontuação` o CRUD de cada domínio, com os erros que o controller declara; `6 · Limpeza` remove o que a execução criou.
+- `7 · Login no Java (opcional)` só responde com o `petbuddies-ai` no ar; sem ele, essa requisição falha e pode ser ignorada.
 
 ---
 
