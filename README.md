@@ -238,15 +238,26 @@ Depois, em qualquer rota daqui:
 curl -s http://localhost:5297/api/protocolo -H "Authorization: Bearer $TOKEN"
 ```
 
-**Sem o Java** — para avaliar este serviço isolado, a coleção Postman gera o token localmente:
-abra a pasta **`0b · Token local (sem o Java)`** e rode `Gera token local`. O script monta um JWT
-`HS256` com `iss: petbuddies-ai` e `perfil: VET`, assinado com a variável de coleção `jwtSecret`,
-e guarda o resultado em `{{token}}` — os demais requests já mandam esse header. **Ajuste
-`jwtSecret` para o mesmo valor de `PETBUDDIES_JWT_SECRET` da sua máquina**, senão a assinatura
+**Sem o Java** — este serviço é entregue e avaliado sozinho, então existe um atalho:
+
+```bash
+curl -s -X POST http://localhost:5297/api/dev/token | jq -r .token
+```
+
+Assina um JWT com o mesmo `PETBUDDIES_JWT_SECRET` que a API valida. `?perfil=TUTOR` emite um
+token do outro perfil, útil para ver o `403`. **Ele só existe em `Development`** — a rota é
+registrada dentro do `if (app.Environment.IsDevelopment())` do `Program.cs`, junto do Swagger.
+Em `Production` ela não é mapeada, e responde `404`: não é uma rota protegida, é uma rota que
+não existe. É por isso que o atalho não contradiz a arquitetura — em produção o serviço continua
+não emitindo token, apenas validando o que o Java emite.
+
+O request `Gera token local` da pasta **`0b`** da coleção Postman continua funcionando, para quem
+preferir: ele assina o mesmo JWT do lado do cliente, com a variável de coleção `jwtSecret`.
+**Ajuste `jwtSecret` para o valor de `PETBUDDIES_JWT_SECRET` da sua máquina**, senão a assinatura
 não confere e tudo volta `401`.
 
-**No Swagger** (`http://localhost:5297/swagger`): gere o token por um dos dois caminhos, clique
-em **Authorize** e cole apenas o token — o prefixo `Bearer` é adicionado pela própria página, que
+**No Swagger** (`http://localhost:5297/swagger`): o endpoint aparece em **dev — apoio ao teste
+local**. Execute, copie o valor de `token`, clique em **Authorize** e cole apenas o token — o prefixo `Bearer` é adicionado pela própria página, que
 guarda a autorização entre recarregamentos.
 
 ---
