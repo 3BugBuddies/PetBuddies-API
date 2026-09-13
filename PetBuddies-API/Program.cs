@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
@@ -11,6 +12,7 @@ using PetBuddies_API.Infrastructure.Data;
 using PetBuddies_API.Infrastructure.IoC;
 using PetBuddies_API.Infrastructure.Security;
 using PetBuddies_API.Presentation;
+using PetBuddies_API.Presentation.Conventions;
 using PetBuddies_API.Presentation.Middlewares;
 using Serilog;
 using System.IO.Compression;
@@ -95,6 +97,20 @@ builder.Services.AddCors(opcoes =>
 // serializa todos enums para string ao inves de number
 builder.Services
     .AddControllers()
+    .ConfigureApplicationPartManager(gerenciador =>
+    {
+        // Fora de Development o controller de token de apoio nem e descoberto.
+        if (builder.Environment.IsDevelopment())
+        {
+            return;
+        }
+
+        foreach (var padrao in gerenciador.FeatureProviders.OfType<ControllerFeatureProvider>().ToList())
+        {
+            gerenciador.FeatureProviders.Remove(padrao);
+        }
+        gerenciador.FeatureProviders.Add(new ControllersSemOsDeDesenvolvimento());
+    })
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
