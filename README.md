@@ -4,13 +4,7 @@ API REST desenvolvida com ASP.NET Core e EF Core — Challenge de **Advanced Bus
 
 O serviço é o **back-office administrativo da clínica veterinária**: é onde se configura o catálogo de protocolos de cuidado, o que a clínica oferece e por quanto, e quanto cada gesto do tutor vale em pontos. O `petbuddies-ai` (Java) consome o catálogo daqui por HTTP ao montar o plano de cuidado de um animal.
 
-```mermaid
-flowchart LR
-    Painel["Painel da clínica<br/><i>Sprint 4</i>"] -.-> Net
-    Java["petbuddies-ai (Java)<br/>API do produto"] -->|"GET /api/protocolo"| Net
-    Net["PetBuddies-API (.NET)<br/>catálogo, oferta e pontuação"]
-    Net --> Oracle[("Oracle<br/>4 tabelas")]
-```
+<img src="docs/figuras/arquitetura.png" alt="Arquitetura: o PetBuddies-API (.NET) guarda protocolos, ofertas e pontuação no próprio Oracle e valida o JWT do Java; o petbuddies-ai (Java) lê o catálogo por GET /api/protocolo, e o .NET só consulta a saúde do Java">
 
 Preço e pontuação são política configurada: nesta sprint o CRUD existe e é validado, e nenhuma aplicação ainda lê essas tabelas para cobrar ou pontuar.
 
@@ -71,6 +65,11 @@ Preço e pontuação são política configurada: nesta sprint o CRUD existe e é
 
 ## Estrutura do Projeto
 
+<img src="docs/figuras/camadas.png" alt="As quatro camadas: Presentation e Infrastructure dependem do Domain passando pela Application; o Domain não referencia nenhuma camada">
+
+<details>
+<summary>Árvore de pastas</summary>
+
 ```
 PetBuddies-API/
 ├── docs/
@@ -79,7 +78,7 @@ PetBuddies-API/
 ├── PetBuddies-API/
 │   ├── Domain/
 │   │   ├── Entities/        # BaseEntity + 4 entidades (Protocolo, RegraProtocolo, Oferta, RegraPontuacao)
-│   │   ├── Enums/           # 7 enums de domínio
+│   │   ├── Enums/           # 8 enums de domínio
 │   │   └── Interfaces/      # Contratos de repositório (IXxxRepository)
 │   ├── Application/
 │   │   ├── Dtos/            # Um subpacote por domínio: XxxDto + SalvarXxxRequest
@@ -113,6 +112,8 @@ PetBuddies-API/
 ├── Dockerfile
 └── README.md
 ```
+
+</details>
 
 ---
 
@@ -307,6 +308,10 @@ pasta `7 · Login no Java (opcional)`.
 - **O console não rastreia infraestrutura.** Requisições a `/health/*` e `/metrics` ficam fora do tracing: são chamadas de máquina, repetidas em laço, e afogariam as requisições que interessam. Elas continuam contando nas métricas — o `/metrics` mostra a linha delas por rota.
 - **Métricas em `GET /metrics`**, no formato de texto do Prometheus, sem autenticação. Esse caminho está **sempre ligado**, independente de coletor: é o que torna as métricas legíveis sem depender de nada externo.
 
+### Uma requisição rastreada
+
+<img src="docs/figuras/rastreamento.png" alt="Uma requisição GET /api/protocolo: o OpenTelemetry abre o span, o CorrelacaoMiddleware usa o TraceId como id de correlação, e o mesmo id aparece no cabeçalho X-Correlation-Id, no log do console, no arquivo JSON e no span">
+
 ### Como monitorar
 
 ```bash
@@ -354,6 +359,25 @@ O `HealthController` expõe as mesmas três verificações em `/api/health/live`
 usa um contrato diferente do de `/health/*`: `name`, `status` e `description` (mais `error` quando há
 exceção), enquanto `/health/*` usa `nome`, `status` e `descricao`.
 
+
+### Evidências
+
+Saída da API rodando em `Development`. Os prints 03, 04 e 05 são da mesma requisição: o id em laranja é o mesmo nos três.
+
+<table>
+<tr>
+<td width="50%" valign="top"><img src="docs/prints/01-swagger-autorizado.png" alt="Swagger com o token de desenvolvimento autorizado e GET /api/protocolo respondendo 200"><br><b>01 · Swagger</b> · token de dev no Authorize, <code>GET /api/protocolo</code> com 200</td>
+<td width="50%" valign="top"><img src="docs/prints/02-health.png" alt="GET /health com as três verificações saudáveis"><br><b>02 · Health check</b> · <code>self</code>, <code>oracle</code> e <code>motor-java</code></td>
+</tr>
+<tr>
+<td valign="top"><img src="docs/prints/03-correlacao-header.png" alt="Resposta com o cabeçalho X-Correlation-Id"><br><b>03 · Cabeçalho</b> · <code>X-Correlation-Id</code> na resposta<br><br><img src="docs/prints/04-log-correlacao.png" alt="Linha de log do console com o mesmo id de correlação"><br><b>04 · Log</b> · a linha da requisição no console, com o mesmo id</td>
+<td valign="top"><img src="docs/prints/05-span.png" alt="Span do OpenTelemetry no console com o mesmo TraceId"><br><b>05 · Span</b> · o <code>TraceId</code> é o id de correlação</td>
+</tr>
+<tr>
+<td colspan="2" valign="top"><img src="docs/prints/06-metrics.png" alt="Métrica de duração da rota api/protocolo em /metrics"><br><b>06 · Métricas</b> · soma e contagem da duração por rota e status em <code>/metrics</code></td>
+</tr>
+</table>
+
 ---
 
 ## Como Testar
@@ -365,6 +389,11 @@ Com o token de `POST /api/dev/token` preenchido em **Authorize** (passo a passo 
 ### Via testes automatizados
 
 Dois projetos xUnit, quatro domínios (`Protocolo`, `RegraProtocolo`, `Oferta`, `RegraPontuacao`) × camada, no padrão ensinado em aula — Repository, Service e Controller testados em separado, com o Controller isolando o Service via mock:
+
+<img src="docs/figuras/testes.png" alt="O que cada tipo de teste exercita e o que ele substitui: Repository com EF Core InMemory, Service com repositório mockado, Controller com service mockado e Autenticação com o app real">
+
+<details>
+<summary>Arquivos de teste</summary>
 
 ```
 PetBuddies-API.Tests.Unit/
@@ -378,6 +407,8 @@ PetBuddies-API.Tests.Integration/
     ├── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}ControllerTest.cs  # WebApplicationFactory + Service mockado (CustomWebApplicationFactory)
     └── AutenticacaoTest.cs                                                # app real, sem mock — sem token (401), token TUTOR (403), token VET (201)
 ```
+
+</details>
 
 O Domínio (`Domain/Entities/*`) não tem teste próprio: as entidades são estrutura de dados, sem
 comportamento próprio. A regra de negócio vive nos casos de uso da camada de Aplicação, e é lá que
