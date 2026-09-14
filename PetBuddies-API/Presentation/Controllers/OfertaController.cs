@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using PetBuddies_API.Application.Dtos.Oferta;
 using PetBuddies_API.Application.Interfaces;
@@ -11,6 +12,7 @@ namespace PetBuddies_API.Presentation.Controllers
     [ApiController]
     [Route("api/oferta")]
     [Authorize(Roles = "VET")]
+    [EnableRateLimiting(LimiteDeRequisicoes.Politica)]
     public class OfertaController : ControllerBase
     {
         private readonly IOfertaService _ofertaService;
