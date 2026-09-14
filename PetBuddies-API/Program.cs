@@ -172,14 +172,26 @@ builder.Services.Configure<GzipCompressionProviderOptions>(options =>
 // Add Rate Limiter
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddFixedWindowLimiter(policyName: "politica_5_tentativas", opt =>
-    {
-        opt.PermitLimit = 5;
-        opt.Window = TimeSpan.FromSeconds(20);
-        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = 2;
-    });
+    options.AddPolicy(LimiteDeRequisicoes.Politica, contexto =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            contexto.Connection.RemoteIpAddress?.ToString() ?? "sem-ip",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = LimiteDeRequisicoes.PermissoesPorJanela,
+                Window = LimiteDeRequisicoes.Janela,
+                QueueLimit = 0
+            }));
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (rejeicao, cancellationToken) =>
+    {
+        if (rejeicao.Lease.TryGetMetadata(MetadataName.RetryAfter, out var espera))
+        {
+            rejeicao.HttpContext.Response.Headers.RetryAfter = ((int)Math.Ceiling(espera.TotalSeconds)).ToString();
+        }
+
+        await rejeicao.HttpContext.Response.WriteAsync(
+            "Limite de requisições atingido. Tente novamente em instantes.", cancellationToken);
+    };
 });
 
 builder.Services.AddHealthChecks()

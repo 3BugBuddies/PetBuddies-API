@@ -102,7 +102,8 @@ PetBuddies-API/
 │   │   │   └── ApenasEmDesenvolvimento.cs  # tira o TokenDevController das rotas fora de Development
 │   │   ├── Middlewares/
 │   │   │   └── CorrelacaoMiddleware.cs
-│   │   └── HealthCheckResponseWriter.cs
+│   │   ├── HealthCheckResponseWriter.cs
+│   │   └── LimiteDeRequisicoes.cs   # nome e limites da política de rate limit
 │   ├── appsettings.json
 │   ├── appsettings.Development.json
 │   └── Program.cs
@@ -212,12 +213,14 @@ um plano de cuidado nasce, e a **política comercial** (oferta e regra de pontua
 
 | Recurso | Rotas | Filtros de listagem | Status codes |
 |---|---|---|---|
-| Protocolo | `GET` `POST` `/api/protocolo`<br>`GET` `PUT` `DELETE` `/api/protocolo/{id}` | `especie`, `categoria`, `ativo` | `200` `201` `204` `400` `404` `409` |
-| RegraProtocolo | `GET` `POST` `/api/regra-protocolo`<br>`GET` `PUT` `DELETE` `/api/regra-protocolo/{id}` | `protocoloId` (obrigatório na listagem) | `200` `201` `204` `400` `404` `409` |
-| Oferta | `GET` `POST` `/api/oferta`<br>`GET` `PUT` `DELETE` `/api/oferta/{id}` | `clinicaId`, `ato` | `200` `201` `204` `400` `404` `409` |
-| RegraPontuacao | `GET` `POST` `/api/regra-pontuacao`<br>`GET` `PUT` `DELETE` `/api/regra-pontuacao/{id}` | `clinicaId`, `gesto` | `200` `201` `204` `400` `404` `409` |
+| Protocolo | `GET` `POST` `/api/protocolo`<br>`GET` `PUT` `DELETE` `/api/protocolo/{id}` | `especie`, `categoria`, `ativo` | `200` `201` `204` `400` `404` `409` `429` |
+| RegraProtocolo | `GET` `POST` `/api/regra-protocolo`<br>`GET` `PUT` `DELETE` `/api/regra-protocolo/{id}` | `protocoloId` (obrigatório na listagem) | `200` `201` `204` `400` `404` `409` `429` |
+| Oferta | `GET` `POST` `/api/oferta`<br>`GET` `PUT` `DELETE` `/api/oferta/{id}` | `clinicaId`, `ato` | `200` `201` `204` `400` `404` `409` `429` |
+| RegraPontuacao | `GET` `POST` `/api/regra-pontuacao`<br>`GET` `PUT` `DELETE` `/api/regra-pontuacao/{id}` | `clinicaId`, `gesto` | `200` `201` `204` `400` `404` `409` `429` |
 
 Listagem vazia devolve `204`; remoção de recurso com vínculo devolve `409`. Erros voltam como `400`, `404` ou `409` com uma mensagem de texto.
+
+**Rate limit:** os quatro recursos aceitam até 200 requisições por minuto por cliente (IP), somadas entre eles (`[EnableRateLimiting]`, política `politica_200_por_minuto`). Acima disso a resposta é `429 Too Many Requests`, com o cabeçalho `Retry-After`. Health checks e `/metrics` ficam fora do limite.
 
 O banco nasce com dois protocolos preventivos de exemplo, um de cão e um de gato, com três regras cada — inseridos pela migration `semear_catalogo_inicial` na primeira subida.
 
@@ -371,6 +374,7 @@ PetBuddies-API.Tests.Unit/
 PetBuddies-API.Tests.Integration/
 └── App/
     ├── {Protocolo,RegraProtocolo,Oferta,RegraPontuacao}ControllerTest.cs  # WebApplicationFactory + Service mockado (CustomWebApplicationFactory)
+    ├── LimiteDeRequisicoesTest.cs                                         # rate limit: a requisição acima do limite volta 429 com Retry-After
     └── AutenticacaoTest.cs                                                # app real, sem mock — sem token (401), token TUTOR (403), token VET (201)
 ```
 
@@ -380,7 +384,7 @@ Todo teste é escrito em Arrange / Act / Assert e nomeado `MetodoTestado_Cenario
 (ex.: `ObterPorIdAsync_RegraExistente_RetornaARegra`). O contexto compartilhado vem de fixtures:
 `RequestBuilderFixture` como Collection Fixture dos testes de service, `PetBuddiesApiFixture` como
 Collection Fixture do teste de autenticação e `CustomWebApplicationFactory` como `IClassFixture`
-dos testes de controller.
+dos testes de controller e de rate limit.
 
 Rodar tudo:
 
@@ -388,7 +392,7 @@ Rodar tudo:
 dotnet test
 ```
 
-**86 testes, todos passando** (63 no `.Tests.Unit`, 23 no `.Tests.Integration`). Tudo roda contra `Microsoft.EntityFrameworkCore.InMemory`: não precisa de Oracle, VPN nem container.
+**87 testes, todos passando** (63 no `.Tests.Unit`, 24 no `.Tests.Integration`). Tudo roda contra `Microsoft.EntityFrameworkCore.InMemory`: não precisa de Oracle, VPN nem container.
 
 Todo teste tem `[Trait]` de camada e domínio — dá para rodar só um recorte:
 
@@ -398,6 +402,7 @@ dotnet test --filter "Service=Oferta"
 dotnet test --filter "Mapper=Oferta"
 dotnet test --filter "Controller=RegraPontuacao"
 dotnet test --filter "Autenticacao=Protocolo"
+dotnet test --filter "LimiteDeRequisicoes=Oferta"
 ```
 
 ### Via Postman

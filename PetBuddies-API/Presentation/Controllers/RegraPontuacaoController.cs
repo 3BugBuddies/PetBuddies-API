@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using PetBuddies_API.Application.Dtos.RegraPontuacao;
 using PetBuddies_API.Application.Interfaces;
@@ -11,6 +12,7 @@ namespace PetBuddies_API.Presentation.Controllers
     [ApiController]
     [Route("api/regra-pontuacao")]
     [Authorize(Roles = "VET")]
+    [EnableRateLimiting(LimiteDeRequisicoes.Politica)]
     public class RegraPontuacaoController : ControllerBase
     {
         private readonly IRegraPontuacaoService _regraPontuacaoService;
