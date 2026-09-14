@@ -6,7 +6,7 @@ O serviço é o **back-office administrativo da clínica veterinária**: é onde
 
 <img src="docs/figuras/arquitetura.png" alt="Arquitetura: o PetBuddies-API (.NET) guarda protocolos, ofertas e pontuação no próprio Oracle e valida o JWT do Java; o petbuddies-ai (Java) lê o catálogo por GET /api/protocolo, e o .NET só consulta a saúde do Java">
 
-Preço e pontuação são política configurada: nesta sprint o CRUD existe e é validado, e nenhuma aplicação ainda lê essas tabelas para cobrar ou pontuar.
+Nesta sprint a API ganhou [health checks](#health-checks) do banco e do serviço Java, [log estruturado com correlação de requisições, tracing e métricas](#observabilidade) com Serilog e OpenTelemetry, e [testes automatizados](#via-testes-automatizados) unitários e de integração no padrão AAA.
 
 ---
 
@@ -126,7 +126,7 @@ PetBuddies-API/
 
 ### 1. Banco de dados
 
-O `docker-compose.yml` sobe **só o Oracle** — a aplicação roda no terminal, onde o log fica visível e o restart é imediato. A porta é `1522`; o serviço Java usa `1521`. Cada serviço tem o próprio schema — nenhum objeto de um existe no banco do outro.
+O `docker-compose.yml` sobe **só o Oracle**, na porta `1522`; a aplicação roda no terminal.
 
 ```bash
 docker compose up -d          # sobe o banco
@@ -185,9 +185,8 @@ No Swagger e no Postman o caminho é o mesmo — detalhe em [Autenticação](#au
 
 ![Diagrama de classes do back-office](docs/diagrama-classes.png)
 
-Quatro entidades, agrupadas pelos dois papéis do serviço. O **catálogo** é lido pelo Java por
-HTTP no instante em que um plano de cuidado nasce; a **política comercial** ainda não tem
-consumidor — preço e pontuação são configuração, e congelar o valor no ato é Sprint 4.
+Quatro entidades em dois grupos: o **catálogo** (protocolo e suas regras), lido pelo Java quando
+um plano de cuidado nasce, e a **política comercial** (oferta e regra de pontuação).
 
 | Entidade | Tabela | Papel |
 |---|---|---|
@@ -195,21 +194,6 @@ consumidor — preço e pontuação são configuração, e congelar o valor no a
 | `RegraProtocoloEntity` | `T_PB_REGRA_PROTOCOLO` | o item do molde — tipo de cuidado, deslocamento, data-base e recorrência |
 | `OfertaEntity` | `T_PB_OFERTA` | o que a clínica oferece e por quanto, com vigência |
 | `RegraPontuacaoEntity` | `T_PB_REGRA_PONTUACAO` | quanto cada gesto do tutor vale, por clínica e vigência |
-
-Três coisas que o desenho mostra e a tabela não mostra:
-
-- **Nenhuma chave cruza os dois bancos.** O plano e o item do lado Java guardam `protocoloId` e
-  `regraProtocoloId` como número solto, lidos uma vez por `GET /api/protocolo`. Depois de
-  materializado, o plano não volta ao catálogo.
-- **`RegraProtocolo` é a única sem carimbo de tempo**, porque é a única que não herda
-  `BaseEntity` — ela não existe fora do protocolo que a contém.
-- **`Oferta` é a única ponte entre os dois pacotes**, por um id nulável: a oferta pode ser de um
-  protocolo, de um procedimento ou de uma consulta.
-
-Os quatro enums próprios do serviço estão no desenho. `EspecieEnum`, `TipoCuidadoEnum` e
-`UnidadeTempoEnum` aparecem como tipo de campo e não estão expandidos: são **vocabulário
-compartilhado com o Java**, e os valores precisam bater nos dois lados — a lista vive em
-`Domain/Enums/`.
 
 ### Invariantes que o schema garante
 
@@ -219,9 +203,6 @@ compartilhado com o Java**, e os valores precisam bater nos dois lados — a lis
 - `RegraPontuacao` — `UK_PONTUACAO_VIGENCIA` (único por clínica + gesto + início de vigência).
 - `RegraProtocolo` — `CK_REGPROT_RECORRENCIA`: `Intervalo` e `UnidadeIntervalo` são ambos nulos
   ou ambos preenchidos.
-
-A fonte do desenho é `.claude/docs/dotnet-sprint-3/diagrama-classes/diagrama-classes.html`, que
-não é versionada — o PNG é o entregável.
 
 ---
 
@@ -236,25 +217,19 @@ não é versionada — o PNG é o entregável.
 | Oferta | `GET` `POST` `/api/oferta`<br>`GET` `PUT` `DELETE` `/api/oferta/{id}` | `clinicaId`, `ato` | `200` `201` `204` `400` `404` `409` |
 | RegraPontuacao | `GET` `POST` `/api/regra-pontuacao`<br>`GET` `PUT` `DELETE` `/api/regra-pontuacao/{id}` | `clinicaId`, `gesto` | `200` `201` `204` `400` `404` `409` |
 
-Listagem vazia devolve `204 No Content`; remoção de recurso com vínculo (FK) devolve `409 Conflict`. Erros são simples, sem envelope: `400 Bad Request`/`404 Not Found`/`409 Conflict` com uma mensagem de texto — shape ausente ou tipo errado no JSON é pego automaticamente pelo `[ApiController]` (DataAnnotations do request), e regra cruzada (ex.: alvo da oferta incoerente com o ato) é pega pelo `Validar()` de cada service, que devolve a mensagem de erro como `string?`.
+Listagem vazia devolve `204`; remoção de recurso com vínculo devolve `409`. Erros voltam como `400`, `404` ou `409` com uma mensagem de texto.
 
-Ao instanciar um plano de cuidado, o `petbuddies-ai` faz `GET` nesses endpoints para ler o catálogo vigente.
-
-> **O catálogo nasce povoado.** A migration `semear_catalogo_inicial` insere dois protocolos preventivos — um de cão e um de gato, com três regras cada — e roda sozinha na subida, porque `Database.Migrate()` é chamado no start. Sem isso o catálogo nasceria vazio, e o motor do Java leria isso como "nenhum protocolo compatível": mesma resposta de sucesso, sem erro e sem log.
- O .NET não inicia chamadas para o Java — só o health check consulta o endereço dele, para reportar saúde.
+O banco nasce com dois protocolos preventivos de exemplo, um de cão e um de gato, com três regras cada — inseridos pela migration `semear_catalogo_inicial` na primeira subida.
 
 ---
 
 ## Autenticação
 
-**Este serviço não emite token — ele valida o que o Java emite.** Não há `POST /api/auth/login`
-aqui: o `AddAuthentication().AddJwtBearer()` (`Program.cs`) confere assinatura, emissor e perfil
-de um JWT `HS256` assinado com `PETBUDDIES_JWT_SECRET`, **o mesmo segredo nos dois serviços**.
-Sem Identity nesta sprint.
+A API valida um JWT `HS256` assinado com `PETBUDDIES_JWT_SECRET` — `AddAuthentication().AddJwtBearer()`, em `Program.cs`.
 
 - Emissor exigido: `petbuddies-ai`. Role vem da claim `perfil` (`RoleClaimType = "perfil"`).
 - Toda rota de negócio é `[Authorize(Roles = "VET")]`: sem token → `401`, token de `TUTOR` → `403`.
-- `/health/*` e `/metrics` são `AllowAnonymous`, propositalmente.
+- `/health/*` e `/metrics` são `AllowAnonymous`.
 
 ### Como obter um token
 
@@ -277,25 +252,21 @@ curl -s http://localhost:5297/api/protocolo -H "Authorization: Bearer $TOKEN"
 **Postman:** nada a fazer. Qualquer requisição da coleção pede o token à API sozinha quando a
 variável `token` está vazia ou vencida; a pasta `0 · Token` faz o mesmo de forma explícita.
 
-O token vale 8 horas e é assinado com o mesmo `PETBUDDIES_JWT_SECRET` que a API valida — em
-`Development`, o valor que já vem no `appsettings.Development.json`, sem nada a configurar.
-`?perfil=TUTOR` emite um token do outro perfil, útil para ver o `403`.
+O token vale 8 horas; `?perfil=TUTOR` emite um token do outro perfil, útil para ver o `403`.
+**A rota só existe em `Development`**, o perfil padrão do `dotnet run`; em qualquer outro ambiente
+ela responde `404` e não aparece no Swagger.
 
-**A rota só existe em `Development`.** O `dotnet run` usa o perfil do `launchSettings.json`, que já
-define `Development` mesmo que o shell tenha outro valor. Em qualquer outro ambiente a rota responde
-`404` e some do Swagger: em produção o serviço só valida o token que o Java emite.
-
-**Com o Java no ar**, o login dele também serve, desde que os dois serviços usem o mesmo
-`PETBUDDIES_JWT_SECRET` (passo 2 de [Como Executar](#como-executar)) — o emissor já é o mesmo. Como subir o Java e os usuários de demonstração
-estão no README do [PetBuddies-AI](https://github.com/3BugBuddies/PetBuddies-AI); no Postman, é a
-pasta `7 · Login no Java (opcional)`.
+**Com o Java no ar**, o token do login dele também é aceito, desde que os dois serviços usem o mesmo
+`PETBUDDIES_JWT_SECRET`. Como subir o Java está no README do
+[PetBuddies-AI](https://github.com/3BugBuddies/PetBuddies-AI); no Postman, é a pasta
+`7 · Login no Java (opcional)`.
 
 ---
 
 ## Observabilidade
 
 - **Serilog:** console (`[{Timestamp} {Level}] [{CorrelationId}] {Message}`) + arquivo JSON compacto em `logs/api-.log`, rotação diária, 7 dias de retenção.
-- **Correlação de requisição** (`CorrelacaoMiddleware`, primeiro middleware do pipeline): usa o `TraceId` do rastreamento já ativo como identificador — nunca inventa um novo — e devolve `X-Correlation-Id` no header de resposta. Se o cliente mandou seu próprio `X-Correlation-Id`, ele entra como propriedade adicional do log, nunca substitui o identificador do rastreamento.
+- **Correlação de requisição** (`CorrelacaoMiddleware`, primeiro middleware do pipeline): usa o `TraceId` da requisição como id de correlação e o devolve no cabeçalho `X-Correlation-Id`. Um `X-Correlation-Id` enviado pelo cliente entra no log como propriedade adicional.
 - **Nível de log pela resposta:** a linha de conclusão de cada requisição escolhe o nível pelo status já calculado:
 
   | Status | Nível |
@@ -304,9 +275,9 @@ pasta `7 · Login no Java (opcional)`.
   | 400 a 499 | `Warning` |
   | demais | `Information` |
 
-- **OpenTelemetry:** tracing (instrumentação de ASP.NET Core, `HttpClient` e Entity Framework Core) e métricas de ASP.NET Core (duração de requisição, contagem por status code). Sem `OTEL_EXPORTER_OTLP_ENDPOINT` configurado, **o tracing** exporta no console — é a única forma de ver um span sem coletor. **A métrica não vai para o console:** o despejo periódico dela ocupava metade do log, e o `/metrics` entrega o mesmo dado quando alguém pede.
-- **O console não rastreia infraestrutura.** Requisições a `/health/*` e `/metrics` ficam fora do tracing: são chamadas de máquina, repetidas em laço, e afogariam as requisições que interessam. Elas continuam contando nas métricas — o `/metrics` mostra a linha delas por rota.
-- **Métricas em `GET /metrics`**, no formato de texto do Prometheus, sem autenticação. Esse caminho está **sempre ligado**, independente de coletor: é o que torna as métricas legíveis sem depender de nada externo.
+- **OpenTelemetry:** tracing (instrumentação de ASP.NET Core, `HttpClient` e Entity Framework Core) e métricas de ASP.NET Core (duração de requisição, contagem por status code). Sem `OTEL_EXPORTER_OTLP_ENDPOINT` configurado, os spans saem no console.
+- Requisições a `/health/*` e `/metrics` ficam fora do tracing e continuam contando nas métricas.
+- **Métricas em `GET /metrics`**, no formato de texto do Prometheus, sem autenticação, com ou sem coletor configurado.
 
 ### Uma requisição rastreada
 
@@ -331,8 +302,6 @@ http_server_request_duration_seconds_count{http_request_method="GET",http_respon
 curl -s localhost:5297/metrics | grep -oE 'http_response_status_code="[0-9]+"' | sort | uniq -c
 ```
 
-Nada disso exige instrumento próprio: `AddAspNetCoreInstrumentation()` já produz as duas.
-
 Além do endpoint:
 
 - A cada requisição, o console mostra o span (`Activity.TraceId`, rota, status).
@@ -355,10 +324,7 @@ curl http://localhost:5297/health
 ```
 
 O `HealthController` expõe as mesmas três verificações em `/api/health/live`, `/api/health/db` e
-`/api/health/externo` — também sem autenticação, `200` quando saudável e `503` quando não. O corpo
-usa um contrato diferente do de `/health/*`: `name`, `status` e `description` (mais `error` quando há
-exceção), enquanto `/health/*` usa `nome`, `status` e `descricao`.
-
+`/api/health/externo` — também sem autenticação, `200` quando saudável e `503` quando não.
 
 ### Evidências
 
@@ -388,7 +354,7 @@ Com o token de `POST /api/dev/token` preenchido em **Authorize** (passo a passo 
 
 ### Via testes automatizados
 
-Dois projetos xUnit, quatro domínios (`Protocolo`, `RegraProtocolo`, `Oferta`, `RegraPontuacao`) × camada, no padrão ensinado em aula — Repository, Service e Controller testados em separado, com o Controller isolando o Service via mock:
+Dois projetos xUnit, quatro domínios (`Protocolo`, `RegraProtocolo`, `Oferta`, `RegraPontuacao`) × camada — Repository, Service e Controller testados em separado, com o Controller isolando o Service via mock:
 
 <img src="docs/figuras/testes.png" alt="O que cada tipo de teste exercita e o que ele substitui: Repository com EF Core InMemory, Service com repositório mockado, Controller com service mockado e Autenticação com o app real">
 
@@ -410,9 +376,11 @@ PetBuddies-API.Tests.Integration/
 
 </details>
 
-O Domínio (`Domain/Entities/*`) não tem teste próprio: as entidades são estrutura de dados, sem
-comportamento próprio. A regra de negócio vive nos casos de uso da camada de Aplicação, e é lá que
-os `*ServiceTest` com Moq cobrem.
+Todo teste é escrito em Arrange / Act / Assert e nomeado `MetodoTestado_Cenario_ResultadoEsperado`
+(ex.: `ObterPorIdAsync_RegraExistente_RetornaARegra`). O contexto compartilhado vem de fixtures:
+`RequestBuilderFixture` como Collection Fixture dos testes de service, `PetBuddiesApiFixture` como
+Collection Fixture do teste de autenticação e `CustomWebApplicationFactory` como `IClassFixture`
+dos testes de controller.
 
 Rodar tudo:
 
@@ -420,7 +388,7 @@ Rodar tudo:
 dotnet test
 ```
 
-**86 testes, todos passando** (63 no `.Tests.Unit`, 23 no `.Tests.Integration` — conferido em 12/09/2026). Tudo roda contra `Microsoft.EntityFrameworkCore.InMemory`: não precisa de Oracle, VPN nem container.
+**86 testes, todos passando** (63 no `.Tests.Unit`, 23 no `.Tests.Integration`). Tudo roda contra `Microsoft.EntityFrameworkCore.InMemory`: não precisa de Oracle, VPN nem container.
 
 Todo teste tem `[Trait]` de camada e domínio — dá para rodar só um recorte:
 
