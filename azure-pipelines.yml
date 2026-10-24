@@ -13,36 +13,10 @@ variables:
 stages:
 
 # ========================================================
-# 1. CRIAR INFRAESTRUTURA
-# ========================================================
-- stage: Infraestrutura
-  displayName: 'Criar infraestrutura'
-  jobs:
-    - job: CriarInfra
-      displayName: 'Provisionar recursos Azure'
-      pool:
-        vmImage: 'ubuntu-latest'
-
-      steps:
-        - checkout: self
-
-        - task: AzureCLI@2
-          displayName: 'Executar script de infraestrutura'
-          inputs:
-            azureSubscription: '$(azureSubscription)'
-            scriptType: 'bash'
-            scriptLocation: 'scriptPath'
-            scriptPath: 'infra/infra-app.sh'
-          env:
-            LOCATION: $(LOCATION)
-            NOME_WEBAPP: $(NOME_WEBAPP)
-
-# ========================================================
-# 2. CI - BUILD E TESTES
+# 1. CI - BUILD E TESTES
 # ========================================================
 - stage: CI
   displayName: 'CI - Build e Testes'
-  dependsOn: Infraestrutura
   jobs:
     - job: BuildTest
       displayName: 'Build and Test'
@@ -99,7 +73,7 @@ stages:
             publishLocation: 'pipeline'
 
 # ========================================================
-# 3. CD - DEPLOY NO AZURE WEB APP
+# 2. CD - DEPLOY NO AZURE WEB APP
 # ========================================================
 - stage: CD
   displayName: 'CD - Deploy no Azure Web App'
