@@ -1,0 +1,143 @@
+trigger:
+  branches:
+    include:
+      - main
+
+variables:
+  buildConfiguration: 'Release'
+  azureSubscription: 'sc-petbuddies-azure'
+  apiProject: 'PetBuddies-API/PetBuddies-API.csproj'
+  testProjects: 'PetBuddies-API.Tests.*/*.csproj'
+  artifactName: 'app'
+
+stages:
+
+# ========================================================
+# 1. CRIAR INFRAESTRUTURA
+# ========================================================
+- stage: Infraestrutura
+  displayName: 'Criar infraestrutura'
+  jobs:
+    - job: CriarInfra
+      displayName: 'Provisionar recursos Azure'
+      pool:
+        vmImage: 'ubuntu-latest'
+
+      steps:
+        - checkout: self
+
+        - task: AzureCLI@2
+          displayName: 'Executar script de infraestrutura'
+          inputs:
+            azureSubscription: '$(azureSubscription)'
+            scriptType: 'bash'
+            scriptLocation: 'scriptPath'
+            scriptPath: 'infra/infra-app.sh'
+          env:
+            LOCATION: $(LOCATION)
+            NOME_WEBAPP: $(NOME_WEBAPP)
+
+# ========================================================
+# 2. CI - BUILD E TESTES
+# ========================================================
+- stage: CI
+  displayName: 'CI - Build e Testes'
+  dependsOn: Infraestrutura
+  jobs:
+    - job: BuildTest
+      displayName: 'Build and Test'
+      pool:
+        vmImage: 'ubuntu-latest'
+
+      steps:
+        - task: UseDotNet@2
+          displayName: 'Configurar .NET 8'
+          inputs:
+            packageType: 'sdk'
+            version: '8.x'
+
+        - task: DotNetCoreCLI@2
+          displayName: 'Restore'
+          inputs:
+            command: 'restore'
+            projects: |
+              $(apiProject)
+              $(testProjects)
+
+        - task: DotNetCoreCLI@2
+          displayName: 'Build'
+          inputs:
+            command: 'build'
+            projects: |
+              $(apiProject)
+              $(testProjects)
+            arguments: '--configuration $(buildConfiguration) --no-restore'
+
+        - task: DotNetCoreCLI@2
+          displayName: 'Test'
+          inputs:
+            command: 'test'
+            projects: '$(testProjects)'
+            arguments: '--configuration $(buildConfiguration) --no-build'
+            publishTestResults: true
+            testRunTitle: 'Testes da API .NET'
+
+        - task: DotNetCoreCLI@2
+          displayName: 'Publish'
+          inputs:
+            command: 'publish'
+            publishWebProjects: false
+            projects: '$(apiProject)'
+            arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+            zipAfterPublish: true
+
+        - task: PublishPipelineArtifact@1
+          displayName: 'Publish Artifact'
+          inputs:
+            targetPath: '$(Build.ArtifactStagingDirectory)'
+            artifact: '$(artifactName)'
+            publishLocation: 'pipeline'
+
+# ========================================================
+# 3. CD - DEPLOY NO AZURE WEB APP
+# ========================================================
+- stage: CD
+  displayName: 'CD - Deploy no Azure Web App'
+  dependsOn: CI
+  condition: succeeded()
+  jobs:
+    - deployment: Deploy
+      displayName: 'Deploy API .NET'
+      pool:
+        vmImage: 'ubuntu-latest'
+      environment: 'petbuddies-net'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - download: current
+                artifact: '$(artifactName)'
+
+              - task: AzureAppServiceSettings@1
+                displayName: 'Configurar variáveis de ambiente do Web App'
+                inputs:
+                  azureSubscription: '$(azureSubscription)'
+                  appName: '$(NOME_WEBAPP)'
+                  resourceGroupName: 'rg-petbuddies'
+                  appSettings: |
+                    [
+                      { "name": "ASPNETCORE_ENVIRONMENT", "value": "Production", "slotSetting": false },
+                      { "name": "ConnectionStrings__Oracle", "value": "Data Source=$(ORACLE_HOST):$(ORACLE_PORT)/$(ORACLE_SID);User Id=$(ORACLE_USER);Password=$(ORACLE_PASS);Max Pool Size=5;Connection Lifetime=1500", "slotSetting": false },
+                      { "name": "PETBUDDIES_JWT_SECRET", "value": "$(PETBUDDIES_JWT_SECRET)", "slotSetting": false },
+                      { "name": "MotorApi__BaseUrl", "value": "$(MOTOR_API_URL)", "slotSetting": false },
+                      { "name": "TZ", "value": "America/Sao_Paulo", "slotSetting": false }
+                    ]
+
+              - task: AzureWebApp@1
+                displayName: 'Deploy via Zip Deploy'
+                inputs:
+                  azureSubscription: '$(azureSubscription)'
+                  appType: 'webAppLinux'
+                  appName: '$(NOME_WEBAPP)'
+                  package: '$(Pipeline.Workspace)/$(artifactName)/**/*.zip'
+                  deploymentMethod: 'zipDeploy'
