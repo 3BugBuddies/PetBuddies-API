@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "PetBuddies API — .NET (back-office)",
-    "description": "Protocolo, regra de protocolo, oferta e regra de pontuação — os quatro domínios do back-office administrativo da clínica.\n\nComo rodar: com a API de pé em Development (`dotnet run --project PetBuddies-API`) e o Oracle no ar, rode a coleção inteira em ordem ou qualquer requisição avulsa. Não há nada a configurar: quando a variável `token` está vazia ou vencida, o script da coleção pede um token à própria API (`POST /api/dev/token`) antes de enviar a requisição.\n\nA pasta `7 · Login no Java (opcional)` só funciona com o `petbuddies-ai` no ar e com o mesmo `PETBUDDIES_JWT_SECRET` nos dois serviços.",
+    "description": "Protocolo, regra de protocolo, oferta e regra de pontuação — os quatro domínios do back-office administrativo da clínica — e a pontuação do responsável por consulta.\n\nComo rodar: com a API de pé em Development (`dotnet run --project PetBuddies-API`) e o Oracle no ar, rode a coleção inteira em ordem ou qualquer requisição avulsa. Não há nada a configurar: quando a variável `token` está vazia ou vencida, o script da coleção pede um token à própria API (`POST /api/dev/token`) antes de enviar a requisição.\n\nA pasta `8 · Login no Java (opcional)` só funciona com o `petbuddies-ai` no ar e com o mesmo `PETBUDDIES_JWT_SECRET` nos dois serviços.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -104,6 +104,56 @@
       "key": "vigenciaPontuacaoDelete",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "responsavelId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "tokenTutor",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "consultaPontuadaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pontosLancados",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "regraCheckinId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "regraAdesaoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "regraEvolucaoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vigenciaCheckin",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vigenciaAdesao",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "vigenciaEvolucao",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -182,6 +232,30 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Consulta health db — 200 ou 503', () => pm.expect(pm.response.code).to.be.oneOf([200, 503]));",
+                  "const json = pm.response.json();",
+                  "pm.test('Corpo tem status e checks', () => {",
+                  "    pm.expect(json).to.have.property('status');",
+                  "    pm.expect(json).to.have.property('checks');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consulta health mongo — 200 ou 503",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health/mongo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Consulta health mongo — 200 ou 503', () => pm.expect(pm.response.code).to.be.oneOf([200, 503]));",
                   "const json = pm.response.json();",
                   "pm.test('Corpo tem status e checks', () => {",
                   "    pm.expect(json).to.have.property('status');",
@@ -273,6 +347,30 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Consulta api/health db — 200 ou 503', () => pm.expect(pm.response.code).to.be.oneOf([200, 503]));",
+                  "const json = pm.response.json();",
+                  "pm.test('Corpo tem status e checks', () => {",
+                  "    pm.expect(json).to.have.property('status');",
+                  "    pm.expect(json).to.have.property('checks');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consulta api/health mongo — 200 ou 503",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health/mongo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Consulta api/health mongo — 200 ou 503', () => pm.expect(pm.response.code).to.be.oneOf([200, 503]));",
                   "const json = pm.response.json();",
                   "pm.test('Corpo tem status e checks', () => {",
                   "    pm.expect(json).to.have.property('status');",
@@ -1479,7 +1577,415 @@
       ]
     },
     {
-      "name": "6 · Limpeza",
+      "name": "6 · Pontuação",
+      "description": "O Java chama `POST /api/pontuacao/consulta` ao fechar uma consulta; aqui a chamada é simulada com o token VET. As regras desta pasta valem a partir de 2027–2036 e a consulta é de 2040, então todas estão vigentes. O tutor lê saldo e extrato com um token de TUTOR que carrega `responsavelId`. A memória de cálculo vem do MongoDB: sem ele no ar, `503`.",
+      "item": [
+        {
+          "name": "Cadastra regra CHECKIN_REGISTRADO — 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/regra-pontuacao",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"gesto\": \"CHECKIN_REGISTRADO\",\n  \"pontos\": 1,\n  \"inicioVigencia\": \"{{vigenciaCheckin}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const base = new Date(Date.UTC(2027, 0, 1));",
+                  "const dias = Math.floor(Math.random() * 3650);",
+                  "base.setUTCDate(base.getUTCDate() + dias);",
+                  "pm.collectionVariables.set('vigenciaCheckin', base.toISOString().slice(0, 10));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra regra CHECKIN_REGISTRADO — 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('regraCheckinId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastra regra ADESAO_COMPLETA — 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/regra-pontuacao",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"gesto\": \"ADESAO_COMPLETA\",\n  \"pontos\": 15,\n  \"inicioVigencia\": \"{{vigenciaAdesao}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const base = new Date(Date.UTC(2027, 0, 1));",
+                  "const dias = Math.floor(Math.random() * 3650);",
+                  "base.setUTCDate(base.getUTCDate() + dias);",
+                  "pm.collectionVariables.set('vigenciaAdesao', base.toISOString().slice(0, 10));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra regra ADESAO_COMPLETA — 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('regraAdesaoId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastra regra EVOLUCAO_POSITIVA — 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/regra-pontuacao",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinicaId\": 1,\n  \"gesto\": \"EVOLUCAO_POSITIVA\",\n  \"pontos\": 5,\n  \"inicioVigencia\": \"{{vigenciaEvolucao}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const base = new Date(Date.UTC(2027, 0, 1));",
+                  "const dias = Math.floor(Math.random() * 3650);",
+                  "base.setUTCDate(base.getUTCDate() + dias);",
+                  "pm.collectionVariables.set('vigenciaEvolucao', base.toISOString().slice(0, 10));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cadastra regra EVOLUCAO_POSITIVA — 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('regraEvolucaoId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lança pontos da consulta — 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/pontuacao/consulta",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultaId\": {{consultaPontuadaId}},\n  \"responsavelId\": {{responsavelId}},\n  \"animalId\": 1,\n  \"clinicaId\": 1,\n  \"dataConsulta\": \"2040-01-01T10:00:00\",\n  \"dataConsultaAnterior\": \"2039-12-02T10:00:00\",\n  \"dosesPrevistas\": 20,\n  \"dosesComCheckin\": 18,\n  \"diasNoPeriodo\": 30,\n  \"diasComCheckin\": 17,\n  \"acionamentosClinica\": 1,\n  \"evolucao\": \"MELHOROU\"\n}"
+            },
+            "description": "Em produção quem chama é o Java, no fechamento da consulta. 18 de 20 doses = 90%: atinge o bônus de adesão."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Consulta nova a cada execução: a mesma consulta não pontua duas vezes.",
+                  "pm.collectionVariables.set('consultaPontuadaId', Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Lança pontos da consulta — 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('pontosLancados', pm.response.json().pontos);",
+                  "pm.test('Lançamento tem pontos', () => pm.expect(pm.response.json().pontos).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reenvia a mesma consulta — 200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/pontuacao/consulta",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultaId\": {{consultaPontuadaId}},\n  \"responsavelId\": {{responsavelId}},\n  \"animalId\": 1,\n  \"clinicaId\": 1,\n  \"dataConsulta\": \"2040-01-01T10:00:00\",\n  \"dataConsultaAnterior\": \"2039-12-02T10:00:00\",\n  \"dosesPrevistas\": 20,\n  \"dosesComCheckin\": 18,\n  \"diasNoPeriodo\": 30,\n  \"diasComCheckin\": 17,\n  \"acionamentosClinica\": 1,\n  \"evolucao\": \"MELHOROU\"\n}"
+            },
+            "description": "O reenvio do Java devolve o lançamento existente, sem pontuar de novo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Reenvia a mesma consulta — 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Mesmos pontos do primeiro envio', () => pm.expect(pm.response.json().pontos).to.eql(Number(pm.collectionVariables.get('pontosLancados'))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lança pontos com check-ins acima das doses — 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/pontuacao/consulta",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultaId\": {{consultaPontuadaId}},\n  \"responsavelId\": {{responsavelId}},\n  \"animalId\": 1,\n  \"clinicaId\": 1,\n  \"dataConsulta\": \"2040-01-01T10:00:00\",\n  \"dataConsultaAnterior\": \"2039-12-02T10:00:00\",\n  \"dosesPrevistas\": 20,\n  \"dosesComCheckin\": 25,\n  \"diasNoPeriodo\": 30,\n  \"diasComCheckin\": 17,\n  \"acionamentosClinica\": 1,\n  \"evolucao\": \"MELHOROU\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Lança pontos com check-ins acima das doses — 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Emite token de tutor — 200",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/dev/token?perfil=TUTOR&responsavelId={{responsavelId}}",
+            "description": "Token de TUTOR com a claim `responsavelId`, a mesma que o Java escreve no login do tutor."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Emite token de tutor — 200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('tokenTutor', pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lança pontos com token de tutor — 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/pontuacao/consulta",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenTutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultaId\": {{consultaPontuadaId}},\n  \"responsavelId\": {{responsavelId}},\n  \"animalId\": 1,\n  \"clinicaId\": 1,\n  \"dataConsulta\": \"2040-01-01T10:00:00\",\n  \"dataConsultaAnterior\": \"2039-12-02T10:00:00\",\n  \"dosesPrevistas\": 20,\n  \"dosesComCheckin\": 18,\n  \"diasNoPeriodo\": 30,\n  \"diasComCheckin\": 17,\n  \"acionamentosClinica\": 1,\n  \"evolucao\": \"MELHOROU\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Lança pontos com token de tutor — 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consulta saldo do tutor — 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/pontuacao/saldo",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenTutor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Consulta saldo do tutor — 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Saldo inclui a consulta lançada', () => pm.expect(pm.response.json().saldo).to.be.at.least(Number(pm.collectionVariables.get('pontosLancados'))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consulta extrato do tutor — 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/pontuacao/extrato",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenTutor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Consulta extrato do tutor — 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Extrato tem a consulta lançada', () => pm.expect(pm.response.json().map(l => String(l.consultaId))).to.include(String(pm.collectionVariables.get('consultaPontuadaId'))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consulta saldo com token de veterinário — 403",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/pontuacao/saldo"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Consulta saldo com token de veterinário — 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consulta memória de cálculo — 200 ou 503",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/pontuacao/consulta/{{consultaPontuadaId}}/memoria",
+            "description": "Lida da coleção `memorias_calculo` do MongoDB: entrada recebida do Java, regras vigentes usadas e pontos por critério."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Consulta memória de cálculo — 200 ou 503', () => pm.expect(pm.response.code).to.be.oneOf([200, 503]));",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Memória tem uma parcela por critério', () => pm.expect(pm.response.json().parcelas).to.have.lengthOf(4));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consulta memória inexistente — 404 ou 503",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/pontuacao/consulta/1/memoria"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Consulta memória inexistente — 404 ou 503', () => pm.expect(pm.response.code).to.be.oneOf([404, 503]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "7 · Limpeza",
       "item": [
         {
           "name": "Remove protocolo com vinculos — 409",
@@ -1575,11 +2081,68 @@
               }
             }
           ]
+        },
+        {
+          "name": "Remove regra CHECKIN_REGISTRADO — 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-pontuacao/{{regraCheckinId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove regra CHECKIN_REGISTRADO — 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove regra ADESAO_COMPLETA — 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-pontuacao/{{regraAdesaoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove regra ADESAO_COMPLETA — 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove regra EVOLUCAO_POSITIVA — 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/regra-pontuacao/{{regraEvolucaoId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Remove regra EVOLUCAO_POSITIVA — 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
-      "name": "7 · Login no Java (opcional)",
+      "name": "8 · Login no Java (opcional)",
       "auth": {
         "type": "noauth"
       },
