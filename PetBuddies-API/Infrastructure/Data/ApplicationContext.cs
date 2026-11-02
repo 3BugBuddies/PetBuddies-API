@@ -60,5 +60,8 @@ namespace PetBuddies_API.Infrastructure.Data
         public DbSet<RegraProtocoloEntity> RegrasProtocolo { get; set; }
         public DbSet<OfertaEntity> Ofertas { get; set; }
         public DbSet<RegraPontuacaoEntity> RegrasPontuacao { get; set; }
+
+        // Programa de pontos do responsável
+        public DbSet<LancamentoPontosEntity> LancamentosPontos { get; set; }
     }
 }
