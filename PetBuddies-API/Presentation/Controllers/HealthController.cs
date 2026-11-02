@@ -24,6 +24,9 @@ namespace PetBuddies_API.Presentation.Controllers
         [HttpGet("db")]
         public Task<IActionResult> Db(CancellationToken ct) => Relatorio("db", ct);
 
+        [HttpGet("mongo")]
+        public Task<IActionResult> Mongo(CancellationToken ct) => Relatorio("mongo", ct);
+
         [HttpGet("externo")]
         public Task<IActionResult> Externo(CancellationToken ct) => Relatorio("externo", ct);
 

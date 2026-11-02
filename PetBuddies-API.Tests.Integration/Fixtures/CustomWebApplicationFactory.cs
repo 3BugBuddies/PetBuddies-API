@@ -33,6 +33,7 @@ namespace PetBuddies_API.Tests.Integration.Fixtures
         public Mock<IRegraProtocoloService> RegraProtocoloServiceMock { get; } = new();
         public Mock<IOfertaService> OfertaServiceMock { get; } = new();
         public Mock<IRegraPontuacaoService> RegraPontuacaoServiceMock { get; } = new();
+        public Mock<IPontuacaoService> PontuacaoServiceMock { get; } = new();
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -69,17 +70,20 @@ namespace PetBuddies_API.Tests.Integration.Fixtures
 
                 services.RemoveAll(typeof(IRegraPontuacaoService));
                 services.AddSingleton(RegraPontuacaoServiceMock.Object);
+
+                services.RemoveAll(typeof(IPontuacaoService));
+                services.AddSingleton(PontuacaoServiceMock.Object);
             });
         }
 
-        public HttpClient CriarClienteComPerfil(string perfil)
+        public HttpClient CriarClienteComPerfil(string perfil, long? responsavelId = null)
         {
             var cliente = CreateClient();
-            cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", CriarToken(perfil));
+            cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", CriarToken(perfil, responsavelId));
             return cliente;
         }
 
-        private string CriarToken(string perfil)
+        private string CriarToken(string perfil, long? responsavelId)
         {
             var jwtOptions = Services.GetRequiredService<IOptions<JwtOptions>>().Value;
 
@@ -87,9 +91,15 @@ namespace PetBuddies_API.Tests.Integration.Fixtures
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
                 SecurityAlgorithms.HmacSha256);
 
+            var claims = new List<Claim> { new("perfil", perfil) };
+            if (responsavelId is not null)
+            {
+                claims.Add(new Claim("responsavelId", responsavelId.Value.ToString(), ClaimValueTypes.Integer64));
+            }
+
             var token = new JwtSecurityToken(
                 issuer: jwtOptions.Issuer,
-                claims: new[] { new Claim("perfil", perfil) },
+                claims: claims,
                 notBefore: DateTime.UtcNow.AddMinutes(-1),
                 expires: DateTime.UtcNow.AddMinutes(30),
                 signingCredentials: credenciais);

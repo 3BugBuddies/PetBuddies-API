@@ -1,4 +1,5 @@
 using PetBuddies_API.Application.Dtos.Oferta;
+using PetBuddies_API.Application.Dtos.Pontuacao;
 using PetBuddies_API.Application.Dtos.Protocolo;
 using PetBuddies_API.Application.Dtos.RegraPontuacao;
 using PetBuddies_API.Application.Dtos.RegraProtocolo;
@@ -61,6 +62,22 @@ namespace PetBuddies_API.Tests.Unit.Fixtures
             Gesto = TipoGestoEnum.CONSULTA_REALIZADA,
             Pontos = 10,
             InicioVigencia = new DateOnly(2026, 1, 1)
+        };
+
+        public PontuarConsultaRequest PontuarConsultaValida() => new()
+        {
+            ConsultaId = 42,
+            ResponsavelId = 1,
+            AnimalId = 3,
+            ClinicaId = 1,
+            DataConsulta = new DateTime(2026, 10, 1, 14, 30, 0),
+            DataConsultaAnterior = new DateTime(2026, 9, 1, 10, 0, 0),
+            DosesPrevistas = 20,
+            DosesComCheckin = 18,
+            DiasNoPeriodo = 30,
+            DiasComCheckin = 17,
+            AcionamentosClinica = 1,
+            Evolucao = EvolucaoClinicaEnum.MELHOROU
         };
     }
 
