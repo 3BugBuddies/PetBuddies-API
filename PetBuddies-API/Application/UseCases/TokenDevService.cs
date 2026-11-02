@@ -21,7 +21,7 @@ namespace PetBuddies_API.Application.UseCases
             _opcoes = opcoes.Value;
         }
 
-        public TokenDevDto Emitir(PerfilEnum perfil)
+        public TokenDevDto Emitir(PerfilEnum perfil, long? responsavelId = null)
         {
             var credenciais = new SigningCredentials(
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_opcoes.Secret)),
@@ -29,9 +29,17 @@ namespace PetBuddies_API.Application.UseCases
 
             // As claims sao as mesmas que o Java emite, e o emissor tambem: um token
             // daqui e indistinguivel de um de la para quem valida.
+            var claims = new List<Claim> { new("perfil", perfil.ToString()) };
+
+            // O Java so escreve responsavelId no token do tutor; as rotas de pontos leem dele.
+            if (perfil == PerfilEnum.TUTOR && responsavelId is not null)
+            {
+                claims.Add(new Claim("responsavelId", responsavelId.Value.ToString(), ClaimValueTypes.Integer64));
+            }
+
             var token = new JwtSecurityToken(
                 issuer: _opcoes.Issuer,
-                claims: new[] { new Claim("perfil", perfil.ToString()) },
+                claims: claims,
                 notBefore: DateTime.UtcNow.AddMinutes(-1),
                 expires: DateTime.UtcNow.AddHours(HorasDeValidade),
                 signingCredentials: credenciais);
