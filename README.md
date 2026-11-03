@@ -237,15 +237,18 @@ duas vezes.
 O **Java** conhece os fatos (consultas, doses, check-ins) e o **.NET** conhece as regras: o Java manda
 as contagens do período, e o cálculo, as regras vigentes e o saldo ficam aqui.
 
+O app nunca chama este serviço: ele fala só com o Java, que chama estas rotas por ele — no
+lançamento com o token de serviço, e nas leituras com o próprio token do tutor.
+
 ```mermaid
 sequenceDiagram
     autonumber
     actor Vet as Veterinária
+    actor Tutor as App (tutor)
     participant Java as petbuddies-ai (Java)
     participant Net as PetBuddies-API (.NET)
     participant Ora as Oracle
     participant Mongo as MongoDB
-    actor Tutor
 
     Vet->>Java: POST /api/consulta/{id}/fechamento (com evolucao)
     Java->>Java: consulta REALIZADA + envio PENDENTE (mesma transação)
@@ -255,8 +258,11 @@ sequenceDiagram
     Net->>Ora: grava T_PB_LANCAMENTO_PONTOS (ID_CONSULTA único)
     Net->>Mongo: grava memorias_calculo (entrada, regras, parcelas)
     Net-->>Java: 201 (ou 200 se a consulta já foi pontuada)
-    Tutor->>Net: GET /api/pontuacao/saldo e /extrato (token de TUTOR)
+    Tutor->>Java: GET /api/pontuacao/saldo e /extrato (token de TUTOR)
+    Java->>Net: GET /api/pontuacao/saldo e /extrato (mesmo token)
     Net->>Ora: SUM dos lançamentos do responsável
+    Net-->>Java: saldo / lançamentos
+    Java-->>Tutor: 200 em envelope HATEOAS
 ```
 
 Se o .NET estiver fora do ar no fechamento, o envio fica `PENDENTE` no Java e é refeito a cada
@@ -334,12 +340,15 @@ Listagem vazia devolve `204`; remoção de recurso com vínculo devolve `409`. E
 
 ### Pontuação
 
+Quem chama estas rotas é o Java: o app consome as rotas equivalentes do `petbuddies-ai`
+(`/api/pontuacao/saldo`, `/extrato` e `/consulta/{id}/memoria`), e o Java repassa para cá.
+
 | Método | Rota | Perfil | O que faz | Status codes |
 |---|---|---|---|---|
 | `POST` | `/api/pontuacao/consulta` | `VET` (o Java, com o token de serviço) | calcula e lança os pontos de uma consulta realizada | `201` lançou · `200` consulta já pontuada · `400` · `403` |
-| `GET` | `/api/pontuacao/saldo` | `TUTOR` | saldo do responsável do token (claim `responsavelId`) | `200` · `403` |
-| `GET` | `/api/pontuacao/extrato` | `TUTOR` | lançamentos do responsável, da consulta mais recente para a mais antiga | `200` · `204` · `403` |
-| `GET` | `/api/pontuacao/consulta/{consultaId}/memoria` | `VET` ou `TUTOR` | memória de cálculo, lida do MongoDB; o tutor só vê as dele | `200` · `403` · `404` · `503` MongoDB fora |
+| `GET` | `/api/pontuacao/saldo` | `TUTOR` (o Java, com o token do tutor) | saldo do responsável do token (claim `responsavelId`) | `200` · `403` |
+| `GET` | `/api/pontuacao/extrato` | `TUTOR` (o Java, com o token do tutor) | lançamentos do responsável, da consulta mais recente para a mais antiga | `200` · `204` · `403` |
+| `GET` | `/api/pontuacao/consulta/{consultaId}/memoria` | `VET` ou `TUTOR` (o Java, com o token de quem pediu) | memória de cálculo, lida do MongoDB; o tutor só vê as dele | `200` · `403` · `404` · `503` MongoDB fora |
 
 **Rate limit:** os recursos aceitam até 200 requisições por minuto por cliente (IP), somadas entre eles (`[EnableRateLimiting]`, política `politica_200_por_minuto`). Acima disso a resposta é `429 Too Many Requests`, com o cabeçalho `Retry-After`. Health checks e `/metrics` ficam fora do limite.
 
