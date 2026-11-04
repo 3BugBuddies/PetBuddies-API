@@ -12,7 +12,8 @@ namespace PetBuddies_API.Infrastructure.Data.Configurations
             {
                 tabela.HasCheckConstraint(
                     "CK_PONTUACAO_GESTO",
-                    "TP_GESTO IN ('PLANO_CRIADO','CONSULTA_AGENDADA','CONSULTA_REALIZADA','PROCEDIMENTO_EXECUTADO')");
+                    "TP_GESTO IN ('PLANO_CRIADO','CONSULTA_AGENDADA','CONSULTA_REALIZADA','PROCEDIMENTO_EXECUTADO',"
+                    + "'CHECKIN_REGISTRADO','ADESAO_COMPLETA','EVOLUCAO_POSITIVA')");
                 tabela.HasCheckConstraint("CK_PONTUACAO_PONTOS", "NR_PONTOS > 0");
             });
 

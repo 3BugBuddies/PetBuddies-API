@@ -22,6 +22,64 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("PetBuddies_API.Domain.Entities.LancamentoPontosEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_LANCAMENTO_PONTOS");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<long>("AnimalId")
+                        .HasColumnType("NUMBER(19)")
+                        .HasColumnName("ID_ANIMAL");
+
+                    b.Property<int>("ClinicaId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID_CLINICA");
+
+                    b.Property<long>("ConsultaId")
+                        .HasColumnType("NUMBER(19)")
+                        .HasColumnName("ID_CONSULTA");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CA_CREATED_AT");
+
+                    b.Property<DateTime>("DataConsulta")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("DH_CONSULTA");
+
+                    b.Property<int>("Pontos")
+                        .HasPrecision(6)
+                        .HasColumnType("NUMBER(6)")
+                        .HasColumnName("NR_PONTOS");
+
+                    b.Property<long>("ResponsavelId")
+                        .HasColumnType("NUMBER(19)")
+                        .HasColumnName("ID_RESPONSAVEL");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("AT_UPDATED_AT");
+
+                    b.HasKey("Id")
+                        .HasName("PK_T_PB_LANCAMENTO_PONTOS");
+
+                    b.HasIndex("ConsultaId")
+                        .IsUnique()
+                        .HasDatabaseName("UK_LANCAMENTO_CONSULTA");
+
+                    b.HasIndex("ResponsavelId")
+                        .HasDatabaseName("IX_LANCAMENTO_RESPONSAVEL");
+
+                    b.ToTable("T_PB_LANCAMENTO_PONTOS", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_LANCAMENTO_PONTOS", "NR_PONTOS >= 0");
+                        });
+                });
+
             modelBuilder.Entity("PetBuddies_API.Domain.Entities.OfertaEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -192,7 +250,7 @@ namespace PetBuddies_API.Infrastructure.Data.Migrations
 
                     b.ToTable("T_PB_REGRA_PONTUACAO", null, t =>
                         {
-                            t.HasCheckConstraint("CK_PONTUACAO_GESTO", "TP_GESTO IN ('PLANO_CRIADO','CONSULTA_AGENDADA','CONSULTA_REALIZADA','PROCEDIMENTO_EXECUTADO')");
+                            t.HasCheckConstraint("CK_PONTUACAO_GESTO", "TP_GESTO IN ('PLANO_CRIADO','CONSULTA_AGENDADA','CONSULTA_REALIZADA','PROCEDIMENTO_EXECUTADO','CHECKIN_REGISTRADO','ADESAO_COMPLETA','EVOLUCAO_POSITIVA')");
 
                             t.HasCheckConstraint("CK_PONTUACAO_PONTOS", "NR_PONTOS > 0");
                         });

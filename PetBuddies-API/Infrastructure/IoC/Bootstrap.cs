@@ -1,5 +1,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -8,6 +9,7 @@ using PetBuddies_API.Application.Interfaces;
 using PetBuddies_API.Application.UseCases;
 using PetBuddies_API.Domain.Interfaces;
 using PetBuddies_API.Infrastructure.Data;
+using PetBuddies_API.Infrastructure.Mongo;
 using PetBuddies_API.Infrastructure.Repositories;
 using Serilog;
 using Serilog.Events;
@@ -97,12 +99,32 @@ namespace PetBuddies_API.Infrastructure.IoC
             services.AddTransient<IRegraProtocoloRepository, RegraProtocoloRepository>();
             services.AddTransient<IOfertaRepository, OfertaRepository>();
             services.AddTransient<IRegraPontuacaoRepository, RegraPontuacaoRepository>();
+            services.AddTransient<ILancamentoPontosRepository, LancamentoPontosRepository>();
+
+            AddMongo(services, configuration);
 
             services.AddTransient<IProtocoloService, ProtocoloService>();
             services.AddTransient<IRegraProtocoloService, RegraProtocoloService>();
             services.AddTransient<IOfertaService, OfertaService>();
             services.AddTransient<IRegraPontuacaoService, RegraPontuacaoService>();
+            services.AddTransient<IPontuacaoService, PontuacaoService>();
             services.AddTransient<ITokenDevService, TokenDevService>();
+        }
+
+        private static void AddMongo(IServiceCollection services, IConfiguration configuration)
+        {
+            MongoMapeamento.Registrar();
+
+            var opcoes = configuration.GetSection(MongoDbOptions.SecaoConfiguracao).Get<MongoDbOptions>() ?? new MongoDbOptions();
+
+            // O cliente só conecta na primeira operação. O timeout curto faz um MongoDB fora do ar
+            // falhar em segundos, e não nos 30 s padrão do driver.
+            var configuracaoDoCliente = MongoClientSettings.FromConnectionString(opcoes.ConnectionString);
+            configuracaoDoCliente.ServerSelectionTimeout = TimeSpan.FromSeconds(3);
+
+            services.AddSingleton<IMongoClient>(new MongoClient(configuracaoDoCliente));
+            services.AddSingleton(provedor => provedor.GetRequiredService<IMongoClient>().GetDatabase(opcoes.Database));
+            services.AddSingleton<IMemoriaCalculoRepository, MemoriaCalculoRepository>();
         }
     }
 }

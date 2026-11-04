@@ -10,6 +10,12 @@ namespace PetBuddies_API.Domain.Interfaces
             TipoGestoEnum? gesto = null,
             CancellationToken cancellationToken = default);
 
+        // Uma regra por gesto: a de início de vigência mais recente até a data informada.
+        Task<List<RegraPontuacaoEntity>> ListarVigentesAsync(
+            int clinicaId,
+            DateOnly data,
+            CancellationToken cancellationToken = default);
+
         Task<RegraPontuacaoEntity?> ObterPorIdAsync(int regraId, CancellationToken cancellationToken = default);
 
         Task<RegraPontuacaoEntity?> ObterParaAlterarAsync(int regraId, CancellationToken cancellationToken = default);
