@@ -1,7 +1,7 @@
-# Banco de desenvolvimento do back-office.
+# Bancos de desenvolvimento do back-office.
 #
-# Só o Oracle sobe aqui — a aplicação roda no terminal (`dotnet run`), onde o log
-# fica visível e o restart é imediato.
+# Só os bancos sobem aqui (Oracle e MongoDB) — a aplicação roda no terminal
+# (`dotnet run`), onde o log fica visível e o restart é imediato.
 #
 #   docker compose up -d          sobe o banco
 #   docker compose down -v        derruba e APAGA o volume
@@ -27,5 +27,21 @@ services:
       retries: 30
       start_period: 60s
 
+  # Memória de cálculo dos pontos (coleção memorias_calculo). Sem autenticação:
+  # só para desenvolvimento, na porta padrão que o appsettings.json já espera.
+  mongo:
+    image: mongo:7.0
+    container_name: petbuddies-mongo-backoffice
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo-backoffice:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
 volumes:
   oracle-backoffice:
+  mongo-backoffice:

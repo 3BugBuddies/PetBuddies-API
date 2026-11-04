@@ -150,5 +150,58 @@ namespace PetBuddies_API.Tests.Unit.App
             // Assert
             Assert.False(await _contexto.RegrasPontuacao.AnyAsync(r => r.Id == regra.Id));
         }
+
+        [Fact]
+        [Trait("Repository", "RegraPontuacao")]
+        public async Task ListarVigentesAsync_VariasVigencias_RetornaAMaisRecenteAteAData()
+        {
+            // Arrange — a de 2026-12 ainda não vale na data da consulta.
+            _contexto.RegrasPontuacao.AddRange(
+                Regra(1, new DateOnly(2026, 1, 1)),
+                Regra(1, new DateOnly(2026, 6, 1)),
+                Regra(1, new DateOnly(2026, 12, 1)));
+            await _contexto.SaveChangesAsync();
+
+            // Act
+            var resultado = await _repositorio.ListarVigentesAsync(1, new DateOnly(2026, 10, 15));
+
+            // Assert
+            var vigente = Assert.Single(resultado);
+            Assert.Equal(new DateOnly(2026, 6, 1), vigente.InicioVigencia);
+        }
+
+        [Fact]
+        [Trait("Repository", "RegraPontuacao")]
+        public async Task ListarVigentesAsync_GestosDiferentes_RetornaUmaRegraPorGesto()
+        {
+            // Arrange
+            _contexto.RegrasPontuacao.AddRange(
+                Regra(1, new DateOnly(2026, 1, 1), TipoGestoEnum.CONSULTA_REALIZADA),
+                Regra(1, new DateOnly(2026, 1, 1), TipoGestoEnum.CHECKIN_REGISTRADO),
+                Regra(1, new DateOnly(2026, 2, 1), TipoGestoEnum.CHECKIN_REGISTRADO));
+            await _contexto.SaveChangesAsync();
+
+            // Act
+            var resultado = await _repositorio.ListarVigentesAsync(1, new DateOnly(2026, 10, 15));
+
+            // Assert
+            Assert.Equal(2, resultado.Count);
+            Assert.Equal(new DateOnly(2026, 2, 1), resultado.Single(r => r.Gesto == TipoGestoEnum.CHECKIN_REGISTRADO).InicioVigencia);
+        }
+
+        [Fact]
+        [Trait("Repository", "RegraPontuacao")]
+        public async Task ListarVigentesAsync_RegraDeOutraClinica_NaoEntra()
+        {
+            // Arrange
+            _contexto.RegrasPontuacao.Add(Regra(2, new DateOnly(2026, 1, 1)));
+            await _contexto.SaveChangesAsync();
+
+            // Act
+            var resultado = await _repositorio.ListarVigentesAsync(1, new DateOnly(2026, 10, 15));
+
+            // Assert
+            Assert.Empty(resultado);
+        }
     }
 }

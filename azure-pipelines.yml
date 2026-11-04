@@ -104,6 +104,8 @@ stages:
                       { "name": "ConnectionStrings__Oracle", "value": "Data Source=$(ORACLE_HOST):$(ORACLE_PORT)/$(ORACLE_SID);User Id=$(ORACLE_USER);Password=$(ORACLE_PASS);Pooling=false", "slotSetting": false },
                       { "name": "PETBUDDIES_JWT_SECRET", "value": "$(PETBUDDIES_JWT_SECRET)", "slotSetting": false },
                       { "name": "MotorApi__BaseUrl", "value": "$(MOTOR_API_URL)", "slotSetting": false },
+                      { "name": "MongoDb__ConnectionString", "value": "$(MONGODB_CONNECTION_STRING)", "slotSetting": false },
+                      { "name": "MongoDb__Database", "value": "petbuddies", "slotSetting": false },
                       { "name": "TZ", "value": "America/Sao_Paulo", "slotSetting": false }
                     ]
 

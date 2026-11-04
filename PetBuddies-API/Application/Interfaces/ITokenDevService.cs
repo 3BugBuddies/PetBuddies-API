@@ -5,6 +5,6 @@ namespace PetBuddies_API.Application.Interfaces
 {
     public interface ITokenDevService
     {
-        TokenDevDto Emitir(PerfilEnum perfil);
+        TokenDevDto Emitir(PerfilEnum perfil, long? responsavelId = null);
     }
 }

@@ -27,9 +27,12 @@ namespace PetBuddies_API.Presentation.Controllers
         [SwaggerOperation(
             Summary = "Emite um token para testar este serviço sem o Java no ar",
             Description = "Assina um JWT com o mesmo PETBUDDIES_JWT_SECRET que a API valida. "
-                        + "Copie o campo 'token' e cole em Authorize. Só existe em Development.")]
+                        + "Copie o campo 'token' e cole em Authorize. Só existe em Development. "
+                        + "Com perfil=TUTOR, informe responsavelId para testar as rotas de pontos.")]
         [ProducesResponseType(typeof(TokenDevDto), StatusCodes.Status200OK)]
-        public ActionResult<TokenDevDto> Emitir([FromQuery] PerfilEnum perfil = PerfilEnum.VET)
-            => Ok(_servico.Emitir(perfil));
+        public ActionResult<TokenDevDto> Emitir(
+            [FromQuery] PerfilEnum perfil = PerfilEnum.VET,
+            [FromQuery] long? responsavelId = null)
+            => Ok(_servico.Emitir(perfil, responsavelId));
     }
 }

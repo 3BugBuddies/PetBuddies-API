@@ -38,6 +38,24 @@ namespace PetBuddies_API.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<List<RegraPontuacaoEntity>> ListarVigentesAsync(
+            int clinicaId,
+            DateOnly data,
+            CancellationToken cancellationToken = default)
+        {
+            var regras = await _context.RegrasPontuacao
+                .AsNoTracking()
+                .Where(regra => regra.ClinicaId == clinicaId && regra.InicioVigencia <= data)
+                .ToListAsync(cancellationToken);
+
+            // Agrupado em memória: são poucas linhas por clínica, e o GroupBy com First
+            // não tem tradução estável no provider Oracle.
+            return regras
+                .GroupBy(regra => regra.Gesto)
+                .Select(grupo => grupo.OrderByDescending(regra => regra.InicioVigencia).First())
+                .ToList();
+        }
+
         public Task<RegraPontuacaoEntity?> ObterPorIdAsync(int regraId, CancellationToken cancellationToken = default)
         {
             return _context.RegrasPontuacao

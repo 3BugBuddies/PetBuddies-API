@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
 using PetBuddies_API.Infrastructure.Data;
 using PetBuddies_API.Infrastructure.IoC;
 using PetBuddies_API.Infrastructure.Security;
@@ -146,7 +147,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Saude — self, oracle, motor-java
+// Saude — self, oracle, mongodb, motor-java
 var cadeiaOracle = builder.Configuration.GetConnectionString("Oracle");
 var urlDoMotor = (builder.Configuration["MotorApi:BaseUrl"] ?? "http://localhost:8080").TrimEnd('/');
 
@@ -200,6 +201,11 @@ builder.Services.AddHealthChecks()
         string.IsNullOrWhiteSpace(cadeiaOracle) ? "Data Source=oracle-nao-configurado;" : cadeiaOracle,
         name: "oracle",
         tags: ["db"],
+        timeout: TimeSpan.FromSeconds(3))
+    .AddMongoDb(
+        provedor => provedor.GetRequiredService<IMongoClient>(),
+        name: "mongodb",
+        tags: ["mongo"],
         timeout: TimeSpan.FromSeconds(3))
     .AddUrlGroup(
         new Uri($"{urlDoMotor}/actuator/health"),
@@ -260,6 +266,12 @@ app.MapHealthChecks("/health/live", new HealthCheckOptions
 app.MapHealthChecks("/health/db", new HealthCheckOptions
 {
     Predicate = verificacao => verificacao.Tags.Contains("db"),
+    ResponseWriter = HealthCheckResponseWriter.EscreverAsync
+}).AllowAnonymous();
+
+app.MapHealthChecks("/health/mongo", new HealthCheckOptions
+{
+    Predicate = verificacao => verificacao.Tags.Contains("mongo"),
     ResponseWriter = HealthCheckResponseWriter.EscreverAsync
 }).AllowAnonymous();
 

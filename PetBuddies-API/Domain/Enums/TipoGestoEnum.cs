@@ -5,6 +5,9 @@ namespace PetBuddies_API.Domain.Enums
         PLANO_CRIADO,
         CONSULTA_AGENDADA,
         CONSULTA_REALIZADA,
-        PROCEDIMENTO_EXECUTADO
+        PROCEDIMENTO_EXECUTADO,
+        CHECKIN_REGISTRADO,
+        ADESAO_COMPLETA,
+        EVOLUCAO_POSITIVA
     }
 }
