@@ -11,7 +11,7 @@ set -euo pipefail
 RESOURCE_GROUP_NAME="rg-petbuddies"
 WEBAPP_NAME="petbuddies-net-rm563925"
 APP_SERVICE_PLAN="plan-petbuddies"
-LOCATION="brazilsouth"
+LOCATION="chilecentral"
 RUNTIME="DOTNETCORE:8.0"
 APP_INSIGHTS_NAME="ai-petbuddies-net"
 COSMOS_ACCOUNT_NAME="cosmos-petbuddies-rm563925"
@@ -43,7 +43,7 @@ az appservice plan create \
   --name $APP_SERVICE_PLAN \
   --resource-group $RESOURCE_GROUP_NAME \
   --location "$LOCATION" \
-  --sku B1 \
+  --sku B2 \
   --is-linux
 
 # Criar o Serviço de Aplicativo
