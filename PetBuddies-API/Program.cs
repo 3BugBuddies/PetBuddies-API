@@ -235,11 +235,8 @@ if (!app.Environment.IsEnvironment("Testing"))
 // Primeiro middleware do pipeline: log da requisicao dentro do escopo da correlacao.
 app.UseMiddleware<CorrelacaoMiddleware>();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c => c.EnablePersistAuthorization());
-}
+app.UseSwagger();
+app.UseSwaggerUI(c => c.EnablePersistAuthorization());
 
 if (!app.Environment.IsDevelopment())
 {
@@ -255,6 +252,7 @@ app.UseRateLimiter();
 app.UseResponseCompression();
 
 app.MapControllers();
+app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription().AllowAnonymous();
 
 // Rotas de saude nao exigem token.
 app.MapHealthChecks("/health/live", new HealthCheckOptions
