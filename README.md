@@ -32,6 +32,9 @@ Ganhou também a [pontuação do responsável](#pontuação-do-responsável): a 
 
 | | |
 |---|---|
+| Aplicação (produção) | https://petbuddies-net-rm563925.azurewebsites.net |
+| Swagger UI (produção) | https://petbuddies-net-rm563925.azurewebsites.net/swagger |
+| Saúde (produção) | https://petbuddies-net-rm563925.azurewebsites.net/health |
 | Swagger UI (local) | `http://localhost:5297/swagger` |
 | Postman collection | [`docs/postman/petbuddies-api-net.postman_collection.json`](docs/postman/petbuddies-api-net.postman_collection.json) |
 | Serviço Java (opcional para avaliar este) | [3BugBuddies/PetBuddies-AI](https://github.com/3BugBuddies/PetBuddies-AI) |
@@ -367,6 +370,10 @@ A API valida um JWT `HS256` assinado com `PETBUDDIES_JWT_SECRET` — `AddAuthent
 - `/health/*` e `/metrics` são `AllowAnonymous`.
 
 ### Como obter um token
+
+> **Em produção** o token vem do serviço Java: faça `POST https://petbuddies-java-rm563925.azurewebsites.net/api/auth/login`
+> com `{ "login": "ana@clinica.com", "senha": "petbuddies123" }` e cole o `token` em **Authorize**, no Swagger.
+> `POST /api/dev/token` só existe em desenvolvimento.
 
 > **Para avaliar este serviço não é preciso subir o Java.** Com a API rodando por `dotnet run`, ela
 > mesma emite o token em `POST /api/dev/token`.
